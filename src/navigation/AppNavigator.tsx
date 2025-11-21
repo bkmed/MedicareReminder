@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
-import { Platform, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, createContext } from 'react';
+import {
+    Platform,
+    View,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+} from 'react-native';
 import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
 import { HomeScreen } from '../screens/HomeScreen';
 import { MedicationListScreen } from '../screens/medications/MedicationListScreen';
 import { AddMedicationScreen } from '../screens/medications/AddMedicationScreen';
@@ -20,197 +27,233 @@ import { DoctorDetailsScreen } from '../screens/doctors/DoctorDetailsScreen';
 import { AnalyticsScreen } from '../screens/analytics/AnalyticsScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 
+// Web navigation context - allows setting active tab and initial screen
+export const WebNavigationContext = createContext({
+    setActiveTab: (tab: string, initialScreen?: string) => { },
+    activeTab: 'main',
+    initialScreen: undefined as string | undefined,
+});
+
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 
+// ----------- Stacks -----------
 const MedicationsStack = () => {
+    const { t } = useTranslation();
+    const webNav = Platform.OS === 'web' ? React.useContext(WebNavigationContext) : null;
+    const initialRouteName = webNav?.initialScreen || 'MedicationList';
+
     return (
-        <Stack.Navigator>
-            <Stack.Screen name="MedicationList" component={MedicationListScreen} options={{ title: 'Medications' }} />
-            <Stack.Screen name="AddMedication" component={AddMedicationScreen} options={{ title: 'Add Medication' }} />
-            <Stack.Screen name="MedicationDetails" component={MedicationDetailsScreen} options={{ title: 'Details' }} />
+        <Stack.Navigator initialRouteName={initialRouteName}>
+            <Stack.Screen
+                name="MedicationList"
+                component={MedicationListScreen}
+                options={{ title: t('navigation.medications') }}
+            />
+            <Stack.Screen
+                name="AddMedication"
+                component={AddMedicationScreen}
+                options={{ title: t('medications.add') }}
+            />
+            <Stack.Screen
+                name="MedicationDetails"
+                component={MedicationDetailsScreen}
+                options={{ title: t('medications.details') }}
+            />
         </Stack.Navigator>
     );
 };
 
 const AppointmentsStack = () => {
+    const { t } = useTranslation();
+    const webNav = Platform.OS === 'web' ? React.useContext(WebNavigationContext) : null;
+    const initialRouteName = webNav?.initialScreen || 'AppointmentList';
+
     return (
-        <Stack.Navigator>
-            <Stack.Screen name="AppointmentList" component={AppointmentListScreen} options={{ title: 'Appointments' }} />
-            <Stack.Screen name="AddAppointment" component={AddAppointmentScreen} options={{ title: 'Add Appointment' }} />
-            <Stack.Screen name="AppointmentDetails" component={AppointmentDetailsScreen} options={{ title: 'Details' }} />
+        <Stack.Navigator initialRouteName={initialRouteName}>
+            <Stack.Screen
+                name="AppointmentList"
+                component={AppointmentListScreen}
+                options={{ title: t('navigation.appointments') }}
+            />
+            <Stack.Screen
+                name="AddAppointment"
+                component={AddAppointmentScreen}
+                options={{ title: t('appointments.add') }}
+            />
+            <Stack.Screen
+                name="AppointmentDetails"
+                component={AppointmentDetailsScreen}
+                options={{ title: t('appointments.details') }}
+            />
         </Stack.Navigator>
     );
 };
 
 const PrescriptionsStack = () => {
+    const { t } = useTranslation();
     return (
         <Stack.Navigator>
-            <Stack.Screen name="PrescriptionList" component={PrescriptionListScreen} options={{ title: 'Prescriptions' }} />
-            <Stack.Screen name="AddPrescription" component={AddPrescriptionScreen} options={{ title: 'Add Prescription' }} />
-            <Stack.Screen name="PrescriptionDetails" component={PrescriptionDetailsScreen} options={{ title: 'Details' }} />
+            <Stack.Screen
+                name="PrescriptionList"
+                component={PrescriptionListScreen}
+                options={{ title: t('navigation.prescriptions') }}
+            />
+            <Stack.Screen
+                name="AddPrescription"
+                component={AddPrescriptionScreen}
+                options={{ title: t('prescriptions.add') }}
+            />
+            <Stack.Screen
+                name="PrescriptionDetails"
+                component={PrescriptionDetailsScreen}
+                options={{ title: t('prescriptions.details') }}
+            />
         </Stack.Navigator>
     );
 };
 
 const DoctorsStack = () => {
+    const { t } = useTranslation();
     return (
         <Stack.Navigator>
-            <Stack.Screen name="DoctorList" component={DoctorListScreen} options={{ title: 'Doctors' }} />
-            <Stack.Screen name="AddDoctor" component={AddDoctorScreen} options={{ title: 'Add Doctor' }} />
-            <Stack.Screen name="DoctorDetails" component={DoctorDetailsScreen} options={{ title: 'Doctor Details' }} />
+            <Stack.Screen
+                name="DoctorList"
+                component={DoctorListScreen}
+                options={{ title: t('navigation.doctors') }}
+            />
+            <Stack.Screen
+                name="AddDoctor"
+                component={AddDoctorScreen}
+                options={{ title: t('doctors.add') }}
+            />
+            <Stack.Screen
+                name="DoctorDetails"
+                component={DoctorDetailsScreen}
+                options={{ title: t('doctors.details') }}
+            />
         </Stack.Navigator>
     );
 };
 
-const TabNavigator = () => {
-    return (
-        <Tab.Navigator screenOptions={{ headerShown: false }}>
-            <Tab.Screen name="HomeTab" component={HomeScreen} options={{ title: 'Home' }} />
-            <Tab.Screen name="MedicationsTab" component={MedicationsStack} options={{ title: 'Medications' }} />
-            <Tab.Screen name="AppointmentsTab" component={AppointmentsStack} options={{ title: 'Appointments' }} />
-        </Tab.Navigator>
-    );
-};
+// ----------- Tabs for Native -----------
+const TabNavigator = () => (
+    <Tab.Navigator screenOptions={{ headerShown: false }}>
+        <Tab.Screen name="HomeTab" component={HomeScreen} />
+        <Tab.Screen name="MedicationsTab" component={MedicationsStack} />
+        <Tab.Screen name="AppointmentsTab" component={AppointmentsStack} />
+    </Tab.Navigator>
+);
 
-// Web-friendly simple navigation without drawer (for web only)
+// ----------- Web Navigation -----------
 const WebNavigator = () => {
     const [activeTab, setActiveTab] = useState('main');
+    const [initialScreen, setInitialScreen] = useState<string | undefined>(undefined);
+
+    const handleSetActiveTab = (tab: string, screen?: string) => {
+        setActiveTab(tab);
+        setInitialScreen(screen);
+        // Clear initialScreen after a short delay to allow navigation
+        if (screen) {
+            setTimeout(() => setInitialScreen(undefined), 100);
+        }
+    };
 
     return (
-        <View style={{ flex: 1 }}>
-            {/* Simple navigation bar for web */}
-            <View style={webStyles.navbar}>
-                <Text style={webStyles.title}>Medicare Reminder</Text>
-                <View style={webStyles.navButtons}>
-                    <TouchableOpacity onPress={() => setActiveTab('main')} style={webStyles.navButton}>
-                        <Text style={[webStyles.navButtonText, activeTab === 'main' && webStyles.activeNavButton]}>Home</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setActiveTab('medications')} style={webStyles.navButton}>
-                        <Text style={[webStyles.navButtonText, activeTab === 'medications' && webStyles.activeNavButton]}>Medications</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setActiveTab('appointments')} style={webStyles.navButton}>
-                        <Text style={[webStyles.navButtonText, activeTab === 'appointments' && webStyles.activeNavButton]}>Appointments</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setActiveTab('analytics')} style={webStyles.navButton}>
-                        <Text style={[webStyles.navButtonText, activeTab === 'analytics' && webStyles.activeNavButton]}>Analytics</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setActiveTab('prescriptions')} style={webStyles.navButton}>
-                        <Text style={[webStyles.navButtonText, activeTab === 'prescriptions' && webStyles.activeNavButton]}>Prescriptions</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setActiveTab('doctors')} style={webStyles.navButton}>
-                        <Text style={[webStyles.navButtonText, activeTab === 'doctors' && webStyles.activeNavButton]}>Doctors</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setActiveTab('profile')} style={webStyles.navButton}>
-                        <Text style={[webStyles.navButtonText, activeTab === 'profile' && webStyles.activeNavButton]}>Profile</Text>
-                    </TouchableOpacity>
+        <WebNavigationContext.Provider value={{ setActiveTab: handleSetActiveTab, activeTab, initialScreen }}>
+            <View style={{ flex: 1 }}>
+                <View style={webStyles.navbar}>
+                    <Text style={webStyles.title}>Medicare Reminder</Text>
+                    <View style={webStyles.navButtons}>
+                        {[
+                            ['main', 'Home'],
+                            ['medications', 'Medications'],
+                            ['appointments', 'Appointments'],
+                            ['analytics', 'Analytics'],
+                            ['prescriptions', 'Prescriptions'],
+                            ['doctors', 'Doctors'],
+                            ['profile', 'Profile'],
+                        ].map(([key, label]) => (
+                            <TouchableOpacity
+                                key={key}
+                                onPress={() => handleSetActiveTab(key)}
+                                style={webStyles.navButton}
+                            >
+                                <Text
+                                    style={[
+                                        webStyles.navButtonText,
+                                        activeTab === key && webStyles.activeNavButton,
+                                    ]}
+                                >
+                                    {label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </View>
+
+                <View style={{ flex: 1, position: 'relative' }}>
+                    {activeTab === 'main' && <HomeScreen />}
+                    {activeTab === 'medications' && <MedicationsStack />}
+                    {activeTab === 'appointments' && <AppointmentsStack />}
+                    {activeTab === 'analytics' && <AnalyticsScreen />}
+                    {activeTab === 'prescriptions' && <PrescriptionsStack />}
+                    {activeTab === 'doctors' && <DoctorsStack />}
+                    {activeTab === 'profile' && <ProfileScreen />}
                 </View>
             </View>
-            {/* Content area with proper positioning for FABs */}
-            <View style={{ flex: 1, position: 'relative' as any }}>
-                {activeTab === 'main' && <HomeScreen />}
-                {activeTab === 'medications' && <MedicationsStack />}
-                {activeTab === 'appointments' && <AppointmentsStack />}
-                {activeTab === 'analytics' && <AnalyticsScreen />}
-                {activeTab === 'prescriptions' && <PrescriptionsStack />}
-                {activeTab === 'doctors' && <DoctorsStack />}
-                {activeTab === 'profile' && <ProfileScreen />}
-            </View>
-        </View>
+        </WebNavigationContext.Provider>
     );
 };
 
-const DrawerNavigator = () => {
-    return (
-        <Drawer.Navigator>
-            <Drawer.Screen name="Main" component={TabNavigator} options={{ title: 'Medicare Reminder' }} />
-            <Drawer.Screen name="Analytics" component={AnalyticsScreen} />
-            <Drawer.Screen name="Prescriptions" component={PrescriptionsStack} />
-            <Drawer.Screen name="Doctors" component={DoctorsStack} />
-            <Drawer.Screen name="Profile" component={ProfileScreen} />
-        </Drawer.Navigator>
-    );
-};
+// -------- Drawer for Native --------
+const DrawerNavigator = () => (
+    <Drawer.Navigator>
+        <Drawer.Screen name="Main" component={TabNavigator} />
+        <Drawer.Screen name="Analytics" component={AnalyticsScreen} />
+        <Drawer.Screen name="Prescriptions" component={PrescriptionsStack} />
+        <Drawer.Screen name="Doctors" component={DoctorsStack} />
+        <Drawer.Screen name="Profile" component={ProfileScreen} />
+    </Drawer.Navigator>
+);
 
+// -------- Root Export --------
 export const AppNavigator = () => {
     const linking: LinkingOptions<any> = {
         prefixes: ['http://localhost:8080', 'medicarereminder://'],
         config: {
             screens: {
                 Root: {
-                    path: '',
                     screens: {
                         Main: {
-                            path: '',
                             screens: {
                                 HomeTab: '',
-                                MedicationsTab: {
-                                    path: 'medications',
-                                    screens: {
-                                        MedicationList: '',
-                                        AddMedication: 'add',
-                                        MedicationDetails: ':medicationId',
-                                    },
-                                },
-                                AppointmentsTab: {
-                                    path: 'appointments',
-                                    screens: {
-                                        AppointmentList: '',
-                                        AddAppointment: 'add',
-                                        AppointmentDetails: ':appointmentId',
-                                    },
-                                },
                             },
                         },
-                        Analytics: 'analytics',
-                        Prescriptions: {
-                            path: 'prescriptions',
-                            screens: {
-                                PrescriptionList: '',
-                                AddPrescription: 'add',
-                                PrescriptionDetails: ':prescriptionId',
-                            },
-                        },
-                        Doctors: {
-                            path: 'doctors',
-                            screens: {
-                                DoctorList: '',
-                                AddDoctor: 'add',
-                                DoctorDetails: ':doctorId',
-                            },
-                        },
-                        Profile: 'profile',
                     },
                 },
             },
         },
     };
 
-    // Use simple web navigation for web platform
     if (Platform.OS === 'web') {
         return (
-            <NavigationContainer
-                linking={linking}
-                fallback={<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Loading...</Text></View>}
-            >
+            <NavigationContainer linking={linking}>
                 <WebNavigator />
             </NavigationContainer>
         );
     }
 
-    //  Native navigation with drawer
     return (
-        <NavigationContainer
-            linking={linking}
-            fallback={<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Loading...</Text></View>}
-        >
+        <NavigationContainer linking={linking}>
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="Root" component={DrawerNavigator} />
             </Stack.Navigator>
         </NavigationContainer>
     );
 };
+
 
 const webStyles = StyleSheet.create({
     navbar: {
@@ -219,12 +262,7 @@ const webStyles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 20,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
         elevation: 3,
-        zIndex: 1000,
     },
     title: {
         fontSize: 20,

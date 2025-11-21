@@ -8,12 +8,14 @@ import {
     Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { appointmentsDb } from '../../database/appointmentsDb';
 import { Appointment } from '../../database/schema';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 
 export const AppointmentListScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -25,7 +27,7 @@ export const AppointmentListScreen = ({ navigation }: any) => {
             setAppointments(data);
         } catch (error) {
             console.error('Error loading appointments:', error);
-            Alert.alert('Error', 'Failed to load appointments');
+            Alert.alert(t('common.error'), t('appointments.loadError'));
         } finally {
             setLoading(false);
         }
@@ -79,8 +81,8 @@ export const AppointmentListScreen = ({ navigation }: any) => {
 
     const renderEmpty = () => (
         <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No upcoming appointments</Text>
-            <Text style={styles.emptySubText}>Tap + to schedule an appointment</Text>
+            <Text style={styles.emptyText}>{t('appointments.noAppointments')}</Text>
+            <Text style={styles.emptySubText}>{t('appointments.addFirst')}</Text>
         </View>
     );
 

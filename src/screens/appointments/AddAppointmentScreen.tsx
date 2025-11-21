@@ -9,12 +9,14 @@ import {
     Alert,
     Switch,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { appointmentsDb } from '../../database/appointmentsDb';
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 
 export const AddAppointmentScreen = ({ navigation, route }: any) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const appointmentId = route.params?.appointmentId;
@@ -51,13 +53,13 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
                 setReminderEnabled(appt.reminderEnabled);
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to load appointment');
+            Alert.alert(t('common.error'), t('appointments.loadError'));
         }
     };
 
     const handleSave = async () => {
         if (!title.trim()) {
-            Alert.alert('Error', 'Please enter a title');
+            Alert.alert(t('common.error'), t('appointments.fillRequired'));
             return;
         }
 
@@ -92,7 +94,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
             navigation.goBack();
         } catch (error) {
             console.error('Error saving appointment:', error);
-            Alert.alert('Error', 'Failed to save appointment');
+            Alert.alert(t('common.error'), t('appointments.saveError'));
         } finally {
             setLoading(false);
         }
@@ -100,34 +102,34 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-            <Text style={styles.label}>Title *</Text>
+            <Text style={styles.label}>{t('appointments.appointmentTitle')} *</Text>
             <TextInput
                 style={styles.input}
                 value={title}
                 onChangeText={setTitle}
-                placeholder="e.g., Annual Checkup"
+                placeholder={t('appointments.titlePlaceholder')}
                 placeholderTextColor={theme.colors.subText}
             />
 
-            <Text style={styles.label}>Doctor Name</Text>
+            <Text style={styles.label}>{t('appointments.doctor')}</Text>
             <TextInput
                 style={styles.input}
                 value={doctorName}
                 onChangeText={setDoctorName}
-                placeholder="e.g., Smith"
+                placeholder={t('appointments.doctorPlaceholder')}
                 placeholderTextColor={theme.colors.subText}
             />
 
-            <Text style={styles.label}>Location</Text>
+            <Text style={styles.label}>{t('appointments.location')}</Text>
             <TextInput
                 style={styles.input}
                 value={location}
                 onChangeText={setLocation}
-                placeholder="e.g., Main Street Clinic"
+                placeholder={t('appointments.locationPlaceholder')}
                 placeholderTextColor={theme.colors.subText}
             />
 
-            <Text style={styles.label}>Date *</Text>
+            <Text style={styles.label}>{t('appointments.date')} *</Text>
             <TextInput
                 style={styles.input}
                 value={date}
@@ -136,7 +138,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
                 placeholderTextColor={theme.colors.subText}
             />
 
-            <Text style={styles.label}>Time *</Text>
+            <Text style={styles.label}>{t('appointments.time')} *</Text>
             <TextInput
                 style={styles.input}
                 value={time}
@@ -145,19 +147,19 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
                 placeholderTextColor={theme.colors.subText}
             />
 
-            <Text style={styles.label}>Notes</Text>
+            <Text style={styles.label}>{t('appointments.notes')}</Text>
             <TextInput
                 style={[styles.input, styles.notesInput]}
                 value={notes}
                 onChangeText={setNotes}
-                placeholder="Additional notes..."
+                placeholder={t('appointments.notesPlaceholder')}
                 placeholderTextColor={theme.colors.subText}
                 multiline
                 numberOfLines={4}
             />
 
             <View style={styles.switchRow}>
-                <Text style={styles.label}>Enable Reminder (1 hour before)</Text>
+                <Text style={styles.label}>{t('appointments.enableReminder')}</Text>
                 <Switch
                     value={reminderEnabled}
                     onValueChange={setReminderEnabled}
@@ -171,7 +173,9 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
                 onPress={handleSave}
                 disabled={loading}
             >
-                <Text style={styles.saveButtonText}>{isEdit ? 'Update' : 'Save'} Appointment</Text>
+                <Text style={styles.saveButtonText}>
+                    {isEdit ? t('appointments.update') : t('appointments.save')}
+                </Text>
             </TouchableOpacity>
         </ScrollView>
     );

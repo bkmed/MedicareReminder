@@ -8,6 +8,7 @@ import {
     Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { medicationsDb } from '../../database/medicationsDb';
 import { Medication } from '../../database/schema';
 import { MedicationCard } from '../../components/MedicationCard';
@@ -16,6 +17,7 @@ import { Theme } from '../../theme';
 
 export const MedicationListScreen = ({ navigation }: any) => {
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const [medications, setMedications] = useState<Medication[]>([]);
     const [loading, setLoading] = useState(true);
@@ -26,7 +28,7 @@ export const MedicationListScreen = ({ navigation }: any) => {
             setMedications(data);
         } catch (error) {
             console.error('Error loading medications:', error);
-            Alert.alert('Error', 'Failed to load medications');
+            Alert.alert(t('common.error'), t('medications.loadError'));
         } finally {
             setLoading(false);
         }
@@ -44,8 +46,8 @@ export const MedicationListScreen = ({ navigation }: any) => {
 
     const renderEmpty = () => (
         <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No medications yet</Text>
-            <Text style={styles.emptySubText}>Tap + to add your first medication</Text>
+            <Text style={styles.emptyText}>{t('medications.empty')}</Text>
+            <Text style={styles.emptySubText}>{t('medications.emptySubtitle')}</Text>
         </View>
     );
 

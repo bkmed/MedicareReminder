@@ -4,6 +4,7 @@ import { Platform } from 'react-native';
 import { AppNavigator } from './src/navigation/AppNavigator';
 import { notificationService } from './src/services/notificationService';
 import { ThemeProvider } from './src/context/ThemeContext';
+import './src/i18n'; // Initialize i18n
 
 const App = () => {
   useEffect(() => {

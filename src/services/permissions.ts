@@ -1,0 +1,182 @@
+import { Platform, Linking, Alert } from 'react-native';
+import { PERMISSIONS, request, check, RESULTS, openSettings } from 'react-native-permissions';
+
+// Declare web-only globals
+declare global {
+    interface Navigator {
+        permissions?: {
+            query(permissionDesc: { name: string }): Promise<{ state: string }>;
+        };
+        mediaDevices?: {
+            getUserMedia(constraints: { video?: boolean; audio?: boolean }): Promise<MediaStream>;
+        };
+    }
+    interface MediaStream {
+        getTracks(): Array<{ stop(): void }>;
+    }
+    interface Window {
+        Notification?: {
+            permission: 'granted' | 'denied' | 'default';
+            requestPermission(): Promise<'granted' | 'denied' | 'default'>;
+        };
+    }
+    const Notification: {
+        permission: 'granted' | 'denied' | 'default';
+        requestPermission(): Promise<'granted' | 'denied' | 'default'>;
+    };
+    type PermissionName = 'camera' | 'microphone' | 'geolocation' | 'notifications' | 'persistent-storage' | 'midi' | 'push' | 'background-fetch' | 'periodic-background-sync' | 'accelerometer' | 'gyroscope' | 'magnetometer' | 'ambient-light-sensor';
+    type PermissionState = 'granted' | 'denied' | 'prompt';
+}
+
+export type PermissionStatus = 'granted' | 'denied' | 'blocked' | 'unavailable' | 'limited';
+
+class PermissionsService {
+    /**
+     * Check camera permission status
+     */
+    async checkCameraPermission(): Promise<PermissionStatus> {
+        if (Platform.OS === 'web') {
+            // Web: Use both MediaDevices API and Permissions API
+            const nav = typeof window !== 'undefined' && (window as any).navigator;
+            if (nav?.permissions?.query) {
+                try {
+                    const result = await nav.permissions.query({ name: 'camera' });
+                    return this.mapWebPermissionState(result.state);
+                } catch (error) {
+                    // Fallback to MediaDevices check if permissions API fails
+                    if (nav.mediaDevices?.getUserMedia) {
+                        return 'denied'; // Can't determine without requesting
+                    }
+                }
+            } else if (nav?.mediaDevices?.getUserMedia) {
+                // Browser supports camera but not permissions query
+                return 'denied'; // Need to request to know actual status
+            }
+            return 'unavailable';
+        }
+
+        // Mobile: Use react-native-permissions
+        const permission = Platform.OS === 'ios'
+            ? PERMISSIONS.IOS.CAMERA
+            : PERMISSIONS.ANDROID.CAMERA;
+        const result = await check(permission);
+        return this.mapNativePermissionStatus(result);
+    }
+
+    /**
+     * Request camera permission
+     */
+    async requestCameraPermission(): Promise<PermissionStatus> {
+        if (Platform.OS === 'web') {
+            const nav = typeof window !== 'undefined' && (window as any).navigator;
+            if (nav?.mediaDevices?.getUserMedia) {
+                try {
+                    const stream = await nav.mediaDevices.getUserMedia({ video: true });
+                    // Stop the stream immediately after getting permission
+                    stream.getTracks().forEach((track: any) => track.stop());
+                    return 'granted';
+                } catch (error: any) {
+                    if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                        return 'blocked';
+                    }
+                    return 'denied';
+                }
+            }
+            return 'unavailable';
+        }
+
+        // Mobile: Request permission
+        const permission = Platform.OS === 'ios'
+            ? PERMISSIONS.IOS.CAMERA
+            : PERMISSIONS.ANDROID.CAMERA;
+        const result = await request(permission);
+        return this.mapNativePermissionStatus(result);
+    }
+
+    /**
+     * Check notification permission status
+     */
+    async checkNotificationPermission(): Promise<PermissionStatus> {
+        if (Platform.OS === 'web') {
+            // Web: Use Notification API
+            if (typeof window !== 'undefined' && 'Notification' in window) {
+                const permission = Notification.permission;
+                if (permission === 'granted') return 'granted';
+                if (permission === 'denied') return 'blocked';
+                return 'denied';
+            }
+            return 'unavailable';
+        }
+
+        // Mobile: Notifications are handled by notificationService
+        // Return unavailable to indicate it's managed elsewhere
+        return 'unavailable';
+    }
+
+    /**
+     * Request notification permission
+     */
+    async requestNotificationPermission(): Promise<PermissionStatus> {
+        if (Platform.OS === 'web') {
+            if (typeof window !== 'undefined' && 'Notification' in window) {
+                try {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') return 'granted';
+                    if (permission === 'denied') return 'blocked';
+                    return 'denied';
+                } catch (error) {
+                    return 'denied';
+                }
+            }
+            return 'unavailable';
+        }
+
+        // Mobile: handled by notificationService
+        return 'unavailable';
+    }
+
+    /**
+     * Map web permission state to our PermissionStatus
+     */
+    private mapWebPermissionState(state: PermissionState): PermissionStatus {
+        switch (state) {
+            case 'granted': return 'granted';
+            case 'denied': return 'blocked';
+            case 'prompt': return 'denied';
+            default: return 'denied';
+        }
+    }
+
+    /**
+     * Map native permission status to our PermissionStatus
+     */
+    private mapNativePermissionStatus(status: string): PermissionStatus {
+        switch (status) {
+            case RESULTS.GRANTED: return 'granted';
+            case RESULTS.DENIED: return 'denied';
+            case RESULTS.BLOCKED: return 'blocked';
+            case RESULTS.LIMITED: return 'limited';
+            case RESULTS.UNAVAILABLE: return 'unavailable';
+            default: return 'denied';
+        }
+    }
+
+    async openAppSettings(): Promise<void> {
+        if (Platform.OS === 'web') {
+            Alert.alert(
+                'Permissions',
+                'Please check your browser settings to manage permissions.',
+                [{ text: 'OK' }]
+            );
+            return;
+        }
+
+        try {
+            await openSettings();
+        } catch (error) {
+            console.error('Error opening settings:', error);
+        }
+    }
+}
+
+export const permissionsService = new PermissionsService();

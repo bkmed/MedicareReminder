@@ -1,29 +1,202 @@
-import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Switch, TouchableOpacity, Alert } from 'react-native';
+import React, { useMemo, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Switch, TouchableOpacity, Alert, ScrollView, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
 import { authService } from '../../services/authService';
+import { permissionsService, PermissionStatus } from '../../services/permissions';
 import { Theme } from '../../theme';
+
+const LANGUAGES = [
+    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'ar', name: 'العربية', flag: '🇹🇳' },
+    { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+];
 
 export const ProfileScreen = ({ navigation }: any) => {
     const { theme, isDark, toggleTheme } = useTheme();
+    const { t, i18n } = useTranslation();
     const styles = useMemo(() => createStyles(theme), [theme]);
+    const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
+    const [cameraPermission, setCameraPermission] = useState<PermissionStatus>('unavailable');
+    const [notificationPermission, setNotificationPermission] = useState<PermissionStatus>('unavailable');
+
+    useEffect(() => {
+        checkPermissions();
+    }, []);
+
+    const checkPermissions = async () => {
+        const camera = await permissionsService.checkCameraPermission();
+        const notification = await permissionsService.checkNotificationPermission();
+        setCameraPermission(camera);
+        setNotificationPermission(notification);
+    };
+
+    const handleLanguageChange = async (langCode: string) => {
+        try {
+            await i18n.changeLanguage(langCode);
+            await AsyncStorage.setItem('user-language', langCode);
+            setCurrentLanguage(langCode);
+
+            // Set RTL for Arabic
+            if (Platform.OS !== 'web') {
+                const I18nManager = require('react-native').I18nManager;
+                const shouldBeRTL = langCode === 'ar';
+                if (I18nManager.isRTL !== shouldBeRTL) {
+                    I18nManager.forceRTL(shouldBeRTL);
+                    Alert.alert(
+                        t('profile.restartRequired'),
+                        t('profile.restartRequiredMessage'),
+                        [{ text: t('common.ok') }]
+                    );
+                }
+            }
+        } catch (error) {
+            Alert.alert(t('common.error'), t('profile.languageChangeError'));
+        }
+    };
+
+    const handleCameraPermission = async (value: boolean) => {
+        if (!value) {
+            // User is trying to disable - just update UI
+            setCameraPermission('denied');
+            return;
+        }
+
+        const status = await permissionsService.requestCameraPermission();
+        setCameraPermission(status);
+
+        if (status === 'blocked') {
+            Alert.alert(
+                t('profile.permissionBlocked'),
+                t('profile.permissionBlockedMessage'),
+                [
+                    { text: t('common.cancel'), style: 'cancel' },
+                    { text: t('profile.openSettings'), onPress: () => permissionsService.openAppSettings() },
+                ]
+            );
+        }
+    };
+
+    const handleNotificationPermission = async (value: boolean) => {
+        if (!value) {
+            // User is trying to disable - just update UI
+            setNotificationPermission('denied');
+            return;
+        }
+
+        const status = await permissionsService.requestNotificationPermission();
+        setNotificationPermission(status);
+
+        if (status === 'blocked') {
+            Alert.alert(
+                t('profile.permissionBlocked'),
+                t('profile.permissionBlockedMessage'),
+                [
+                    { text: t('common.cancel'), style: 'cancel' },
+                    { text: t('profile.openSettings'), onPress: () => permissionsService.openAppSettings() },
+                ]
+            );
+        }
+    };
 
     const handleLogout = async () => {
         try {
             await authService.logout();
-            // Navigation will be handled by AppNavigator state change
         } catch (error) {
-            Alert.alert('Error', 'Failed to logout');
+            Alert.alert(t('common.error'), t('profile.logoutError'));
+        }
+    };
+
+    const getPermissionStatusText = (status: PermissionStatus) => {
+        switch (status) {
+            case 'granted': return t('profile.permissionGranted');
+            case 'denied': return t('profile.permissionDenied');
+            case 'blocked': return t('profile.permissionBlocked');
+            case 'limited': return t('profile.permissionLimited');
+            default: return t('profile.permissionUnavailable');
+        }
+    };
+
+    const getPermissionStatusColor = (status: PermissionStatus) => {
+        switch (status) {
+            case 'granted': return theme.colors.success;
+            case 'denied': return theme.colors.warning;
+            case 'blocked': return theme.colors.error;
+            default: return theme.colors.subText;
         }
     };
 
     return (
-        <View style={styles.container}>
+        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+            {/* Language Section */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Settings</Text>
+                <Text style={styles.sectionTitle}>{t('profile.language')}</Text>
+                {LANGUAGES.map((lang) => (
+                    <TouchableOpacity
+                        key={lang.code}
+                        style={[
+                            styles.languageRow,
+                            currentLanguage === lang.code && styles.languageRowActive,
+                        ]}
+                        onPress={() => handleLanguageChange(lang.code)}
+                    >
+                        <View style={styles.languageInfo}>
+                            <Text style={styles.languageFlag}>{lang.flag}</Text>
+                            <Text style={styles.languageName}>{lang.name}</Text>
+                        </View>
+                        {currentLanguage === lang.code && (
+                            <Text style={styles.checkmark}>✓</Text>
+                        )}
+                    </TouchableOpacity>
+                ))}
+            </View>
 
+            {/* Permissions Section */}
+            <View style={styles.section}>
+                <Text style={styles.sectionTitle}>{t('profile.permissions')}</Text>
+
+                <View style={styles.permissionRow}>
+                    <View style={styles.permissionInfo}>
+                        <Text style={styles.permissionLabel}>{t('profile.camera')}</Text>
+                        <Text style={[styles.permissionStatus, { color: getPermissionStatusColor(cameraPermission) }]}>
+                            {getPermissionStatusText(cameraPermission)}
+                        </Text>
+                    </View>
+                    {cameraPermission !== 'unavailable' && (
+                        <Switch
+                            value={cameraPermission === 'granted'}
+                            onValueChange={handleCameraPermission}
+                            trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                            thumbColor={theme.colors.surface}
+                        />
+                    )}
+                </View>
+
+                <View style={styles.permissionRow}>
+                    <View style={styles.permissionInfo}>
+                        <Text style={styles.permissionLabel}>{t('profile.notifications')}</Text>
+                        <Text style={[styles.permissionStatus, { color: getPermissionStatusColor(notificationPermission) }]}>
+                            {getPermissionStatusText(notificationPermission)}
+                        </Text>
+                    </View>
+                    {notificationPermission !== 'unavailable' && (
+                        <Switch
+                            value={notificationPermission === 'granted'}
+                            onValueChange={handleNotificationPermission}
+                            trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                            thumbColor={theme.colors.surface}
+                        />
+                    )}
+                </View>
+            </View>
+
+            {/* Appearance Section */}
+            <View style={styles.section}>
+                <Text style={styles.sectionTitle}>{t('profile.appearance')}</Text>
                 <View style={styles.row}>
-                    <Text style={styles.label}>Dark Mode</Text>
+                    <Text style={styles.label}>{t('profile.darkMode')}</Text>
                     <Switch
                         value={isDark}
                         onValueChange={toggleTheme}
@@ -33,10 +206,11 @@ export const ProfileScreen = ({ navigation }: any) => {
                 </View>
             </View>
 
+            {/* Logout Button */}
             <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                <Text style={styles.logoutText}>Log Out</Text>
+                <Text style={styles.logoutText}>{t('profile.logout')}</Text>
             </TouchableOpacity>
-        </View>
+        </ScrollView>
     );
 };
 
@@ -44,7 +218,10 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.colors.background,
+    },
+    content: {
         padding: theme.spacing.m,
+        paddingBottom: theme.spacing.xl,
     },
     section: {
         backgroundColor: theme.colors.surface,
@@ -67,6 +244,68 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     label: {
         ...theme.textVariants.body,
         color: theme.colors.text,
+    },
+    languageRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: theme.spacing.m,
+        paddingHorizontal: theme.spacing.s,
+        borderRadius: theme.spacing.s,
+        marginBottom: theme.spacing.xs,
+    },
+    languageRowActive: {
+        backgroundColor: theme.colors.primaryBackground,
+    },
+    languageInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    languageFlag: {
+        fontSize: 24,
+        marginRight: theme.spacing.m,
+    },
+    languageName: {
+        ...theme.textVariants.body,
+        color: theme.colors.text,
+        fontSize: 16,
+    },
+    checkmark: {
+        ...theme.textVariants.body,
+        color: theme.colors.primary,
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    permissionRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: theme.spacing.m,
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.border,
+    },
+    permissionInfo: {
+        flex: 1,
+    },
+    permissionLabel: {
+        ...theme.textVariants.body,
+        color: theme.colors.text,
+        marginBottom: theme.spacing.xs,
+    },
+    permissionStatus: {
+        ...theme.textVariants.caption,
+        fontSize: 12,
+    },
+    permissionButton: {
+        backgroundColor: theme.colors.primary,
+        paddingHorizontal: theme.spacing.m,
+        paddingVertical: theme.spacing.s,
+        borderRadius: theme.spacing.s,
+    },
+    permissionButtonText: {
+        ...theme.textVariants.button,
+        color: '#FFFFFF',
+        fontSize: 14,
     },
     logoutButton: {
         backgroundColor: theme.colors.surface,

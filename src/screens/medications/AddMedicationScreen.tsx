@@ -9,6 +9,7 @@ import {
     Alert,
     Switch,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { medicationsDb } from '../../database/medicationsDb';
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
@@ -16,6 +17,7 @@ import { Theme } from '../../theme';
 
 export const AddMedicationScreen = ({ navigation, route }: any) => {
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const medicationId = route.params?.medicationId;
     const isEdit = !!medicationId;
@@ -50,13 +52,13 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
                 setReminderEnabled(med.reminderEnabled);
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to load medication');
+            Alert.alert(t('common.error'), t('medications.loadError'));
         }
     };
 
     const handleSave = async () => {
         if (!name.trim() || !dosage.trim()) {
-            Alert.alert('Error', 'Please fill in all required fields');
+            Alert.alert(t('common.error'), t('medications.fillRequired'));
             return;
         }
 
@@ -91,7 +93,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
 
             navigation.goBack();
         } catch (error) {
-            Alert.alert('Error', 'Failed to save medication');
+            Alert.alert(t('common.error'), t('medications.saveError'));
         } finally {
             setLoading(false);
         }
@@ -113,25 +115,25 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-            <Text style={styles.label}>Name *</Text>
+            <Text style={styles.label}>{t('medications.name')} *</Text>
             <TextInput
                 style={styles.input}
                 value={name}
                 onChangeText={setName}
-                placeholder="e.g., Aspirin"
+                placeholder={t('medications.namePlaceholder')}
                 placeholderTextColor={theme.colors.subText}
             />
 
-            <Text style={styles.label}>Dosage *</Text>
+            <Text style={styles.label}>{t('medications.dosage')} *</Text>
             <TextInput
                 style={styles.input}
                 value={dosage}
                 onChangeText={setDosage}
-                placeholder="e.g., 100mg"
+                placeholder={t('medications.dosagePlaceholder')}
                 placeholderTextColor={theme.colors.subText}
             />
 
-            <Text style={styles.label}>Frequency</Text>
+            <Text style={styles.label}>{t('medications.frequency')}</Text>
             <View style={styles.frequencyContainer}>
                 {['Daily', 'Twice a day', 'Weekly'].map((freq) => (
                     <TouchableOpacity
@@ -140,13 +142,13 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
                         onPress={() => setFrequency(freq)}
                     >
                         <Text style={[styles.frequencyText, frequency === freq && styles.frequencyTextActive]}>
-                            {freq}
+                            {t(`medications.freq${freq.replace(/\s+/g, '')}`)}
                         </Text>
                     </TouchableOpacity>
                 ))}
             </View>
 
-            <Text style={styles.label}>Reminder Times</Text>
+            <Text style={styles.label}>{t('medications.reminderTimes')}</Text>
             {times.map((time, index) => (
                 <View key={index} style={styles.timeRow}>
                     <TextInput
@@ -164,10 +166,10 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
                 </View>
             ))}
             <TouchableOpacity onPress={handleAddTime} style={styles.addTimeButton}>
-                <Text style={styles.addTimeButtonText}>+ Add Time</Text>
+                <Text style={styles.addTimeButtonText}>+ {t('medications.addTime')}</Text>
             </TouchableOpacity>
 
-            <Text style={styles.label}>Start Date</Text>
+            <Text style={styles.label}>{t('medications.startDate')}</Text>
             <TextInput
                 style={styles.input}
                 value={startDate}
@@ -176,7 +178,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
                 placeholderTextColor={theme.colors.subText}
             />
 
-            <Text style={styles.label}>End Date (Optional)</Text>
+            <Text style={styles.label}>{t('medications.endDate')}</Text>
             <TextInput
                 style={styles.input}
                 value={endDate}
@@ -185,19 +187,19 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
                 placeholderTextColor={theme.colors.subText}
             />
 
-            <Text style={styles.label}>Notes</Text>
+            <Text style={styles.label}>{t('medications.notes')}</Text>
             <TextInput
                 style={[styles.input, styles.notesInput]}
                 value={notes}
                 onChangeText={setNotes}
-                placeholder="Additional notes..."
+                placeholder={t('medications.notesPlaceholder')}
                 placeholderTextColor={theme.colors.subText}
                 multiline
                 numberOfLines={4}
             />
 
             <View style={styles.switchRow}>
-                <Text style={styles.label}>Enable Reminders</Text>
+                <Text style={styles.label}>{t('medications.enableReminders')}</Text>
                 <Switch
                     value={reminderEnabled}
                     onValueChange={setReminderEnabled}
@@ -211,7 +213,9 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
                 onPress={handleSave}
                 disabled={loading}
             >
-                <Text style={styles.saveButtonText}>{isEdit ? 'Update' : 'Save'} Medication</Text>
+                <Text style={styles.saveButtonText}>
+                    {isEdit ? t('medications.update') : t('common.save')} {t('medications.medication')}
+                </Text>
             </TouchableOpacity>
         </ScrollView>
     );
