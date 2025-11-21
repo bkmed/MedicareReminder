@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     View,
     Text,
@@ -11,8 +11,12 @@ import { useFocusEffect } from '@react-navigation/native';
 import { medicationsDb } from '../../database/medicationsDb';
 import { Medication } from '../../database/schema';
 import { MedicationCard } from '../../components/MedicationCard';
+import { useTheme } from '../../context/ThemeContext';
+import { Theme } from '../../theme';
 
 export const MedicationListScreen = ({ navigation }: any) => {
+    const { theme } = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const [medications, setMedications] = useState<Medication[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -70,13 +74,13 @@ export const MedicationListScreen = ({ navigation }: any) => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: theme.colors.background,
     },
     listContent: {
-        padding: 16,
+        padding: theme.spacing.m,
         flexGrow: 1,
     },
     emptyContainer: {
@@ -86,34 +90,29 @@ const styles = StyleSheet.create({
         paddingVertical: 60,
     },
     emptyText: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#666',
-        marginBottom: 8,
+        ...theme.textVariants.subheader,
+        color: theme.colors.subText,
+        marginBottom: theme.spacing.s,
     },
     emptySubText: {
-        fontSize: 14,
-        color: '#999',
+        ...theme.textVariants.body,
+        color: theme.colors.subText,
     },
     fab: {
         position: 'absolute',
-        right: 24,
-        bottom: 24,
+        right: theme.spacing.l,
+        bottom: theme.spacing.l,
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: '#007AFF',
+        backgroundColor: theme.colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 8,
+        ...theme.shadows.medium,
     },
     fabText: {
         fontSize: 32,
-        color: '#FFF',
+        color: theme.colors.surface,
         fontWeight: '300',
     },
 });

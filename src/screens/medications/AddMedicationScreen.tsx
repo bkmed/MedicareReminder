@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     View,
     Text,
@@ -11,8 +11,12 @@ import {
 } from 'react-native';
 import { medicationsDb } from '../../database/medicationsDb';
 import { notificationService } from '../../services/notificationService';
+import { useTheme } from '../../context/ThemeContext';
+import { Theme } from '../../theme';
 
 export const AddMedicationScreen = ({ navigation, route }: any) => {
+    const { theme } = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const medicationId = route.params?.medicationId;
     const isEdit = !!medicationId;
 
@@ -115,6 +119,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
                 value={name}
                 onChangeText={setName}
                 placeholder="e.g., Aspirin"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Dosage *</Text>
@@ -123,6 +128,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
                 value={dosage}
                 onChangeText={setDosage}
                 placeholder="e.g., 100mg"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Frequency</Text>
@@ -148,6 +154,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
                         value={time}
                         onChangeText={(value) => handleTimeChange(index, value)}
                         placeholder="HH:MM"
+                        placeholderTextColor={theme.colors.subText}
                     />
                     {times.length > 1 && (
                         <TouchableOpacity onPress={() => handleRemoveTime(index)} style={styles.removeButton}>
@@ -166,6 +173,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
                 value={startDate}
                 onChangeText={setStartDate}
                 placeholder="YYYY-MM-DD"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>End Date (Optional)</Text>
@@ -174,6 +182,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
                 value={endDate}
                 onChangeText={setEndDate}
                 placeholder="YYYY-MM-DD"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Notes</Text>
@@ -182,13 +191,19 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
                 value={notes}
                 onChangeText={setNotes}
                 placeholder="Additional notes..."
+                placeholderTextColor={theme.colors.subText}
                 multiline
                 numberOfLines={4}
             />
 
             <View style={styles.switchRow}>
                 <Text style={styles.label}>Enable Reminders</Text>
-                <Switch value={reminderEnabled} onValueChange={setReminderEnabled} />
+                <Switch
+                    value={reminderEnabled}
+                    onValueChange={setReminderEnabled}
+                    trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                    thumbColor={theme.colors.surface}
+                />
             </View>
 
             <TouchableOpacity
@@ -202,28 +217,29 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: theme.colors.background,
     },
     content: {
-        padding: 16,
+        padding: theme.spacing.m,
     },
     label: {
-        fontSize: 16,
+        ...theme.textVariants.body,
         fontWeight: '600',
-        color: '#000',
-        marginBottom: 8,
-        marginTop: 16,
+        color: theme.colors.text,
+        marginBottom: theme.spacing.s,
+        marginTop: theme.spacing.m,
     },
     input: {
-        backgroundColor: '#FFF',
-        borderRadius: 8,
-        padding: 12,
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.spacing.s,
+        padding: theme.spacing.m,
         fontSize: 16,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: theme.colors.border,
+        color: theme.colors.text,
     },
     notesInput: {
         minHeight: 100,
@@ -231,35 +247,35 @@ const styles = StyleSheet.create({
     },
     frequencyContainer: {
         flexDirection: 'row',
-        gap: 8,
-        marginBottom: 8,
+        gap: theme.spacing.s,
+        marginBottom: theme.spacing.s,
     },
     frequencyButton: {
         flex: 1,
-        padding: 12,
-        borderRadius: 8,
-        backgroundColor: '#FFF',
+        padding: theme.spacing.m,
+        borderRadius: theme.spacing.s,
+        backgroundColor: theme.colors.surface,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: theme.colors.border,
         alignItems: 'center',
     },
     frequencyButtonActive: {
-        backgroundColor: '#007AFF',
-        borderColor: '#007AFF',
+        backgroundColor: theme.colors.primary,
+        borderColor: theme.colors.primary,
     },
     frequencyText: {
-        fontSize: 14,
-        color: '#666',
+        ...theme.textVariants.body,
+        color: theme.colors.subText,
     },
     frequencyTextActive: {
-        color: '#FFF',
+        color: theme.colors.surface,
         fontWeight: '600',
     },
     timeRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
-        marginBottom: 8,
+        gap: theme.spacing.s,
+        marginBottom: theme.spacing.s,
     },
     timeInput: {
         flex: 1,
@@ -268,25 +284,25 @@ const styles = StyleSheet.create({
         width: 32,
         height: 32,
         borderRadius: 16,
-        backgroundColor: '#FF3B30',
+        backgroundColor: theme.colors.error,
         justifyContent: 'center',
         alignItems: 'center',
     },
     removeButtonText: {
-        color: '#FFF',
+        color: theme.colors.surface,
         fontSize: 18,
         fontWeight: 'bold',
     },
     addTimeButton: {
-        padding: 12,
+        padding: theme.spacing.m,
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#007AFF',
-        borderRadius: 8,
+        borderColor: theme.colors.primary,
+        borderRadius: theme.spacing.s,
         borderStyle: 'dashed',
     },
     addTimeButtonText: {
-        color: '#007AFF',
+        color: theme.colors.primary,
         fontSize: 14,
         fontWeight: '600',
     },
@@ -294,22 +310,22 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 16,
+        marginTop: theme.spacing.m,
     },
     saveButton: {
-        backgroundColor: '#007AFF',
-        padding: 16,
-        borderRadius: 8,
+        backgroundColor: theme.colors.primary,
+        padding: theme.spacing.m,
+        borderRadius: theme.spacing.s,
         alignItems: 'center',
-        marginTop: 24,
-        marginBottom: 32,
+        marginTop: theme.spacing.l,
+        marginBottom: theme.spacing.xl,
+        ...theme.shadows.small,
     },
     saveButtonDisabled: {
         opacity: 0.5,
     },
     saveButtonText: {
-        color: '#FFF',
-        fontSize: 16,
-        fontWeight: '600',
+        ...theme.textVariants.button,
+        color: theme.colors.surface,
     },
 });

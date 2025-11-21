@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     View,
     Text,
@@ -11,8 +11,12 @@ import {
 } from 'react-native';
 import { appointmentsDb } from '../../database/appointmentsDb';
 import { notificationService } from '../../services/notificationService';
+import { useTheme } from '../../context/ThemeContext';
+import { Theme } from '../../theme';
 
 export const AddAppointmentScreen = ({ navigation, route }: any) => {
+    const { theme } = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const appointmentId = route.params?.appointmentId;
     const isEdit = !!appointmentId;
 
@@ -102,6 +106,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
                 value={title}
                 onChangeText={setTitle}
                 placeholder="e.g., Annual Checkup"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Doctor Name</Text>
@@ -110,6 +115,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
                 value={doctorName}
                 onChangeText={setDoctorName}
                 placeholder="e.g., Smith"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Location</Text>
@@ -118,6 +124,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
                 value={location}
                 onChangeText={setLocation}
                 placeholder="e.g., Main Street Clinic"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Date *</Text>
@@ -126,6 +133,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
                 value={date}
                 onChangeText={setDate}
                 placeholder="YYYY-MM-DD"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Time *</Text>
@@ -134,6 +142,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
                 value={time}
                 onChangeText={setTime}
                 placeholder="HH:MM"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Notes</Text>
@@ -142,13 +151,19 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
                 value={notes}
                 onChangeText={setNotes}
                 placeholder="Additional notes..."
+                placeholderTextColor={theme.colors.subText}
                 multiline
                 numberOfLines={4}
             />
 
             <View style={styles.switchRow}>
                 <Text style={styles.label}>Enable Reminder (1 hour before)</Text>
-                <Switch value={reminderEnabled} onValueChange={setReminderEnabled} />
+                <Switch
+                    value={reminderEnabled}
+                    onValueChange={setReminderEnabled}
+                    trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                    thumbColor={theme.colors.surface}
+                />
             </View>
 
             <TouchableOpacity
@@ -162,28 +177,29 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: theme.colors.background,
     },
     content: {
-        padding: 16,
+        padding: theme.spacing.m,
     },
     label: {
-        fontSize: 16,
+        ...theme.textVariants.caption,
         fontWeight: '600',
-        color: '#000',
-        marginBottom: 8,
-        marginTop: 16,
+        color: theme.colors.text,
+        marginBottom: theme.spacing.s,
+        marginTop: theme.spacing.m,
     },
     input: {
-        backgroundColor: '#FFF',
-        borderRadius: 8,
-        padding: 12,
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.spacing.s,
+        padding: theme.spacing.m,
         fontSize: 16,
+        color: theme.colors.text,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: theme.colors.border,
     },
     notesInput: {
         minHeight: 100,
@@ -193,22 +209,21 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginTop: 16,
+        marginTop: theme.spacing.m,
     },
     saveButton: {
-        backgroundColor: '#007AFF',
-        padding: 16,
-        borderRadius: 8,
+        backgroundColor: theme.colors.primary,
+        padding: theme.spacing.m,
+        borderRadius: theme.spacing.s,
         alignItems: 'center',
-        marginTop: 24,
-        marginBottom: 32,
+        marginTop: theme.spacing.l,
+        marginBottom: theme.spacing.xl,
     },
     saveButtonDisabled: {
         opacity: 0.5,
     },
     saveButtonText: {
-        color: '#FFF',
-        fontSize: 16,
-        fontWeight: '600',
+        ...theme.textVariants.button,
+        color: theme.colors.surface,
     },
 });

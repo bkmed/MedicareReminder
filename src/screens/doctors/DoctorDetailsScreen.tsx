@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
     View,
     Text,
@@ -12,10 +12,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import { doctorsDb } from '../../database/doctorsDb';
 import { appointmentsDb } from '../../database/appointmentsDb';
 import { Doctor, Appointment } from '../../database/schema';
-import { theme } from '../../theme';
+import { useTheme } from '../../context/ThemeContext';
+import { Theme } from '../../theme';
 
 export const DoctorDetailsScreen = ({ navigation, route }: any) => {
     const { doctorId } = route.params;
+    const { theme } = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const [doctor, setDoctor] = useState<Doctor | null>(null);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
@@ -90,7 +93,7 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
-                <Text>Loading...</Text>
+                <Text style={{ color: theme.colors.text }}>Loading...</Text>
             </View>
         );
     }
@@ -174,7 +177,7 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: theme.colors.background,
@@ -183,6 +186,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: theme.colors.background,
     },
     content: {
         padding: theme.spacing.m,
@@ -204,6 +208,7 @@ const styles = StyleSheet.create({
         ...theme.textVariants.header,
         fontSize: 24,
         marginBottom: theme.spacing.xs,
+        color: theme.colors.text,
     },
     specialty: {
         ...theme.textVariants.subheader,
@@ -219,9 +224,12 @@ const styles = StyleSheet.create({
         paddingVertical: theme.spacing.xs,
         borderRadius: theme.spacing.s,
         backgroundColor: theme.colors.background,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
     },
     deleteButton: {
-        backgroundColor: '#FFF0F0',
+        backgroundColor: theme.colors.surface,
+        borderColor: theme.colors.error,
     },
     actionText: {
         ...theme.textVariants.body,
@@ -246,9 +254,11 @@ const styles = StyleSheet.create({
         ...theme.textVariants.caption,
         fontWeight: '600',
         textTransform: 'uppercase',
+        color: theme.colors.subText,
     },
     detailValue: {
         ...theme.textVariants.body,
+        color: theme.colors.text,
     },
     sectionHeader: {
         flexDirection: 'row',
@@ -258,6 +268,7 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         ...theme.textVariants.subheader,
+        color: theme.colors.text,
     },
     addButton: {
         backgroundColor: theme.colors.primary,
@@ -268,6 +279,7 @@ const styles = StyleSheet.create({
     addButtonText: {
         ...theme.textVariants.button,
         fontSize: 14,
+        color: theme.colors.surface,
     },
     appointmentWrapper: {
         marginBottom: theme.spacing.m,
@@ -289,6 +301,7 @@ const styles = StyleSheet.create({
     appointmentTitle: {
         ...theme.textVariants.body,
         fontWeight: '600',
+        color: theme.colors.text,
     },
     appointmentDate: {
         ...theme.textVariants.caption,
@@ -298,11 +311,12 @@ const styles = StyleSheet.create({
     appointmentDetail: {
         ...theme.textVariants.caption,
         marginTop: theme.spacing.xs,
+        color: theme.colors.subText,
     },
     emptyState: {
         alignItems: 'center',
         padding: theme.spacing.xl,
-        backgroundColor: 'rgba(0,0,0,0.02)',
+        backgroundColor: theme.colors.surface,
         borderRadius: theme.spacing.m,
     },
     emptyText: {

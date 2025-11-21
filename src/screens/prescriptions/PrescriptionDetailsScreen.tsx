@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     View,
     Text,
@@ -10,9 +10,13 @@ import {
 } from 'react-native';
 import { prescriptionsDb } from '../../database/prescriptionsDb';
 import { Prescription } from '../../database/schema';
+import { useTheme } from '../../context/ThemeContext';
+import { Theme } from '../../theme';
 
 export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
     const { prescriptionId } = route.params;
+    const { theme } = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const [prescription, setPrescription] = useState<Prescription | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -60,7 +64,7 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
     if (loading || !prescription) {
         return (
             <View style={styles.container}>
-                <Text>Loading...</Text>
+                <Text style={{ color: theme.colors.text }}>Loading...</Text>
             </View>
         );
     }
@@ -112,56 +116,56 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: theme.colors.background,
     },
     content: {
-        padding: 16,
+        padding: theme.spacing.m,
     },
     photo: {
         width: '100%',
         height: 300,
-        borderRadius: 12,
-        marginBottom: 16,
+        borderRadius: theme.spacing.m,
+        marginBottom: theme.spacing.m,
+        backgroundColor: theme.colors.border,
     },
     section: {
-        backgroundColor: '#FFF',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.spacing.m,
+        padding: theme.spacing.m,
+        marginBottom: theme.spacing.m,
+        ...theme.shadows.small,
     },
     medicationName: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#000',
+        ...theme.textVariants.header,
+        color: theme.colors.text,
     },
     label: {
-        fontSize: 14,
-        color: '#666',
+        ...theme.textVariants.caption,
+        color: theme.colors.subText,
         marginBottom: 4,
     },
     value: {
-        fontSize: 16,
-        color: '#000',
+        ...theme.textVariants.body,
+        color: theme.colors.text,
     },
     button: {
-        backgroundColor: '#007AFF',
-        padding: 16,
-        borderRadius: 8,
+        backgroundColor: theme.colors.primary,
+        padding: theme.spacing.m,
+        borderRadius: theme.spacing.s,
         alignItems: 'center',
-        marginTop: 12,
+        marginTop: theme.spacing.m,
     },
     editButton: {
-        backgroundColor: '#34C759',
+        backgroundColor: theme.colors.secondary,
     },
     deleteButton: {
-        backgroundColor: '#FF3B30',
+        backgroundColor: theme.colors.error,
     },
     buttonText: {
-        color: '#FFF',
-        fontSize: 16,
-        fontWeight: '600',
+        ...theme.textVariants.button,
+        color: theme.colors.surface,
     },
 });

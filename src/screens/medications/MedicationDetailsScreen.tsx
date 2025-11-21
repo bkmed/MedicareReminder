@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     View,
     Text,
@@ -10,9 +10,13 @@ import {
 import { medicationsDb } from '../../database/medicationsDb';
 import { notificationService } from '../../services/notificationService';
 import { Medication } from '../../database/schema';
+import { useTheme } from '../../context/ThemeContext';
+import { Theme } from '../../theme';
 
 export const MedicationDetailsScreen = ({ navigation, route }: any) => {
     const { medicationId } = route.params;
+    const { theme } = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const [medication, setMedication] = useState<Medication | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -65,7 +69,7 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
     if (loading || !medication) {
         return (
             <View style={styles.container}>
-                <Text>Loading...</Text>
+                <Text style={{ color: theme.colors.text }}>Loading...</Text>
             </View>
         );
     }
@@ -134,39 +138,39 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: theme.colors.background,
     },
     content: {
-        padding: 16,
+        padding: theme.spacing.m,
     },
     section: {
-        backgroundColor: '#FFF',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.spacing.m,
+        padding: theme.spacing.m,
+        marginBottom: theme.spacing.m,
+        ...theme.shadows.small,
     },
     name: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#000',
+        ...theme.textVariants.header,
+        color: theme.colors.text,
         marginBottom: 4,
     },
     dosage: {
-        fontSize: 18,
-        color: '#666',
+        ...theme.textVariants.subheader,
+        color: theme.colors.subText,
         fontWeight: '600',
     },
     label: {
-        fontSize: 14,
-        color: '#666',
+        ...theme.textVariants.caption,
+        color: theme.colors.subText,
         marginBottom: 4,
     },
     value: {
-        fontSize: 16,
-        color: '#000',
+        ...theme.textVariants.body,
+        color: theme.colors.text,
     },
     timesContainer: {
         flexDirection: 'row',
@@ -175,32 +179,31 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     timeBadge: {
-        backgroundColor: '#007AFF',
+        backgroundColor: theme.colors.primary,
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 16,
     },
     timeText: {
-        color: '#FFF',
-        fontSize: 12,
+        ...theme.textVariants.caption,
+        color: theme.colors.surface,
         fontWeight: '600',
     },
     button: {
-        backgroundColor: '#007AFF',
-        padding: 16,
-        borderRadius: 8,
+        backgroundColor: theme.colors.primary,
+        padding: theme.spacing.m,
+        borderRadius: theme.spacing.s,
         alignItems: 'center',
-        marginTop: 12,
+        marginTop: theme.spacing.m,
     },
     editButton: {
-        backgroundColor: '#34C759',
+        backgroundColor: theme.colors.secondary,
     },
     deleteButton: {
-        backgroundColor: '#FF3B30',
+        backgroundColor: theme.colors.error,
     },
     buttonText: {
-        color: '#FFF',
-        fontSize: 16,
-        fontWeight: '600',
+        ...theme.textVariants.button,
+        color: theme.colors.surface,
     },
 });

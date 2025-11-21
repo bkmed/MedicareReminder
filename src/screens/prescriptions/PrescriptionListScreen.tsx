@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
     View,
     Text,
@@ -11,8 +11,12 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { prescriptionsDb } from '../../database/prescriptionsDb';
 import { Prescription } from '../../database/schema';
+import { useTheme } from '../../context/ThemeContext';
+import { Theme } from '../../theme';
 
 export const PrescriptionListScreen = ({ navigation }: any) => {
+    const { theme } = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -100,63 +104,58 @@ export const PrescriptionListScreen = ({ navigation }: any) => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: theme.colors.background,
     },
     listContent: {
-        padding: 16,
+        padding: theme.spacing.m,
         flexGrow: 1,
     },
     card: {
-        backgroundColor: '#FFF',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.spacing.m,
+        padding: theme.spacing.m,
+        marginBottom: theme.spacing.m,
         flexDirection: 'row',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        ...theme.shadows.small,
     },
     cardWarning: {
         borderLeftWidth: 4,
-        borderLeftColor: '#FF9500',
+        borderLeftColor: theme.colors.warning,
     },
     thumbnail: {
         width: 80,
         height: 80,
-        borderRadius: 8,
-        marginRight: 12,
-        backgroundColor: '#E0E0E0',
+        borderRadius: theme.spacing.s,
+        marginRight: theme.spacing.m,
+        backgroundColor: theme.colors.border,
     },
     details: {
         flex: 1,
     },
     medicationName: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#000',
-        marginBottom: 4,
+        ...theme.textVariants.subheader,
+        marginBottom: theme.spacing.xs,
+        color: theme.colors.text,
     },
     doctor: {
-        fontSize: 14,
-        color: '#666',
-        marginBottom: 4,
+        ...theme.textVariants.body,
+        color: theme.colors.subText,
+        marginBottom: theme.spacing.xs,
     },
     date: {
-        fontSize: 13,
-        color: '#999',
+        ...theme.textVariants.caption,
         marginBottom: 2,
+        color: theme.colors.subText,
     },
     expiry: {
-        fontSize: 13,
-        color: '#999',
+        ...theme.textVariants.caption,
+        color: theme.colors.subText,
     },
     expiryWarning: {
-        color: '#FF9500',
+        color: theme.colors.warning,
         fontWeight: '600',
     },
     emptyContainer: {
@@ -166,34 +165,30 @@ const styles = StyleSheet.create({
         paddingVertical: 60,
     },
     emptyText: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#666',
-        marginBottom: 8,
+        ...theme.textVariants.subheader,
+        color: theme.colors.subText,
+        marginBottom: theme.spacing.s,
     },
     emptySubText: {
-        fontSize: 14,
-        color: '#999',
+        ...theme.textVariants.body,
+        color: theme.colors.subText,
     },
     fab: {
         position: 'absolute',
-        right: 24,
-        bottom: 24,
+        right: theme.spacing.l,
+        bottom: theme.spacing.l,
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: '#007AFF',
+        backgroundColor: theme.colors.primary,
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 8,
+        ...theme.shadows.medium,
     },
     fabText: {
         fontSize: 32,
-        color: '#FFF',
+        color: theme.colors.surface,
         fontWeight: '300',
+        marginTop: -2,
     },
 });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     View,
     Text,
@@ -11,8 +11,13 @@ import {
 } from 'react-native';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { prescriptionsDb } from '../../database/prescriptionsDb';
+import { notificationService } from '../../services/notificationService';
+import { useTheme } from '../../context/ThemeContext';
+import { Theme } from '../../theme';
 
 export const AddPrescriptionScreen = ({ navigation, route }: any) => {
+    const { theme } = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const prescriptionId = route.params?.prescriptionId;
     const isEdit = !!prescriptionId;
 
@@ -89,10 +94,24 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
                 notes: notes.trim() || undefined,
             };
 
+            let id = prescriptionId;
+
             if (isEdit) {
                 await prescriptionsDb.update(prescriptionId, prescriptionData);
             } else {
-                await prescriptionsDb.add(prescriptionData);
+                id = await prescriptionsDb.add(prescriptionData);
+            }
+
+            // Schedule reminder if expiry date is set
+            if (expiryDate) {
+                await notificationService.schedulePrescriptionExpiryReminder(
+                    id,
+                    prescriptionData.medicationName,
+                    expiryDate
+                );
+            } else if (isEdit) {
+                // If expiry date removed, cancel reminder
+                await notificationService.cancelPrescriptionReminder(id);
             }
 
             navigation.goBack();
@@ -122,6 +141,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
                 value={medicationName}
                 onChangeText={setMedicationName}
                 placeholder="e.g., Lisinopril"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Doctor Name</Text>
@@ -130,6 +150,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
                 value={doctorName}
                 onChangeText={setDoctorName}
                 placeholder="e.g., Smith"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Issue Date *</Text>
@@ -138,6 +159,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
                 value={issueDate}
                 onChangeText={setIssueDate}
                 placeholder="YYYY-MM-DD"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Expiry Date (Optional)</Text>
@@ -146,6 +168,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
                 value={expiryDate}
                 onChangeText={setExpiryDate}
                 placeholder="YYYY-MM-DD"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Notes</Text>
@@ -154,6 +177,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
                 value={notes}
                 onChangeText={setNotes}
                 placeholder="Additional notes..."
+                placeholderTextColor={theme.colors.subText}
                 multiline
                 numberOfLines={4}
             />
@@ -169,71 +193,72 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: theme.colors.background,
     },
     content: {
-        padding: 16,
+        padding: theme.spacing.m,
     },
     photoButton: {
         alignItems: 'center',
-        marginBottom: 24,
+        marginBottom: theme.spacing.l,
     },
     photo: {
         width: 200,
         height: 200,
-        borderRadius: 12,
+        borderRadius: theme.spacing.m,
     },
     photoPlaceholder: {
         width: 200,
         height: 200,
-        borderRadius: 12,
-        backgroundColor: '#E0E0E0',
+        borderRadius: theme.spacing.m,
+        backgroundColor: theme.colors.surface,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 2,
-        borderColor: '#007AFF',
+        borderColor: theme.colors.primary,
         borderStyle: 'dashed',
     },
     photoPlaceholderText: {
-        fontSize: 16,
-        color: '#007AFF',
+        ...theme.textVariants.body,
+        color: theme.colors.primary,
     },
     label: {
-        fontSize: 16,
+        ...theme.textVariants.body,
         fontWeight: '600',
-        color: '#000',
-        marginBottom: 8,
-        marginTop: 16,
+        color: theme.colors.text,
+        marginBottom: theme.spacing.s,
+        marginTop: theme.spacing.m,
     },
     input: {
-        backgroundColor: '#FFF',
-        borderRadius: 8,
-        padding: 12,
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.spacing.s,
+        padding: theme.spacing.m,
         fontSize: 16,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: theme.colors.border,
+        color: theme.colors.text,
     },
     notesInput: {
         minHeight: 100,
         textAlignVertical: 'top',
     },
     saveButton: {
-        backgroundColor: '#007AFF',
-        padding: 16,
-        borderRadius: 8,
+        backgroundColor: theme.colors.primary,
+        padding: theme.spacing.m,
+        borderRadius: theme.spacing.s,
         alignItems: 'center',
-        marginTop: 24,
-        marginBottom: 32,
+        marginTop: theme.spacing.l,
+        marginBottom: theme.spacing.xl,
+        ...theme.shadows.small,
     },
     saveButtonDisabled: {
         opacity: 0.5,
     },
     saveButtonText: {
-        color: '#FFF',
-        fontSize: 16,
-        fontWeight: '600',
+        ...theme.textVariants.button,
+        color: theme.colors.surface,
     },
 });

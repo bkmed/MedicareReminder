@@ -162,6 +162,60 @@ export const notificationService = {
         await notifee.cancelNotification(`appt-${appointmentId}`);
     },
 
+    // Schedule prescription expiry reminder
+    schedulePrescriptionExpiryReminder: async (
+        prescriptionId: number,
+        medicationName: string,
+        expiryDate: string
+    ) => {
+        if (Platform.OS === 'web') return;
+        const expiry = new Date(expiryDate);
+
+        // Schedule 7 days before expiry
+        const reminderTime = new Date(expiry.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+        // If 7 days before is in the past, try 1 day before
+        if (reminderTime < new Date()) {
+            reminderTime.setTime(expiry.getTime() - 24 * 60 * 60 * 1000);
+        }
+
+        if (reminderTime < new Date()) {
+            console.log('Expiry reminder time has passed, skipping');
+            return;
+        }
+
+        const trigger: TimestampTrigger = {
+            type: TriggerType.TIMESTAMP,
+            timestamp: reminderTime.getTime(),
+        };
+
+        await notifee.createTriggerNotification(
+            {
+                id: `rx-${prescriptionId}`,
+                title: 'Prescription Expiring Soon',
+                body: `Your prescription for ${medicationName} expires on ${expiry.toLocaleDateString()}`,
+                android: {
+                    channelId: 'medications',
+                    pressAction: {
+                        id: 'default',
+                        launchActivity: 'default',
+                    },
+                },
+                data: {
+                    type: 'prescription',
+                    prescriptionId: prescriptionId.toString(),
+                },
+            },
+            trigger
+        );
+    },
+
+    // Cancel prescription reminder
+    cancelPrescriptionReminder: async (prescriptionId: number) => {
+        if (Platform.OS === 'web') return;
+        await notifee.cancelNotification(`rx-${prescriptionId}`);
+    },
+
     // Handle notification press (called from App.tsx)
     handleNotificationPress: async (notificationId: string, data: any) => {
         console.log('Notification pressed:', notificationId, data);

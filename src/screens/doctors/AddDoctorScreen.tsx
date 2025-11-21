@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     View,
     Text,
@@ -9,8 +9,12 @@ import {
     Alert,
 } from 'react-native';
 import { doctorsDb } from '../../database/doctorsDb';
+import { useTheme } from '../../context/ThemeContext';
+import { Theme } from '../../theme';
 
 export const AddDoctorScreen = ({ navigation, route }: any) => {
+    const { theme } = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const doctorId = route.params?.doctorId;
     const isEdit = !!doctorId;
 
@@ -106,6 +110,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
                 value={name}
                 onChangeText={setName}
                 placeholder="e.g., John Smith"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Specialty</Text>
@@ -114,6 +119,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
                 value={specialty}
                 onChangeText={setSpecialty}
                 placeholder="e.g., Cardiology"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Phone</Text>
@@ -122,6 +128,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
                 value={phone}
                 onChangeText={setPhone}
                 placeholder="e.g., (555) 123-4567"
+                placeholderTextColor={theme.colors.subText}
                 keyboardType="phone-pad"
             />
 
@@ -131,6 +138,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
                 value={email}
                 onChangeText={setEmail}
                 placeholder="e.g., doctor@clinic.com"
+                placeholderTextColor={theme.colors.subText}
                 keyboardType="email-address"
                 autoCapitalize="none"
             />
@@ -141,6 +149,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
                 value={address}
                 onChangeText={setAddress}
                 placeholder="e.g., 123 Main St, City"
+                placeholderTextColor={theme.colors.subText}
             />
 
             <Text style={styles.label}>Notes</Text>
@@ -149,6 +158,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
                 value={notes}
                 onChangeText={setNotes}
                 placeholder="Additional notes..."
+                placeholderTextColor={theme.colors.subText}
                 multiline
                 numberOfLines={4}
             />
@@ -170,59 +180,58 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#F2F2F7',
+        backgroundColor: theme.colors.background,
     },
     content: {
-        padding: 16,
+        padding: theme.spacing.m,
     },
     label: {
-        fontSize: 16,
+        ...theme.textVariants.caption,
         fontWeight: '600',
-        color: '#000',
-        marginBottom: 8,
-        marginTop: 16,
+        color: theme.colors.text,
+        marginBottom: theme.spacing.s,
+        marginTop: theme.spacing.m,
     },
     input: {
-        backgroundColor: '#FFF',
-        borderRadius: 8,
-        padding: 12,
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.spacing.s,
+        padding: theme.spacing.m,
         fontSize: 16,
+        color: theme.colors.text,
         borderWidth: 1,
-        borderColor: '#E0E0E0',
+        borderColor: theme.colors.border,
     },
     notesInput: {
         minHeight: 100,
         textAlignVertical: 'top',
     },
     saveButton: {
-        backgroundColor: '#007AFF',
-        padding: 16,
-        borderRadius: 8,
+        backgroundColor: theme.colors.primary,
+        padding: theme.spacing.m,
+        borderRadius: theme.spacing.s,
         alignItems: 'center',
-        marginTop: 24,
+        marginTop: theme.spacing.l,
     },
     saveButtonDisabled: {
         opacity: 0.5,
     },
     saveButtonText: {
-        color: '#FFF',
-        fontSize: 16,
-        fontWeight: '600',
+        ...theme.textVariants.button,
+        color: theme.colors.surface,
     },
     deleteButton: {
-        backgroundColor: '#FF3B30',
-        padding: 16,
-        borderRadius: 8,
+        backgroundColor: theme.colors.error,
+        padding: theme.spacing.m,
+        borderRadius: theme.spacing.s,
         alignItems: 'center',
-        marginTop: 12,
-        marginBottom: 32,
+        marginTop: theme.spacing.m,
+        marginBottom: theme.spacing.xl,
     },
     deleteButtonText: {
-        color: '#FFF',
-        fontSize: 16,
-        fontWeight: '600',
+        ...theme.textVariants.button,
+        color: theme.colors.surface,
     },
 });
