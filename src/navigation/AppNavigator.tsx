@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Platform } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { Platform, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -16,11 +16,9 @@ import { AddPrescriptionScreen } from '../screens/prescriptions/AddPrescriptionS
 import { PrescriptionDetailsScreen } from '../screens/prescriptions/PrescriptionDetailsScreen';
 import { DoctorListScreen } from '../screens/doctors/DoctorListScreen';
 import { AddDoctorScreen } from '../screens/doctors/AddDoctorScreen';
+import { DoctorDetailsScreen } from '../screens/doctors/DoctorDetailsScreen';
 import { AnalyticsScreen } from '../screens/analytics/AnalyticsScreen';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-
-// Placeholder screens
-const ProfileScreen = () => <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Profile</Text></View>;
+import { ProfileScreen } from '../screens/profile/ProfileScreen';
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -61,6 +59,7 @@ const DoctorsStack = () => {
         <Stack.Navigator>
             <Stack.Screen name="DoctorList" component={DoctorListScreen} options={{ title: 'Doctors' }} />
             <Stack.Screen name="AddDoctor" component={AddDoctorScreen} options={{ title: 'Add Doctor' }} />
+            <Stack.Screen name="DoctorDetails" component={DoctorDetailsScreen} options={{ title: 'Doctor Details' }} />
         </Stack.Navigator>
     );
 };
@@ -88,6 +87,12 @@ const WebNavigator = () => {
                     <TouchableOpacity onPress={() => setActiveTab('main')} style={webStyles.navButton}>
                         <Text style={[webStyles.navButtonText, activeTab === 'main' && webStyles.activeNavButton]}>Home</Text>
                     </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setActiveTab('medications')} style={webStyles.navButton}>
+                        <Text style={[webStyles.navButtonText, activeTab === 'medications' && webStyles.activeNavButton]}>Medications</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setActiveTab('appointments')} style={webStyles.navButton}>
+                        <Text style={[webStyles.navButtonText, activeTab === 'appointments' && webStyles.activeNavButton]}>Appointments</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity onPress={() => setActiveTab('analytics')} style={webStyles.navButton}>
                         <Text style={[webStyles.navButtonText, activeTab === 'analytics' && webStyles.activeNavButton]}>Analytics</Text>
                     </TouchableOpacity>
@@ -97,14 +102,20 @@ const WebNavigator = () => {
                     <TouchableOpacity onPress={() => setActiveTab('doctors')} style={webStyles.navButton}>
                         <Text style={[webStyles.navButtonText, activeTab === 'doctors' && webStyles.activeNavButton]}>Doctors</Text>
                     </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setActiveTab('profile')} style={webStyles.navButton}>
+                        <Text style={[webStyles.navButtonText, activeTab === 'profile' && webStyles.activeNavButton]}>Profile</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
-            {/* Content area */}
-            <View style={{ flex: 1 }}>
-                {activeTab === 'main' && <TabNavigator />}
+            {/* Content area with proper positioning for FABs */}
+            <View style={{ flex: 1, position: 'relative' as any }}>
+                {activeTab === 'main' && <HomeScreen />}
+                {activeTab === 'medications' && <MedicationsStack />}
+                {activeTab === 'appointments' && <AppointmentsStack />}
                 {activeTab === 'analytics' && <AnalyticsScreen />}
                 {activeTab === 'prescriptions' && <PrescriptionsStack />}
                 {activeTab === 'doctors' && <DoctorsStack />}
+                {activeTab === 'profile' && <ProfileScreen />}
             </View>
         </View>
     );
@@ -123,7 +134,7 @@ const DrawerNavigator = () => {
 };
 
 export const AppNavigator = () => {
-    const linking = {
+    const linking: LinkingOptions<any> = {
         prefixes: ['http://localhost:8080', 'medicarereminder://'],
         config: {
             screens: {
@@ -166,6 +177,7 @@ export const AppNavigator = () => {
                             screens: {
                                 DoctorList: '',
                                 AddDoctor: 'add',
+                                DoctorDetails: ':doctorId',
                             },
                         },
                         Profile: 'profile',
@@ -189,7 +201,10 @@ export const AppNavigator = () => {
 
     //  Native navigation with drawer
     return (
-        <NavigationContainer linking={linking} fallback={<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Loading...</Text></View>}>
+        <NavigationContainer
+            linking={linking}
+            fallback={<View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><Text>Loading...</Text></View>}
+        >
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="Root" component={DrawerNavigator} />
             </Stack.Navigator>
@@ -209,6 +224,7 @@ const webStyles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
+        zIndex: 1000,
     },
     title: {
         fontSize: 20,

@@ -153,9 +153,9 @@ const createStyles = (theme: Theme) => StyleSheet.create({
         color: theme.colors.subText,
     },
     fab: {
-        position: 'absolute',
+        position: 'absolute' as any,
         right: theme.spacing.l,
-        bottom: theme.spacing.l,
+        top: theme.spacing.l,
         width: 56,
         height: 56,
         borderRadius: 28,
@@ -163,7 +163,9 @@ const createStyles = (theme: Theme) => StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         ...theme.shadows.medium,
-    },
+        zIndex: 999,
+        elevation: 10,
+    } as any,
     fabText: {
         fontSize: 32,
         color: theme.colors.surface,
