@@ -1,5 +1,10 @@
 pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
 plugins { id("com.facebook.react.settings") }
+
+// Manually include react-native-nitro-modules to fix dependency resolution
+include ':react-native-nitro-modules'
+project(':react-native-nitro-modules').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-nitro-modules/android')
+
 extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
 rootProject.name = 'MedicareReminder'
 include ':app'

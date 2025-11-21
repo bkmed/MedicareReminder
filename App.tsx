@@ -1,45 +1,35 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useEffect } from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Platform } from 'react-native';
+import { AppNavigator } from './src/navigation/AppNavigator';
+import { notificationService } from './src/services/notificationService';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
+const App = () => {
+  useEffect(() => {
+    // Initialize notifications (native only)
+    // Note: MMKV storage is ready to use immediately, no initialization needed
+    const initialize = async () => {
+      try {
+        // Only initialize native modules on iOS/Android
+        if (Platform.OS !== 'web') {
+          await notificationService.initialize();
+          console.log('App initialized successfully');
+        } else {
+          console.log('Running on web - MMKV storage ready via localStorage');
+        }
+      } catch (error) {
+        console.error('Error initializing app:', error);
+      }
+    };
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+    initialize();
+  }, []);
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
+      <AppNavigator />
     </SafeAreaProvider>
   );
-}
-
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+};
 
 export default App;

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+</head>
+<body>
+  <script>
+    console.log('Opening socket to webpack...');
+    const ws = new WebSocket('ws://localhost:8080/ws');
+    ws.onerror = (err) => console.error('WebSocket error:', err);
+    ws.onopen = () => console.log('WebSocket connected!');
+  </script>
+  <div id="test">Testing - if you see this, HTML is rendering</div>
+  <script src="http://localhost:8080/bundle.web.js"></script>
+</body>
+</html>
