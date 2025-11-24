@@ -125,16 +125,12 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   };
 
   return (
-    <ScrollView
-      testID="addmedication"
-      style={styles.container}
-      contentContainerStyle={styles.content}
-    >
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.label}>{t('medications.name')} *</Text>
       <TextInput
         style={[styles.input, errors.name && styles.inputError]}
         value={name}
-        onChangeText={(text) => {
+        onChangeText={text => {
           setName(text);
           if (errors.name) {
             setErrors({ ...errors, name: '' });
@@ -149,7 +145,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
       <TextInput
         style={[styles.input, errors.dosage && styles.inputError]}
         value={dosage}
-        onChangeText={(text) => {
+        onChangeText={text => {
           setDosage(text);
           if (errors.dosage) {
             setErrors({ ...errors, dosage: '' });

@@ -130,7 +130,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
 
     return (
         <View>
-            <ScrollView testID='adddoctor' style={styles.container} contentContainerStyle={styles.content}>
+            <ScrollView style={styles.container} contentContainerStyle={styles.content}>
                 <Text style={styles.label}>{t('doctors.name')} *</Text>
                 <TextInput
                     style={[styles.input, errors.name && styles.inputError]}

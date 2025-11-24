@@ -95,7 +95,7 @@ export const DoctorListScreen = ({ navigation }: any) => {
     );
 
     return (
-        <View testID='doctorlist' style={styles.container}>
+        <View style={styles.container}>
             <View style={styles.searchContainer}>
                 <SearchInput
                     value={searchQuery}
@@ -105,7 +105,6 @@ export const DoctorListScreen = ({ navigation }: any) => {
             </View>
             <FlatList
                 data={filteredDoctors}
-                testID='doctorflatlist'
                 renderItem={renderDoctor}
                 keyExtractor={(item) => item.id?.toString() || ''}
                 contentContainerStyle={styles.listContent}

@@ -119,7 +119,6 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
 
   return (
     <ScrollView
-      testID="addappointment"
       style={styles.container}
       contentContainerStyle={styles.content}
     >
