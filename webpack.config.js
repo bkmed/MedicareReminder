@@ -13,7 +13,7 @@ module.exports = {
     clean: true,
   },
   devServer: {
-    port: 8001,
+    port: 8002,
     allowedHosts: 'auto',
     historyApiFallback: true,
   },

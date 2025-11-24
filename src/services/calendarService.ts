@@ -27,35 +27,10 @@ class CalendarService {
         }
 
         if (Platform.OS === 'web') {
-            return this.addToCalendarWeb(appointment);
+            console.warn('Calendar service is not supported on web. Use AddToCalendarButton component.');
+            return false;
         } else {
             return this.addToCalendarNative(appointment);
-        }
-    }
-
-    /**
-     * Web implementation - Download ICS file
-     */
-    private addToCalendarWeb(appointment: CalendarAppointment): boolean {
-        try {
-            const icsContent = this.generateICS(appointment);
-            const filename = `appointment-${appointment.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.ics`;
-
-            if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-                const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' } as any);
-                const link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.setAttribute('download', filename);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(link.href);
-            }
-
-            return true;
-        } catch (error) {
-            console.error('Error creating ICS file:', error);
-            return false;
         }
     }
 

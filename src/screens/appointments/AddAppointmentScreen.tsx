@@ -12,10 +12,9 @@ import {
 import { useTranslation } from 'react-i18next';
 import { appointmentsDb } from '../../database/appointmentsDb';
 import { notificationService } from '../../services/notificationService';
-import { calendarService } from '../../services/calendarService';
-import { permissionsService } from '../../services/permissions';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
+import { CalendarButton } from '../../components/CalendarButton';
 
 export const AddAppointmentScreen = ({ navigation, route }: any) => {
   const { t } = useTranslation();
@@ -97,68 +96,12 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
         );
       }
 
-      // Offer to add to calendar after successful save
-      Alert.alert(
-        t('common.success'),
-        t('appointments.addToCalendar'),
-        [
-          {
-            text: t('common.no'),
-            style: 'cancel',
-            onPress: () => navigation.goBack(),
-          },
-          {
-            text: t('common.yes'),
-            onPress: async () => {
-              await handleAddToCalendar();
-              navigation.goBack();
-            },
-          },
-        ]
-      );
+      navigation.goBack();
     } catch (error) {
       console.error('Error saving appointment:', error);
       Alert.alert(t('common.error'), t('appointments.saveError'));
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleAddToCalendar = async () => {
-    try {
-      // Check permission first
-      const permission = await permissionsService.checkCalendarPermission();
-
-      if (permission !== 'granted') {
-        Alert.alert(
-          t('common.error'),
-          t('appointments.calendarPermissionRequired'),
-          [
-            { text: t('common.ok') }
-          ]
-        );
-        return;
-      }
-
-      const success = await calendarService.addToCalendar({
-        id: appointmentId?.toString(),
-        title,
-        date,
-        time,
-        location,
-        reason: doctorName,
-        notes,
-        enableReminder: reminderEnabled,
-      });
-
-      if (success) {
-        Alert.alert(t('common.success'), t('appointments.addedToCalendar'));
-      } else {
-        Alert.alert(t('common.error'), t('appointments.calendarError'));
-      }
-    } catch (error) {
-      console.error('Error adding to calendar:', error);
-      Alert.alert(t('common.error'), t('appointments.calendarError'));
     }
   };
 
@@ -246,6 +189,14 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
           {isEdit ? t('appointments.update') : t('appointments.save')}
         </Text>
       </TouchableOpacity>
+
+      <CalendarButton
+        title={title}
+        date={date}
+        time={time}
+        location={location}
+        notes={`Doctor: ${doctorName}\n${notes}`}
+      />
     </ScrollView>
   );
 };
