@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Switch, TouchableOpacity, Alert, ScrollView, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storageService } from '../../services/storage';
 import { useTheme } from '../../context/ThemeContext';
 import { authService } from '../../services/authService';
 import { permissionsService, PermissionStatus } from '../../services/permissions';
@@ -39,7 +39,7 @@ export const ProfileScreen = ({ navigation }: any) => {
     const handleLanguageChange = async (langCode: string) => {
         try {
             await i18n.changeLanguage(langCode);
-            await AsyncStorage.setItem('user-language', langCode);
+            storageService.setString('user-language', langCode);
             setCurrentLanguage(langCode);
 
             // Set RTL for Arabic

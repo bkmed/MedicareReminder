@@ -256,6 +256,10 @@
         "nephrology": "أمراض الكلى",
         "immunology": "المناعة"
     },
+    "offline": {
+        "noConnection": "لا يوجد اتصال بالإنترنت",
+        "limitedFunctionality": "قد تكون بعض الميزات غير متاحة"
+    },
     "languages": {
         "en": "English",
         "fr": "Français",

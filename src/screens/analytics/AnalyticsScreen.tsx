@@ -10,6 +10,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { LineChart, BarChart } from 'react-native-chart-kit';
 import { analyticsService, AnalyticsData } from '../../services/analyticsService';
+import { googleAnalytics } from '../../services/googleAnalytics';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -21,6 +22,8 @@ export const AnalyticsScreen = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Log screen view for analytics
+        googleAnalytics.logScreenView('AnalyticsScreen', 'analytics');
         loadAnalytics();
     }, []);
 
@@ -35,6 +38,13 @@ export const AnalyticsScreen = () => {
             setAnalytics(data);
             setAdherenceChart(adherence);
             setAppointmentsChart(appointments);
+
+            // Log analytics view event
+            googleAnalytics.logEvent('view_analytics_dashboard', {
+                total_medications: data.totalMedications,
+                upcoming_appointments: data.upcomingAppointments,
+                adherence_rate: data.medicationAdherence,
+            });
         } catch (error) {
             console.error('Error loading analytics:', error);
         } finally {

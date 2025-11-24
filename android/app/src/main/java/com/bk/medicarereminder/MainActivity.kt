@@ -1,4 +1,4 @@
-package com.medicarereminder
+package com.bk.medicarereminder
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

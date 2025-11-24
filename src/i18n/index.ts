@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { storageService } from '../services/storage';
 import { Platform } from 'react-native';
 
 // Import translation files
@@ -15,7 +15,7 @@ const languageDetector = {
     async: true,
     detect: async (callback: (lang: string) => void) => {
         try {
-            const savedLanguage = await AsyncStorage.getItem('user-language');
+            const savedLanguage = storageService.getString('user-language');
             if (savedLanguage) {
                 callback(savedLanguage);
                 return;
@@ -30,7 +30,7 @@ const languageDetector = {
     init: () => { },
     cacheUserLanguage: async (language: string) => {
         try {
-            await AsyncStorage.setItem('user-language', language);
+            storageService.setString('user-language', language);
         } catch (error) {
             console.error('Error caching language:', error);
         }

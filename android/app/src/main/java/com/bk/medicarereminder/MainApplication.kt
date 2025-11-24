@@ -1,4 +1,4 @@
-package com.medicarereminder
+package com.bk.medicarereminder
 
 import android.app.Application
 import com.facebook.react.PackageList

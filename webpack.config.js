@@ -21,18 +21,24 @@ module.exports = {
     rules: [
       {
         test: /\.(js|ts)x?$/,
-        exclude: /node_modules[/\\](?!(react-native-chart-kit|react-native-image-picker))/,
+        exclude: /node_modules[/\\](?!(react-native|react-native-chart-kit|react-native-image-picker|@react-native|react-native-web)[/\\])/,
 
         use: {
           loader: 'babel-loader',
           options: {
             presets: [
+              '@babel/preset-flow', // Strip Flow types
               [
                 '@babel/preset-env',
                 {
                   loose: true,
                 },
               ],
+              '@babel/preset-react',
+              '@babel/preset-typescript',
+            ],
+            plugins: [
+              'react-native-web',
             ],
           },
         },

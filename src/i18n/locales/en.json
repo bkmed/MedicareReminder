@@ -252,6 +252,10 @@
     "nephrology": "Nephrology",
     "immunology": "Immunology"
   },
+  "offline": {
+    "noConnection": "No Internet Connection",
+    "limitedFunctionality": "Some features may be unavailable"
+  },
   "languages": {
     "en": "English",
     "fr": "Français",
