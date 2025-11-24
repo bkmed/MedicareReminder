@@ -27,8 +27,11 @@ export const analyticsService = {
                 count: medications.length, // Simplified: all meds every day
             }));
 
-            // Calculate adherence (simplified: assume 80% for demo)
-            const medicationAdherence = 80;
+            // Calculate adherence from real history
+            const history = await medicationsDb.getAllHistory();
+            const totalHistory = history.length;
+            const takenCount = history.filter((h) => h.status === 'taken').length;
+            const medicationAdherence = totalHistory > 0 ? Math.round((takenCount / totalHistory) * 100) : 0;
 
             return {
                 totalMedications: medications.length,
@@ -51,18 +54,25 @@ export const analyticsService = {
 
     // Get medication adherence for last 7 days
     getMedicationAdherence: async (): Promise<{ labels: string[]; data: number[] }> => {
-        // Simplified implementation - returns mock data
+        const history = await medicationsDb.getAllHistory();
         const last7Days = Array.from({ length: 7 }, (_, i) => {
             const date = new Date();
             date.setDate(date.getDate() - (6 - i));
-            return date.toLocaleDateString('en-US', { weekday: 'short' });
+            return {
+                label: date.toLocaleDateString('en-US', { weekday: 'short' }),
+                dateStr: date.toISOString().split('T')[0],
+            };
         });
 
-        // Mock adherence data (would come from medication_history in real implementation)
-        const adherenceData = [85, 90, 75, 100, 80, 95, 88];
+        const adherenceData = last7Days.map((day) => {
+            const dayHistory = history.filter((h) => h.takenAt.startsWith(day.dateStr));
+            if (dayHistory.length === 0) return 0;
+            const taken = dayHistory.filter((h) => h.status === 'taken').length;
+            return Math.round((taken / dayHistory.length) * 100);
+        });
 
         return {
-            labels: last7Days,
+            labels: last7Days.map((d) => d.label),
             data: adherenceData,
         };
     },

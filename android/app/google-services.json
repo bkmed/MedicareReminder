@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "643740408782",
+    "project_id": "medicare-reminder-b272f",
+    "storage_bucket": "medicare-reminder-b272f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:643740408782:android:cc76de5335a16fc91aa99f",
+        "android_client_info": {
+          "package_name": "com.bk.medicarereminder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjq6xKdgUIdSG8mWPMNJ9bvkVAbiFOcS4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

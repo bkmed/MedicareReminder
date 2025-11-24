@@ -5,6 +5,8 @@ import { AppNavigator } from './src/navigation/AppNavigator';
 import { notificationService } from './src/services/notificationService';
 import { ThemeProvider } from './src/context/ThemeContext';
 import './src/i18n'; // Initialize i18n
+import { app } from './src/config/firebase';
+import { initWebAnalytics } from './src/services/googleAnalytics';
 
 const App = () => {
   useEffect(() => {
@@ -18,6 +20,7 @@ const App = () => {
           console.log('App initialized successfully');
         } else {
           console.log('Running on web - MMKV storage ready via localStorage');
+         // initWebAnalytics(app);
         }
       } catch (error) {
         console.error('Error initializing app:', error);

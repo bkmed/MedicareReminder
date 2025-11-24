@@ -110,4 +110,9 @@ export const medicationsDb = {
         history.push(newEntry);
         saveAllHistory(history);
     },
+
+    // Get all history (for analytics)
+    getAllHistory: async (): Promise<MedicationHistory[]> => {
+        return getAllHistory();
+    },
 };

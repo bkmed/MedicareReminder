@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyAl5UTPAT6XIN8YPoHCxajd0ijZBlUfevU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>643740408782</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.bk.medicarereminder</string>
+	<key>PROJECT_ID</key>
+	<string>medicare-reminder-b272f</string>
+	<key>STORAGE_BUCKET</key>
+	<string>medicare-reminder-b272f.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:643740408782:ios:0be4c7c4982d8c6c1aa99f</string>
+</dict>
+</plist>
