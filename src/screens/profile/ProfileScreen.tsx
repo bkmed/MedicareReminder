@@ -21,6 +21,7 @@ export const ProfileScreen = ({ navigation }: any) => {
     const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
     const [cameraPermission, setCameraPermission] = useState<PermissionStatus>('unavailable');
     const [notificationPermission, setNotificationPermission] = useState<PermissionStatus>('unavailable');
+    const [calendarPermission, setCalendarPermission] = useState<PermissionStatus>('unavailable');
 
     useEffect(() => {
         checkPermissions();
@@ -29,8 +30,10 @@ export const ProfileScreen = ({ navigation }: any) => {
     const checkPermissions = async () => {
         const camera = await permissionsService.checkCameraPermission();
         const notification = await permissionsService.checkNotificationPermission();
+        const calendar = await permissionsService.checkCalendarPermission();
         setCameraPermission(camera);
         setNotificationPermission(notification);
+        setCalendarPermission(calendar);
     };
 
     const handleLanguageChange = async (langCode: string) => {
@@ -88,6 +91,28 @@ export const ProfileScreen = ({ navigation }: any) => {
 
         const status = await permissionsService.requestNotificationPermission();
         setNotificationPermission(status);
+
+        if (status === 'blocked') {
+            Alert.alert(
+                t('profile.permissionBlocked'),
+                t('profile.permissionBlockedMessage'),
+                [
+                    { text: t('common.cancel'), style: 'cancel' },
+                    { text: t('profile.openSettings'), onPress: () => permissionsService.openAppSettings() },
+                ]
+            );
+        }
+    };
+
+    const handleCalendarPermission = async (value: boolean) => {
+        if (!value) {
+            // User is trying to disable - just update UI
+            setCalendarPermission('denied');
+            return;
+        }
+
+        const status = await permissionsService.requestCalendarPermission();
+        setCalendarPermission(status);
 
         if (status === 'blocked') {
             Alert.alert(
@@ -185,6 +210,23 @@ export const ProfileScreen = ({ navigation }: any) => {
                         <Switch
                             value={notificationPermission === 'granted'}
                             onValueChange={handleNotificationPermission}
+                            trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+                            thumbColor={theme.colors.surface}
+                        />
+                    )}
+                </View>
+
+                <View style={styles.permissionRow}>
+                    <View style={styles.permissionInfo}>
+                        <Text style={styles.permissionLabel}>{t('profile.calendar')}</Text>
+                        <Text style={[styles.permissionStatus, { color: getPermissionStatusColor(calendarPermission) }]}>
+                            {getPermissionStatusText(calendarPermission)}
+                        </Text>
+                    </View>
+                    {calendarPermission !== 'unavailable' && (
+                        <Switch
+                            value={calendarPermission === 'granted'}
+                            onValueChange={handleCalendarPermission}
                             trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
                             thumbColor={theme.colors.surface}
                         />

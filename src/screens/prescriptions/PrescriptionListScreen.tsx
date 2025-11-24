@@ -9,6 +9,7 @@ import {
     Image,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { prescriptionsDb } from '../../database/prescriptionsDb';
 import { Prescription } from '../../database/schema';
 import { useTheme } from '../../context/ThemeContext';
@@ -16,6 +17,7 @@ import { Theme } from '../../theme';
 
 export const PrescriptionListScreen = ({ navigation }: any) => {
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
     const [loading, setLoading] = useState(true);
@@ -26,7 +28,7 @@ export const PrescriptionListScreen = ({ navigation }: any) => {
             setPrescriptions(data);
         } catch (error) {
             console.error('Error loading prescriptions:', error);
-            Alert.alert('Error', 'Failed to load prescriptions');
+            Alert.alert(t('common.error'), t('prescriptions.loadError'));
         } finally {
             setLoading(false);
         }
@@ -61,14 +63,14 @@ export const PrescriptionListScreen = ({ navigation }: any) => {
                     <Text style={styles.medicationName}>{item.medicationName}</Text>
 
                     {item.doctorName && (
-                        <Text style={styles.doctor}>Dr. {item.doctorName}</Text>
+                        <Text style={styles.doctor}>{t('prescriptions.doctor')} {item.doctorName}</Text>
                     )}
 
-                    <Text style={styles.date}>Issued: {new Date(item.issueDate).toLocaleDateString()}</Text>
+                    <Text style={styles.date}>{t('prescriptions.issued')}: {new Date(item.issueDate).toLocaleDateString()}</Text>
 
                     {item.expiryDate && (
                         <Text style={[styles.expiry, expiryWarning && styles.expiryWarning]}>
-                            Expires: {new Date(item.expiryDate).toLocaleDateString()}
+                            {t('prescriptions.expires')}: {new Date(item.expiryDate).toLocaleDateString()}
                             {expiryWarning && ' ⚠️'}
                         </Text>
                     )}
@@ -79,8 +81,8 @@ export const PrescriptionListScreen = ({ navigation }: any) => {
 
     const renderEmpty = () => (
         <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No prescriptions</Text>
-            <Text style={styles.emptySubText}>Tap + to add a prescription</Text>
+            <Text style={styles.emptyText}>{t('prescriptions.empty')}</Text>
+            <Text style={styles.emptySubText}>{t('prescriptions.emptySubtitle')}</Text>
         </View>
     );
 

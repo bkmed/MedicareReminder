@@ -8,12 +8,14 @@ import {
     TouchableOpacity,
     Alert,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { doctorsDb } from '../../database/doctorsDb';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 
 export const AddDoctorScreen = ({ navigation, route }: any) => {
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const doctorId = route.params?.doctorId;
     const isEdit = !!doctorId;
@@ -44,13 +46,13 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
                 setNotes(doctor.notes || '');
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to load doctor');
+            Alert.alert(t('common.error'), t('doctors.loadError'));
         }
     };
 
     const handleSave = async () => {
         if (!name.trim()) {
-            Alert.alert('Error', 'Please enter doctor name');
+            Alert.alert(t('common.error'), t('doctors.fillRequired'));
             return;
         }
 
@@ -74,7 +76,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
             navigation.goBack();
         } catch (error) {
             console.error('Error saving doctor:', error);
-            Alert.alert('Error', 'Failed to save doctor');
+            Alert.alert(t('common.error'), t('doctors.saveError'));
         } finally {
             setLoading(false);
         }
@@ -82,19 +84,19 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
 
     const handleDelete = () => {
         Alert.alert(
-            'Delete Doctor',
-            'Are you sure you want to delete this doctor?',
+            t('doctors.deleteConfirmTitle'),
+            t('doctors.deleteConfirmMessage'),
             [
-                { text: 'Cancel', style: 'cancel' },
+                { text: t('common.cancel'), style: 'cancel' },
                 {
-                    text: 'Delete',
+                    text: t('common.delete'),
                     style: 'destructive',
                     onPress: async () => {
                         try {
                             await doctorsDb.delete(doctorId);
                             navigation.goBack();
                         } catch (error) {
-                            Alert.alert('Error', 'Failed to delete doctor');
+                            Alert.alert(t('common.error'), t('doctors.deleteError'));
                         }
                     },
                 },
@@ -103,86 +105,87 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
     };
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-            <Text style={styles.label}>Name *</Text>
-            <TextInput
-                style={styles.input}
-                value={name}
-                onChangeText={setName}
-                placeholder="e.g., John Smith"
-                placeholderTextColor={theme.colors.subText}
-            />
+        <View testID='testadddoctor' style={{ flex: 1 }}>
+            <ScrollView testID='adddoctor' style={styles.container} contentContainerStyle={styles.content}>
+                <Text style={styles.label}>{t('doctors.name')} *</Text>
+                <TextInput
+                    style={styles.input}
+                    value={name}
+                    onChangeText={setName}
+                    placeholder={t('doctors.namePlaceholder')}
+                    placeholderTextColor={theme.colors.subText}
+                />
 
-            <Text style={styles.label}>Specialty</Text>
-            <TextInput
-                style={styles.input}
-                value={specialty}
-                onChangeText={setSpecialty}
-                placeholder="e.g., Cardiology"
-                placeholderTextColor={theme.colors.subText}
-            />
+                <Text style={styles.label}>{t('doctors.specialty')}</Text>
+                <TextInput
+                    style={styles.input}
+                    value={specialty}
+                    onChangeText={setSpecialty}
+                    placeholder={t('doctors.specialtyPlaceholder')}
+                    placeholderTextColor={theme.colors.subText}
+                />
 
-            <Text style={styles.label}>Phone</Text>
-            <TextInput
-                style={styles.input}
-                value={phone}
-                onChangeText={setPhone}
-                placeholder="e.g., (555) 123-4567"
-                placeholderTextColor={theme.colors.subText}
-                keyboardType="phone-pad"
-            />
+                <Text style={styles.label}>{t('doctors.phone')}</Text>
+                <TextInput
+                    style={styles.input}
+                    value={phone}
+                    onChangeText={setPhone}
+                    placeholder={t('doctors.phonePlaceholder')}
+                    placeholderTextColor={theme.colors.subText}
+                    keyboardType="phone-pad"
+                />
 
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="e.g., doctor@clinic.com"
-                placeholderTextColor={theme.colors.subText}
-                keyboardType="email-address"
-                autoCapitalize="none"
-            />
+                <Text style={styles.label}>{t('doctors.email')}</Text>
+                <TextInput
+                    style={styles.input}
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder={t('doctors.emailPlaceholder')}
+                    placeholderTextColor={theme.colors.subText}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                />
 
-            <Text style={styles.label}>Address</Text>
-            <TextInput
-                style={styles.input}
-                value={address}
-                onChangeText={setAddress}
-                placeholder="e.g., 123 Main St, City"
-                placeholderTextColor={theme.colors.subText}
-            />
+                <Text style={styles.label}>{t('doctors.address')}</Text>
+                <TextInput
+                    style={styles.input}
+                    value={address}
+                    onChangeText={setAddress}
+                    placeholder={t('doctors.addressPlaceholder')}
+                    placeholderTextColor={theme.colors.subText}
+                />
 
-            <Text style={styles.label}>Notes</Text>
-            <TextInput
-                style={[styles.input, styles.notesInput]}
-                value={notes}
-                onChangeText={setNotes}
-                placeholder="Additional notes..."
-                placeholderTextColor={theme.colors.subText}
-                multiline
-                numberOfLines={4}
-            />
+                <Text style={styles.label}>{t('appointments.notes')}</Text>
+                <TextInput
+                    style={[styles.input, styles.notesInput]}
+                    value={notes}
+                    onChangeText={setNotes}
+                    placeholder={t('doctors.notesPlaceholder')}
+                    placeholderTextColor={theme.colors.subText}
+                    multiline
+                    numberOfLines={4}
+                />
 
-            <TouchableOpacity
-                style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-                onPress={handleSave}
-                disabled={loading}
-            >
-                <Text style={styles.saveButtonText}>{isEdit ? 'Update' : 'Save'} Doctor</Text>
-            </TouchableOpacity>
-
-            {isEdit && (
-                <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-                    <Text style={styles.deleteButtonText}>Delete Doctor</Text>
+                <TouchableOpacity
+                    style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+                    onPress={handleSave}
+                    disabled={loading}
+                >
+                    <Text style={styles.saveButtonText}>{isEdit ? t('doctors.updateButton') : t('doctors.saveButton')}</Text>
                 </TouchableOpacity>
-            )}
-        </ScrollView>
+
+                {isEdit && (
+                    <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+                        <Text style={styles.deleteButtonText}>{t('doctors.deleteButton')}</Text>
+                    </TouchableOpacity>
+                )}
+            </ScrollView>
+        </View>
     );
 };
 
 const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
-        flex: 1,
         backgroundColor: theme.colors.background,
     },
     content: {

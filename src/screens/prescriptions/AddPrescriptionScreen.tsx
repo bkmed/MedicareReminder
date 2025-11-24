@@ -9,6 +9,7 @@ import {
     Alert,
     Image,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { prescriptionsDb } from '../../database/prescriptionsDb';
 import { notificationService } from '../../services/notificationService';
@@ -17,6 +18,7 @@ import { Theme } from '../../theme';
 
 export const AddPrescriptionScreen = ({ navigation, route }: any) => {
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const prescriptionId = route.params?.prescriptionId;
     const isEdit = !!prescriptionId;
@@ -47,14 +49,14 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
                 setNotes(prescription.notes || '');
             }
         } catch (error) {
-            Alert.alert('Error', 'Failed to load prescription');
+            Alert.alert(t('common.error'), t('prescriptions.loadError'));
         }
     };
 
     const handleTakePhoto = () => {
-        Alert.alert('Add Photo', 'Choose an option', [
+        Alert.alert(t('prescriptions.addPhoto'), t('prescriptions.chooseOption'), [
             {
-                text: 'Take Photo',
+                text: t('prescriptions.takePhoto'),
                 onPress: () => {
                     launchCamera({ mediaType: 'photo', quality: 0.8 }, (response) => {
                         if (response.assets && response.assets[0].uri) {
@@ -64,7 +66,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
                 },
             },
             {
-                text: 'Choose from Library',
+                text: t('prescriptions.chooseFromLibrary'),
                 onPress: () => {
                     launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, (response) => {
                         if (response.assets && response.assets[0].uri) {
@@ -73,13 +75,13 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
                     });
                 },
             },
-            { text: 'Cancel', style: 'cancel' },
+            { text: t('common.cancel'), style: 'cancel' },
         ]);
     };
 
     const handleSave = async () => {
         if (!medicationName.trim()) {
-            Alert.alert('Error', 'Please enter medication name');
+            Alert.alert(t('common.error'), t('prescriptions.fillRequired'));
             return;
         }
 
@@ -117,79 +119,81 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
             navigation.goBack();
         } catch (error) {
             console.error('Error saving prescription:', error);
-            Alert.alert('Error', 'Failed to save prescription');
+            Alert.alert(t('common.error'), t('prescriptions.saveError'));
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-            <TouchableOpacity style={styles.photoButton} onPress={handleTakePhoto}>
-                {photoUri ? (
-                    <Image source={{ uri: photoUri }} style={styles.photo} />
-                ) : (
-                    <View style={styles.photoPlaceholder}>
-                        <Text style={styles.photoPlaceholderText}>📷 Add Photo</Text>
-                    </View>
-                )}
-            </TouchableOpacity>
+        <View style={{ flex: 1 }}>
+            <ScrollView testID='addprescription' style={styles.container} contentContainerStyle={styles.content}>
+                <TouchableOpacity style={styles.photoButton} onPress={handleTakePhoto}>
+                    {photoUri ? (
+                        <Image source={{ uri: photoUri }} style={styles.photo} />
+                    ) : (
+                        <View style={styles.photoPlaceholder}>
+                            <Text style={styles.photoPlaceholderText}>{t('prescriptions.photoButton')}</Text>
+                        </View>
+                    )}
+                </TouchableOpacity>
 
-            <Text style={styles.label}>Medication Name *</Text>
-            <TextInput
-                style={styles.input}
-                value={medicationName}
-                onChangeText={setMedicationName}
-                placeholder="e.g., Lisinopril"
-                placeholderTextColor={theme.colors.subText}
-            />
+                <Text style={styles.label}>{t('prescriptions.medicationNameLabel')} *</Text>
+                <TextInput
+                    style={styles.input}
+                    value={medicationName}
+                    onChangeText={setMedicationName}
+                    placeholder={t('prescriptions.medicationPlaceholder')}
+                    placeholderTextColor={theme.colors.subText}
+                />
 
-            <Text style={styles.label}>Doctor Name</Text>
-            <TextInput
-                style={styles.input}
-                value={doctorName}
-                onChangeText={setDoctorName}
-                placeholder="e.g., Smith"
-                placeholderTextColor={theme.colors.subText}
-            />
+                <Text style={styles.label}>{t('prescriptions.doctorNameLabel')}</Text>
+                <TextInput
+                    style={styles.input}
+                    value={doctorName}
+                    onChangeText={setDoctorName}
+                    placeholder={t('prescriptions.doctorPlaceholder')}
+                    placeholderTextColor={theme.colors.subText}
+                />
 
-            <Text style={styles.label}>Issue Date *</Text>
-            <TextInput
-                style={styles.input}
-                value={issueDate}
-                onChangeText={setIssueDate}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={theme.colors.subText}
-            />
+                <Text style={styles.label}>{t('prescriptions.issueDateLabel')} *</Text>
+                <TextInput
+                    style={styles.input}
+                    value={issueDate}
+                    onChangeText={setIssueDate}
+                    placeholder="YYYY-MM-DD"
+                    placeholderTextColor={theme.colors.subText}
+                />
 
-            <Text style={styles.label}>Expiry Date (Optional)</Text>
-            <TextInput
-                style={styles.input}
-                value={expiryDate}
-                onChangeText={setExpiryDate}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={theme.colors.subText}
-            />
+                <Text style={styles.label}>{t('prescriptions.expiryDateLabel')}</Text>
+                <TextInput
+                    style={styles.input}
+                    value={expiryDate}
+                    onChangeText={setExpiryDate}
+                    placeholder="YYYY-MM-DD"
+                    placeholderTextColor={theme.colors.subText}
+                />
 
-            <Text style={styles.label}>Notes</Text>
-            <TextInput
-                style={[styles.input, styles.notesInput]}
-                value={notes}
-                onChangeText={setNotes}
-                placeholder="Additional notes..."
-                placeholderTextColor={theme.colors.subText}
-                multiline
-                numberOfLines={4}
-            />
+                <Text style={styles.label}>{t('prescriptions.notesLabel')}</Text>
+                <TextInput
+                    style={[styles.input, styles.notesInput]}
+                    value={notes}
+                    onChangeText={setNotes}
+                    placeholder={t('appointments.notesPlaceholder')}
+                    placeholderTextColor={theme.colors.subText}
+                    multiline
+                    numberOfLines={4}
+                />
 
-            <TouchableOpacity
-                style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-                onPress={handleSave}
-                disabled={loading}
-            >
-                <Text style={styles.saveButtonText}>{isEdit ? 'Update' : 'Save'} Prescription</Text>
-            </TouchableOpacity>
-        </ScrollView>
+                <TouchableOpacity
+                    style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+                    onPress={handleSave}
+                    disabled={loading}
+                >
+                    <Text style={styles.saveButtonText}>{isEdit ? t('prescriptions.updateButton') : t('prescriptions.saveButton')}</Text>
+                </TouchableOpacity>
+            </ScrollView>
+        </View>
     );
 };
 

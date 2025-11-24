@@ -7,12 +7,14 @@ import {
     Dimensions,
     ActivityIndicator,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { LineChart, BarChart } from 'react-native-chart-kit';
 import { analyticsService, AnalyticsData } from '../../services/analyticsService';
 
 const screenWidth = Dimensions.get('window').width;
 
 export const AnalyticsScreen = () => {
+    const { t } = useTranslation();
     const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
     const [adherenceChart, setAdherenceChart] = useState<{ labels: string[]; data: number[] } | null>(null);
     const [appointmentsChart, setAppointmentsChart] = useState<{ labels: string[]; data: number[] } | null>(null);
@@ -70,37 +72,37 @@ export const AnalyticsScreen = () => {
 
     return (
         <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-            <Text style={styles.title}>Health Analytics</Text>
+            <Text style={styles.title}>{t('analytics.healthAnalytics')}</Text>
 
             {/* Summary Cards */}
             <View style={styles.cardsRow}>
                 <View style={[styles.card, styles.cardBlue]}>
                     <Text style={styles.cardNumber}>{analytics.totalMedications}</Text>
-                    <Text style={styles.cardLabel}>Medications</Text>
+                    <Text style={styles.cardLabel}>{t('analytics.medications')}</Text>
                 </View>
 
                 <View style={[styles.card, styles.cardGreen]}>
                     <Text style={styles.cardNumber}>{analytics.upcomingAppointments}</Text>
-                    <Text style={styles.cardLabel}>Appointments</Text>
+                    <Text style={styles.cardLabel}>{t('analytics.appointments')}</Text>
                 </View>
             </View>
 
             <View style={styles.cardsRow}>
                 <View style={[styles.card, styles.cardOrange]}>
                     <Text style={styles.cardNumber}>{analytics.expiringPrescriptions}</Text>
-                    <Text style={styles.cardLabel}>Expiring Soon</Text>
+                    <Text style={styles.cardLabel}>{t('analytics.expiringSoon')}</Text>
                 </View>
 
                 <View style={[styles.card, styles.cardPurple]}>
                     <Text style={styles.cardNumber}>{analytics.medicationAdherence}%</Text>
-                    <Text style={styles.cardLabel}>Adherence</Text>
+                    <Text style={styles.cardLabel}>{t('analytics.adherence')}</Text>
                 </View>
             </View>
 
             {/* Medication Adherence Chart */}
             {adherenceChart && adherenceChart.data.length > 0 && (
                 <View style={styles.chartSection}>
-                    <Text style={styles.chartTitle}>Medication Adherence (Last 7 Days)</Text>
+                    <Text style={styles.chartTitle}>{t('analytics.adherenceChart')}</Text>
                     <LineChart
                         data={{
                             labels: adherenceChart.labels,
@@ -122,7 +124,7 @@ export const AnalyticsScreen = () => {
             {/* Upcoming Appointments Chart */}
             {appointmentsChart && appointmentsChart.data.some(val => val > 0) && (
                 <View style={styles.chartSection}>
-                    <Text style={styles.chartTitle}>Upcoming Appointments</Text>
+                    <Text style={styles.chartTitle}>{t('analytics.upcomingAppointmentsChart')}</Text>
                     <BarChart
                         data={{
                             labels: appointmentsChart.labels,
@@ -145,13 +147,13 @@ export const AnalyticsScreen = () => {
 
             {/* Health Insights */}
             <View style={styles.insightsSection}>
-                <Text style={styles.sectionTitle}>Health Insights</Text>
+                <Text style={styles.sectionTitle}>{t('analytics.healthInsights')}</Text>
 
                 {analytics.medicationAdherence >= 90 && (
                     <View style={[styles.insightCard, styles.insightGood]}>
                         <Text style={styles.insightEmoji}>✅</Text>
                         <Text style={styles.insightText}>
-                            Excellent adherence! You're taking {analytics.medicationAdherence}% of your medications on time.
+                            {t('analytics.excellentAdherence', { adherence: analytics.medicationAdherence })}
                         </Text>
                     </View>
                 )}
@@ -160,7 +162,7 @@ export const AnalyticsScreen = () => {
                     <View style={[styles.insightCard, styles.insightWarning]}>
                         <Text style={styles.insightEmoji}>⚠️</Text>
                         <Text style={styles.insightText}>
-                            {analytics.expiringPrescriptions} prescription{analytics.expiringPrescriptions > 1 ? 's' : ''} expiring soon. Consider renewing.
+                            {t('analytics.prescriptionsExpiring', { count: analytics.expiringPrescriptions })}
                         </Text>
                     </View>
                 )}
@@ -169,7 +171,7 @@ export const AnalyticsScreen = () => {
                     <View style={[styles.insightCard, styles.insightInfo]}>
                         <Text style={styles.insightEmoji}>📅</Text>
                         <Text style={styles.insightText}>
-                            You have {analytics.upcomingAppointments} upcoming appointment{analytics.upcomingAppointments > 1 ? 's' : ''}. Stay on schedule!
+                            {t('analytics.upcomingAppointmentsInsight', { count: analytics.upcomingAppointments })}
                         </Text>
                     </View>
                 )}

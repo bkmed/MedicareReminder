@@ -19,10 +19,20 @@ declare global {
             permission: 'granted' | 'denied' | 'default';
             requestPermission(): Promise<'granted' | 'denied' | 'default'>;
         };
+        localStorage: {
+            getItem(key: string): string | null;
+            setItem(key: string, value: string): void;
+            removeItem(key: string): void;
+        };
     }
     const Notification: {
         permission: 'granted' | 'denied' | 'default';
         requestPermission(): Promise<'granted' | 'denied' | 'default'>;
+    };
+    const localStorage: {
+        getItem(key: string): string | null;
+        setItem(key: string, value: string): void;
+        removeItem(key: string): void;
     };
     type PermissionName = 'camera' | 'microphone' | 'geolocation' | 'notifications' | 'persistent-storage' | 'midi' | 'push' | 'background-fetch' | 'periodic-background-sync' | 'accelerometer' | 'gyroscope' | 'magnetometer' | 'ambient-light-sensor';
     type PermissionState = 'granted' | 'denied' | 'prompt';
@@ -133,6 +143,53 @@ class PermissionsService {
 
         // Mobile: handled by notificationService
         return 'unavailable';
+    }
+
+    /**
+     * Check calendar permission status
+     */
+    async checkCalendarPermission(): Promise<PermissionStatus> {
+        if (Platform.OS === 'web') {
+            // Web: Use localStorage to track calendar permission preference
+            if (typeof window !== 'undefined' && window.localStorage) {
+                const permission = localStorage.getItem('calendar-permission');
+                if (permission === 'granted') return 'granted';
+                return 'denied';
+            }
+            return 'unavailable';
+        }
+
+        // Mobile: Use react-native-permissions
+        const permission = Platform.OS === 'ios'
+            ? PERMISSIONS.IOS.CALENDARS
+            : PERMISSIONS.ANDROID.WRITE_CALENDAR;
+        const result = await check(permission);
+        return this.mapNativePermissionStatus(result);
+    }
+
+    /**
+     * Request calendar permission
+     */
+    async requestCalendarPermission(): Promise<PermissionStatus> {
+        if (Platform.OS === 'web') {
+            // Web: Store permission preference in localStorage
+            if (typeof window !== 'undefined' && window.localStorage) {
+                try {
+                    localStorage.setItem('calendar-permission', 'granted');
+                    return 'granted';
+                } catch (error) {
+                    return 'denied';
+                }
+            }
+            return 'unavailable';
+        }
+
+        // Mobile: Request permission
+        const permission = Platform.OS === 'ios'
+            ? PERMISSIONS.IOS.CALENDARS
+            : PERMISSIONS.ANDROID.WRITE_CALENDAR;
+        const result = await request(permission);
+        return this.mapNativePermissionStatus(result);
     }
 
     /**

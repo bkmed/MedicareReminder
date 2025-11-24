@@ -8,6 +8,7 @@ import {
     Alert,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { doctorsDb } from '../../database/doctorsDb';
 import { Doctor } from '../../database/schema';
 import { useTheme } from '../../context/ThemeContext';
@@ -15,6 +16,7 @@ import { Theme } from '../../theme';
 
 export const DoctorListScreen = ({ navigation }: any) => {
     const { theme } = useTheme();
+    const { t } = useTranslation();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const [doctors, setDoctors] = useState<Doctor[]>([]);
     const [loading, setLoading] = useState(true);
@@ -25,7 +27,7 @@ export const DoctorListScreen = ({ navigation }: any) => {
             setDoctors(data);
         } catch (error) {
             console.error('Error loading doctors:', error);
-            Alert.alert('Error', 'Failed to load doctors');
+            Alert.alert(t('common.error'), t('doctors.loadError'));
         } finally {
             setLoading(false);
         }
@@ -44,7 +46,7 @@ export const DoctorListScreen = ({ navigation }: any) => {
                 onPress={() => navigation.navigate('DoctorDetails', { doctorId: item.id })}
             >
                 <View style={styles.headerRow}>
-                    <Text style={styles.name}>Dr. {item.name}</Text>
+                    <Text style={styles.name}>{t('doctors.doctor')} {item.name}</Text>
                     {item.specialty && (
                         <View style={styles.specialtyBadge}>
                             <Text style={styles.specialtyText}>{item.specialty}</Text>
@@ -69,8 +71,8 @@ export const DoctorListScreen = ({ navigation }: any) => {
 
     const renderEmpty = () => (
         <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No doctors</Text>
-            <Text style={styles.emptySubText}>Tap + to add a doctor</Text>
+            <Text style={styles.emptyText}>{t('doctors.empty')}</Text>
+            <Text style={styles.emptySubText}>{t('doctors.emptySubtitle')}</Text>
         </View>
     );
 
