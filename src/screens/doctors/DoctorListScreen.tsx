@@ -13,12 +13,14 @@ import { doctorsDb } from '../../database/doctorsDb';
 import { Doctor } from '../../database/schema';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
+import { SearchInput } from '../../components/SearchInput';
 
 export const DoctorListScreen = ({ navigation }: any) => {
     const { theme } = useTheme();
     const { t } = useTranslation();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const [doctors, setDoctors] = useState<Doctor[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
 
     const loadDoctors = async () => {
@@ -39,6 +41,20 @@ export const DoctorListScreen = ({ navigation }: any) => {
         }, [])
     );
 
+    const filteredDoctors = useMemo(() => {
+        if (!searchQuery) return doctors;
+        const lowerQuery = searchQuery.toLowerCase();
+        return doctors.filter(
+            (doc) => {
+                const specialty = doc.specialty ? t(`specialties.${doc.specialty}`, { defaultValue: doc.specialty }) : '';
+                return (
+                    doc.name.toLowerCase().includes(lowerQuery) ||
+                    specialty.toLowerCase().includes(lowerQuery)
+                );
+            }
+        );
+    }, [doctors, searchQuery, t]);
+
     const renderDoctor = ({ item }: { item: Doctor }) => {
         return (
             <TouchableOpacity
@@ -49,7 +65,9 @@ export const DoctorListScreen = ({ navigation }: any) => {
                     <Text style={styles.name}>{t('doctors.doctor')} {item.name}</Text>
                     {item.specialty && (
                         <View style={styles.specialtyBadge}>
-                            <Text style={styles.specialtyText}>{item.specialty}</Text>
+                            <Text style={styles.specialtyText}>
+                                {t(`specialties.${item.specialty}`, { defaultValue: item.specialty })}
+                            </Text>
                         </View>
                     )}
                 </View>
@@ -77,9 +95,17 @@ export const DoctorListScreen = ({ navigation }: any) => {
     );
 
     return (
-        <View style={styles.container}>
+        <View testID='doctorlist' style={styles.container}>
+            <View style={styles.searchContainer}>
+                <SearchInput
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholder={t('common.searchPlaceholder')}
+                />
+            </View>
             <FlatList
-                data={doctors}
+                data={filteredDoctors}
+                testID='doctorflatlist'
                 renderItem={renderDoctor}
                 keyExtractor={(item) => item.id?.toString() || ''}
                 contentContainerStyle={styles.listContent}
@@ -98,12 +124,16 @@ export const DoctorListScreen = ({ navigation }: any) => {
 
 const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
-        flex: 1,
         backgroundColor: theme.colors.background,
     },
     listContent: {
         padding: theme.spacing.m,
         flexGrow: 1,
+        paddingBottom: 80, // Space for FAB
+    },
+    searchContainer: {
+        padding: theme.spacing.m,
+        paddingBottom: 0,
     },
     card: {
         backgroundColor: theme.colors.surface, // Use surface for card background
@@ -157,7 +187,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     fab: {
         position: 'absolute' as any,
         right: theme.spacing.l,
-        top: theme.spacing.l,
+        bottom: theme.spacing.l,
         width: 56,
         height: 56,
         borderRadius: 28,

@@ -30,6 +30,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   const [time, setTime] = useState('09:00');
   const [notes, setNotes] = useState('');
   const [reminderEnabled, setReminderEnabled] = useState(true);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -59,8 +60,19 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   };
 
   const handleSave = async () => {
+    const newErrors: { [key: string]: string } = {};
     if (!title.trim()) {
-      Alert.alert(t('common.error'), t('appointments.fillRequired'));
+      newErrors.title = t('common.required');
+    }
+    if (!date.trim()) {
+      newErrors.date = t('common.required');
+    }
+    if (!time.trim()) {
+      newErrors.time = t('common.required');
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
       return;
     }
 
@@ -113,12 +125,18 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
     >
       <Text style={styles.label}>{t('appointments.appointmentTitle')} *</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, errors.title && styles.inputError]}
         value={title}
-        onChangeText={setTitle}
+        onChangeText={(text) => {
+          setTitle(text);
+          if (errors.title) {
+            setErrors({ ...errors, title: '' });
+          }
+        }}
         placeholder={t('appointments.titlePlaceholder')}
         placeholderTextColor={theme.colors.subText}
       />
+      {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
 
       <Text style={styles.label}>{t('appointments.doctor')}</Text>
       <TextInput
@@ -140,21 +158,33 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
 
       <Text style={styles.label}>{t('appointments.date')} *</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, errors.date && styles.inputError]}
         value={date}
-        onChangeText={setDate}
+        onChangeText={(text) => {
+          setDate(text);
+          if (errors.date) {
+            setErrors({ ...errors, date: '' });
+          }
+        }}
         placeholder="YYYY-MM-DD"
         placeholderTextColor={theme.colors.subText}
       />
+      {errors.date && <Text style={styles.errorText}>{errors.date}</Text>}
 
       <Text style={styles.label}>{t('appointments.time')} *</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, errors.time && styles.inputError]}
         value={time}
-        onChangeText={setTime}
+        onChangeText={(text) => {
+          setTime(text);
+          if (errors.time) {
+            setErrors({ ...errors, time: '' });
+          }
+        }}
         placeholder="HH:MM"
         placeholderTextColor={theme.colors.subText}
       />
+      {errors.time && <Text style={styles.errorText}>{errors.time}</Text>}
 
       <Text style={styles.label}>{t('appointments.notes')}</Text>
       <TextInput
@@ -250,5 +280,14 @@ const createStyles = (theme: Theme) =>
     saveButtonText: {
       ...theme.textVariants.button,
       color: theme.colors.surface,
+    },
+    inputError: {
+      borderColor: theme.colors.error,
+    },
+    errorText: {
+      color: theme.colors.error,
+      fontSize: 12,
+      marginTop: 4,
+      marginLeft: 4,
     },
   });

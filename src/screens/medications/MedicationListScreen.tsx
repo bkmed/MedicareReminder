@@ -14,12 +14,14 @@ import { Medication } from '../../database/schema';
 import { MedicationCard } from '../../components/MedicationCard';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
+import { SearchInput } from '../../components/SearchInput';
 
 export const MedicationListScreen = ({ navigation }: any) => {
     const { theme } = useTheme();
     const { t } = useTranslation();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const [medications, setMedications] = useState<Medication[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
 
     const loadMedications = async () => {
@@ -40,6 +42,16 @@ export const MedicationListScreen = ({ navigation }: any) => {
         }, [])
     );
 
+    const filteredMedications = useMemo(() => {
+        if (!searchQuery) return medications;
+        const lowerQuery = searchQuery.toLowerCase();
+        return medications.filter(
+            (med) =>
+                med.name.toLowerCase().includes(lowerQuery) ||
+                med.dosage.toLowerCase().includes(lowerQuery)
+        );
+    }, [medications, searchQuery]);
+
     const handleMedicationPress = (medication: Medication) => {
         navigation.navigate('MedicationDetails', { medicationId: medication.id });
     };
@@ -53,8 +65,15 @@ export const MedicationListScreen = ({ navigation }: any) => {
 
     return (
         <View style={styles.container}>
+            <View style={styles.searchContainer}>
+                <SearchInput
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholder={t('common.searchPlaceholder')}
+                />
+            </View>
             <FlatList
-                data={medications}
+                data={filteredMedications}
                 renderItem={({ item }) => (
                     <MedicationCard
                         medication={item}
@@ -78,12 +97,16 @@ export const MedicationListScreen = ({ navigation }: any) => {
 
 const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
-        flex: 1,
         backgroundColor: theme.colors.background,
     },
     listContent: {
         padding: theme.spacing.m,
         flexGrow: 1,
+        paddingBottom: 80,
+    },
+    searchContainer: {
+        padding: theme.spacing.m,
+        paddingBottom: 0,
     },
     emptyContainer: {
         flex: 1,
@@ -103,7 +126,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     fab: {
         position: 'absolute' as any,
         right: theme.spacing.l,
-        top: theme.spacing.l,
+        bottom: theme.spacing.l,
         width: 56,
         height: 56,
         borderRadius: 28,

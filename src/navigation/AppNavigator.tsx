@@ -195,7 +195,7 @@ const WebNavigator = () => {
     <WebNavigationContext.Provider
       value={{ setActiveTab: handleSetActiveTab, activeTab, initialScreen }}
     >
-      <View style={{ flex: 1 }}>
+      <View>
         <View style={webStyles.navbar}>
           <Text style={webStyles.title}>{t('home.appName')}</Text>
           <View style={webStyles.navButtons}>

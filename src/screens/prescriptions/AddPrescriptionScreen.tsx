@@ -29,6 +29,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
     const [expiryDate, setExpiryDate] = useState('');
     const [photoUri, setPhotoUri] = useState('');
     const [notes, setNotes] = useState('');
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -80,8 +81,16 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
     };
 
     const handleSave = async () => {
+        const newErrors: { [key: string]: string } = {};
         if (!medicationName.trim()) {
-            Alert.alert(t('common.error'), t('prescriptions.fillRequired'));
+            newErrors.medicationName = t('common.required');
+        }
+        if (!issueDate.trim()) {
+            newErrors.issueDate = t('common.required');
+        }
+
+        setErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) {
             return;
         }
 
@@ -126,7 +135,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
     };
 
     return (
-        <View style={{ flex: 1 }}>
+        <View>
             <ScrollView testID='addprescription' style={styles.container} contentContainerStyle={styles.content}>
                 <TouchableOpacity style={styles.photoButton} onPress={handleTakePhoto}>
                     {photoUri ? (
@@ -140,12 +149,18 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
                 <Text style={styles.label}>{t('prescriptions.medicationNameLabel')} *</Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, errors.medicationName && styles.inputError]}
                     value={medicationName}
-                    onChangeText={setMedicationName}
+                    onChangeText={(text) => {
+                        setMedicationName(text);
+                        if (errors.medicationName) {
+                            setErrors({ ...errors, medicationName: '' });
+                        }
+                    }}
                     placeholder={t('prescriptions.medicationPlaceholder')}
                     placeholderTextColor={theme.colors.subText}
                 />
+                {errors.medicationName && <Text style={styles.errorText}>{errors.medicationName}</Text>}
 
                 <Text style={styles.label}>{t('prescriptions.doctorNameLabel')}</Text>
                 <TextInput
@@ -158,12 +173,18 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
                 <Text style={styles.label}>{t('prescriptions.issueDateLabel')} *</Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, errors.issueDate && styles.inputError]}
                     value={issueDate}
-                    onChangeText={setIssueDate}
+                    onChangeText={(text) => {
+                        setIssueDate(text);
+                        if (errors.issueDate) {
+                            setErrors({ ...errors, issueDate: '' });
+                        }
+                    }}
                     placeholder="YYYY-MM-DD"
                     placeholderTextColor={theme.colors.subText}
                 />
+                {errors.issueDate && <Text style={styles.errorText}>{errors.issueDate}</Text>}
 
                 <Text style={styles.label}>{t('prescriptions.expiryDateLabel')}</Text>
                 <TextInput
@@ -264,5 +285,14 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     saveButtonText: {
         ...theme.textVariants.button,
         color: theme.colors.surface,
+    },
+    inputError: {
+        borderColor: theme.colors.error,
+    },
+    errorText: {
+        color: theme.colors.error,
+        fontSize: 12,
+        marginTop: 4,
+        marginLeft: 4,
     },
 });

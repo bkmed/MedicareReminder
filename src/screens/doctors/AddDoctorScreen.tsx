@@ -12,6 +12,9 @@ import { useTranslation } from 'react-i18next';
 import { doctorsDb } from '../../database/doctorsDb';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
+import { Dropdown } from '../../components/Dropdown';
+import { MEDICAL_SPECIALTIES } from '../../constants/specialties';
+import { isValidEmail, isValidPhone } from '../../utils/validation';
 
 export const AddDoctorScreen = ({ navigation, route }: any) => {
     const { theme } = useTheme();
@@ -26,7 +29,15 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
     const [email, setEmail] = useState('');
     const [address, setAddress] = useState('');
     const [notes, setNotes] = useState('');
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [loading, setLoading] = useState(false);
+
+    const specialtyOptions = useMemo(() => {
+        return MEDICAL_SPECIALTIES.map((key) => ({
+            label: t(`specialties.${key}`),
+            value: key,
+        }));
+    }, [t]);
 
     useEffect(() => {
         if (isEdit) {
@@ -51,8 +62,21 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
     };
 
     const handleSave = async () => {
+        const newErrors: { [key: string]: string } = {};
         if (!name.trim()) {
-            Alert.alert(t('common.error'), t('doctors.fillRequired'));
+            newErrors.name = t('common.required');
+        }
+
+        if (email.trim() && !isValidEmail(email.trim())) {
+            newErrors.email = t('common.invalidEmail');
+        }
+
+        if (phone.trim() && !isValidPhone(phone.trim())) {
+            newErrors.phone = t('common.invalidPhone');
+        }
+
+        setErrors(newErrors);
+        if (Object.keys(newErrors).length > 0) {
             return;
         }
 
@@ -105,46 +129,63 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
     };
 
     return (
-        <View testID='testadddoctor' style={{ flex: 1 }}>
+        <View>
             <ScrollView testID='adddoctor' style={styles.container} contentContainerStyle={styles.content}>
                 <Text style={styles.label}>{t('doctors.name')} *</Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, errors.name && styles.inputError]}
                     value={name}
-                    onChangeText={setName}
+                    onChangeText={(text) => {
+                        setName(text);
+                        if (errors.name) {
+                            setErrors({ ...errors, name: '' });
+                        }
+                    }}
                     placeholder={t('doctors.namePlaceholder')}
                     placeholderTextColor={theme.colors.subText}
                 />
+                {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
-                <Text style={styles.label}>{t('doctors.specialty')}</Text>
-                <TextInput
-                    style={styles.input}
+                <Dropdown
+                    label={t('doctors.specialty')}
+                    data={specialtyOptions}
                     value={specialty}
-                    onChangeText={setSpecialty}
+                    onSelect={setSpecialty}
                     placeholder={t('doctors.specialtyPlaceholder')}
-                    placeholderTextColor={theme.colors.subText}
                 />
 
                 <Text style={styles.label}>{t('doctors.phone')}</Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, errors.phone && styles.inputError]}
                     value={phone}
-                    onChangeText={setPhone}
+                    onChangeText={(text) => {
+                        setPhone(text);
+                        if (errors.phone) {
+                            setErrors({ ...errors, phone: '' });
+                        }
+                    }}
                     placeholder={t('doctors.phonePlaceholder')}
                     placeholderTextColor={theme.colors.subText}
                     keyboardType="phone-pad"
                 />
+                {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
 
                 <Text style={styles.label}>{t('doctors.email')}</Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, errors.email && styles.inputError]}
                     value={email}
-                    onChangeText={setEmail}
+                    onChangeText={(text) => {
+                        setEmail(text);
+                        if (errors.email) {
+                            setErrors({ ...errors, email: '' });
+                        }
+                    }}
                     placeholder={t('doctors.emailPlaceholder')}
                     placeholderTextColor={theme.colors.subText}
                     keyboardType="email-address"
                     autoCapitalize="none"
                 />
+                {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
                 <Text style={styles.label}>{t('doctors.address')}</Text>
                 <TextInput
@@ -236,5 +277,14 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     deleteButtonText: {
         ...theme.textVariants.button,
         color: theme.colors.surface,
+    },
+    inputError: {
+        borderColor: theme.colors.error,
+    },
+    errorText: {
+        color: theme.colors.error,
+        fontSize: 12,
+        marginTop: 4,
+        marginLeft: 4,
     },
 });

@@ -13,12 +13,14 @@ import { appointmentsDb } from '../../database/appointmentsDb';
 import { Appointment } from '../../database/schema';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
+import { SearchInput } from '../../components/SearchInput';
 
 export const AppointmentListScreen = ({ navigation }: any) => {
     const { t } = useTranslation();
     const { theme } = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
 
     const loadAppointments = async () => {
@@ -38,6 +40,16 @@ export const AppointmentListScreen = ({ navigation }: any) => {
             loadAppointments();
         }, [])
     );
+
+    const filteredAppointments = useMemo(() => {
+        if (!searchQuery) return appointments;
+        const lowerQuery = searchQuery.toLowerCase();
+        return appointments.filter(
+            (appt) =>
+                appt.title.toLowerCase().includes(lowerQuery) ||
+                (appt.doctorName && appt.doctorName.toLowerCase().includes(lowerQuery))
+        );
+    }, [appointments, searchQuery]);
 
     const formatDateTime = (dateTimeString: string) => {
         const date = new Date(dateTimeString);
@@ -88,8 +100,15 @@ export const AppointmentListScreen = ({ navigation }: any) => {
 
     return (
         <View style={styles.container}>
+            <View style={styles.searchContainer}>
+                <SearchInput
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    placeholder={t('common.searchPlaceholder')}
+                />
+            </View>
             <FlatList
-                data={appointments}
+                data={filteredAppointments}
                 renderItem={renderAppointment}
                 keyExtractor={(item) => item.id?.toString() || ''}
                 contentContainerStyle={styles.listContent}
@@ -108,12 +127,16 @@ export const AppointmentListScreen = ({ navigation }: any) => {
 
 const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
-        flex: 1,
         backgroundColor: theme.colors.background,
     },
     listContent: {
         padding: theme.spacing.m,
         flexGrow: 1,
+        paddingBottom: 80,
+    },
+    searchContainer: {
+        padding: theme.spacing.m,
+        paddingBottom: 0,
     },
     card: {
         backgroundColor: theme.colors.surface,
@@ -177,7 +200,7 @@ const createStyles = (theme: Theme) => StyleSheet.create({
     fab: {
         position: 'absolute' as any,
         right: theme.spacing.l,
-        top: theme.spacing.l,
+        bottom: theme.spacing.l,
         width: 56,
         height: 56,
         borderRadius: 28,

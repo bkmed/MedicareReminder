@@ -12,11 +12,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import { doctorsDb } from '../../database/doctorsDb';
 import { appointmentsDb } from '../../database/appointmentsDb';
 import { Doctor, Appointment } from '../../database/schema';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 
 export const DoctorDetailsScreen = ({ navigation, route }: any) => {
     const { doctorId } = route.params;
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
     const [doctor, setDoctor] = useState<Doctor | null>(null);
@@ -108,7 +110,9 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
                         <View>
                             <Text style={styles.name}>Dr. {doctor.name}</Text>
                             {doctor.specialty && (
-                                <Text style={styles.specialty}>{doctor.specialty}</Text>
+                                <Text style={styles.specialty}>
+                                    {t(`specialties.${doctor.specialty}`, { defaultValue: doctor.specialty })}
+                                </Text>
                             )}
                         </View>
                         <View style={styles.actions}>
@@ -179,7 +183,6 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
 
 const createStyles = (theme: Theme) => StyleSheet.create({
     container: {
-        flex: 1,
         backgroundColor: theme.colors.background,
     },
     loadingContainer: {

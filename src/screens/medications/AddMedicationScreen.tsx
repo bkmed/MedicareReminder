@@ -32,6 +32,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   const [endDate, setEndDate] = useState('');
   const [notes, setNotes] = useState('');
   const [reminderEnabled, setReminderEnabled] = useState(true);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -59,8 +60,16 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   };
 
   const handleSave = async () => {
-    if (!name.trim() || !dosage.trim()) {
-      Alert.alert(t('common.error'), t('medications.fillRequired'));
+    const newErrors: { [key: string]: string } = {};
+    if (!name.trim()) {
+      newErrors.name = t('common.required');
+    }
+    if (!dosage.trim()) {
+      newErrors.dosage = t('common.required');
+    }
+
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) {
       return;
     }
 
@@ -123,21 +132,33 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
     >
       <Text style={styles.label}>{t('medications.name')} *</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, errors.name && styles.inputError]}
         value={name}
-        onChangeText={setName}
+        onChangeText={(text) => {
+          setName(text);
+          if (errors.name) {
+            setErrors({ ...errors, name: '' });
+          }
+        }}
         placeholder={t('medications.namePlaceholder')}
         placeholderTextColor={theme.colors.subText}
       />
+      {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
       <Text style={styles.label}>{t('medications.dosage')} *</Text>
       <TextInput
-        style={styles.input}
+        style={[styles.input, errors.dosage && styles.inputError]}
         value={dosage}
-        onChangeText={setDosage}
+        onChangeText={(text) => {
+          setDosage(text);
+          if (errors.dosage) {
+            setErrors({ ...errors, dosage: '' });
+          }
+        }}
         placeholder={t('medications.dosagePlaceholder')}
         placeholderTextColor={theme.colors.subText}
       />
+      {errors.dosage && <Text style={styles.errorText}>{errors.dosage}</Text>}
 
       <Text style={styles.label}>{t('medications.frequency')}</Text>
       <View style={styles.frequencyContainer}>
@@ -355,5 +376,14 @@ const createStyles = (theme: Theme) =>
     saveButtonText: {
       ...theme.textVariants.button,
       color: theme.colors.surface,
+    },
+    inputError: {
+      borderColor: theme.colors.error,
+    },
+    errorText: {
+      color: theme.colors.error,
+      fontSize: 12,
+      marginTop: 4,
+      marginLeft: 4,
     },
   });
