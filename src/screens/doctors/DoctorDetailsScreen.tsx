@@ -37,12 +37,13 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
   const navigateToAddAppointment = () => {
     if (Platform.OS === 'web') {
       if (setActiveTab) {
-        setActiveTab('Appointments', 'AddAppointment');
+        setActiveTab('Appointments', 'AddAppointment', {
+          doctorName: doctor?.name || '',
+        });
       }
     } else {
-      navigation.navigate('Main', {
-        screen: 'AppointmentsTab',
-        params: { screen: 'AddAppointment' },
+      navigation.navigate('AddAppointment', {
+        doctorName: doctor?.name || '',
       });
     }
   };
@@ -65,9 +66,8 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
         });
       }
     } else {
-      navigation.navigate('Main', {
-        screen: 'AddPrescription',
-        params: { doctorName: doctor.name },
+      navigation.navigate('AddPrescription', {
+        doctorName: doctor.name,
       });
     }
   };
@@ -131,7 +131,7 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
       <View style={styles.appointmentHeader}>
         <Text style={styles.appointmentTitle}>{item.title}</Text>
         <Text style={styles.appointmentDate}>
-          {new Date(item.dateTime).toLocaleDateString()}{' '}
+          {new Date(item.dateTime).toLocaleDateString()}
           {new Date(item.dateTime).toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',

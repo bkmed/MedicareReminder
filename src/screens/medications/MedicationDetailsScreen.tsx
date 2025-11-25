@@ -71,7 +71,9 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
   if (loading || !medication) {
     return (
       <View style={styles.container}>
-        <Text style={{ color: theme.colors.text }}>{t('medicationDetails.loading')}</Text>
+        <Text style={{ color: theme.colors.text }}>
+          {t('medicationDetails.loading')}
+        </Text>
       </View>
     );
   }
@@ -87,12 +89,16 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.label}>{t('medicationDetails.frequencyLabel')}</Text>
+          <Text style={styles.label}>
+            {t('medicationDetails.frequencyLabel')}
+          </Text>
           <Text style={styles.value}>{medication.frequency}</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.label}>{t('medicationDetails.reminderTimesLabel')}</Text>
+          <Text style={styles.label}>
+            {t('medicationDetails.reminderTimesLabel')}
+          </Text>
           <View style={styles.timesContainer}>
             {times.map((time, index) => (
               <View key={index} style={styles.timeBadge}>
@@ -103,49 +109,65 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.label}>{t('medicationDetails.startDateLabel')}</Text>
+          <Text style={styles.label}>
+            {t('medicationDetails.startDateLabel')}
+          </Text>
           <Text style={styles.value}>{medication.startDate}</Text>
         </View>
 
         {medication.endDate && (
           <View style={styles.section}>
-            <Text style={styles.label}>{t('medicationDetails.endDateLabel')}</Text>
+            <Text style={styles.label}>
+              {t('medicationDetails.endDateLabel')}
+            </Text>
             <Text style={styles.value}>{medication.endDate}</Text>
           </View>
         )}
 
         {medication.notes && (
           <View style={styles.section}>
-            <Text style={styles.label}>{t('medicationDetails.notesLabel')}</Text>
+            <Text style={styles.label}>
+              {t('medicationDetails.notesLabel')}
+            </Text>
             <Text style={styles.value}>{medication.notes}</Text>
           </View>
         )}
 
         <View style={styles.section}>
-          <Text style={styles.label}>{t('medicationDetails.remindersLabel')}</Text>
+          <Text style={styles.label}>
+            {t('medicationDetails.remindersLabel')}
+          </Text>
           <Text style={styles.value}>
-            {medication.reminderEnabled ? t('medicationDetails.reminderEnabled') : t('medicationDetails.reminderDisabled')}
+            {medication.reminderEnabled
+              ? t('medicationDetails.reminderEnabled')
+              : t('medicationDetails.reminderDisabled')}
           </Text>
         </View>
 
         <TouchableOpacity style={styles.button} onPress={handleViewHistory}>
-          <Text style={styles.buttonText}>{t('medicationDetails.viewHistoryButton')}</Text>
+          <Text style={styles.buttonText}>
+            {t('medicationDetails.viewHistoryButton')}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, styles.editButton]}
           onPress={handleEdit}
         >
-          <Text style={styles.buttonText}>{t('medicationDetails.editButton')}</Text>
+          <Text style={styles.buttonText}>
+            {t('medicationDetails.editButton')}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, styles.deleteButton]}
           onPress={handleDelete}
         >
-          <Text style={styles.buttonText}>{t('medicationDetails.deleteButton')}</Text>
+          <Text style={styles.buttonText}>
+            {t('medicationDetails.deleteButton')}
+          </Text>
         </TouchableOpacity>
-      </ScrollView>{' '}
+      </ScrollView>
     </View>
   );
 };

@@ -103,7 +103,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
       }
 
       if (Platform.OS === 'web') {
-        setActiveTab('Prescriptions');
+        setActiveTab('Medications');
       } else {
         navigation.goBack();
       }
@@ -250,7 +250,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
           disabled={loading}
         >
           <Text style={styles.saveButtonText}>
-            {isEdit ? t('medications.update') : t('common.save')}{' '}
+            {isEdit ? t('medications.update') : t('common.save')}
             {t('medications.medication')}
           </Text>
         </TouchableOpacity>

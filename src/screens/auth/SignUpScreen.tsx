@@ -35,7 +35,10 @@ export const SignUpScreen = ({ navigation }: any) => {
     try {
       await authService.register(name, email, password);
     } catch (error: any) {
-      Alert.alert(t('signUp.errorTitle'), error.message || t('signUp.errorRegistrationFailed'));
+      Alert.alert(
+        t('signUp.errorTitle'),
+        error.message || t('signUp.errorRegistrationFailed'),
+      );
     } finally {
       setLoading(false);
     }

@@ -34,7 +34,10 @@ export const LoginScreen = ({ navigation }: any) => {
     try {
       await authService.login(email, password);
     } catch (error: any) {
-      Alert.alert(t('login.errorTitle'), error.message || t('login.errorLoginFailed'));
+      Alert.alert(
+        t('login.errorTitle'),
+        error.message || t('login.errorLoginFailed'),
+      );
     } finally {
       setLoading(false);
     }
@@ -82,7 +85,9 @@ export const LoginScreen = ({ navigation }: any) => {
             onPress={() => navigation.navigate('ForgotPassword')}
             style={styles.forgotPassword}
           >
-            <Text style={styles.forgotPasswordText}>{t('login.forgotPassword')}</Text>
+            <Text style={styles.forgotPasswordText}>
+              {t('login.forgotPassword')}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity

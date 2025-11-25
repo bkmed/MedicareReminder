@@ -90,7 +90,7 @@ export const PrescriptionListScreen = ({ navigation }: any) => {
           )}
 
           <Text style={styles.date}>
-            {t('prescriptions.issued')}:{' '}
+            {t('prescriptions.issued')}:
             {new Date(item.issueDate).toLocaleDateString()}
           </Text>
 
@@ -98,7 +98,7 @@ export const PrescriptionListScreen = ({ navigation }: any) => {
             <Text
               style={[styles.expiry, expiryWarning && styles.expiryWarning]}
             >
-              {t('prescriptions.expires')}:{' '}
+              {t('prescriptions.expires')}:
               {new Date(item.expiryDate).toLocaleDateString()}
               {expiryWarning && ' ⚠️'}
             </Text>

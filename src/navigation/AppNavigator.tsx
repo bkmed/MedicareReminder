@@ -35,7 +35,8 @@ enableScreens();
 export const WebNavigationContext = createContext({
   activeTab: 'Home',
   subScreen: '',
-  setActiveTab: (tab: string, subScreen?: string) => {},
+  screenParams: {} as any,
+  setActiveTab: (tab: string, subScreen?: string, params?: any) => { },
 });
 
 // ======= Stacks =======
@@ -175,38 +176,54 @@ const WebNavigator = () => {
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('Home');
   const [subScreen, setSubScreen] = useState('');
+  const [screenParams, setScreenParams] = useState<any>({});
 
   const contextValue = useMemo(
     () => ({
       activeTab,
       subScreen,
-      setActiveTab: (tab: string, screen?: string) => {
+      screenParams,
+      setActiveTab: (tab: string, screen?: string, params?: any) => {
         setActiveTab(tab);
         setSubScreen(screen || '');
+        setScreenParams(params || {});
       },
     }),
-    [activeTab, subScreen],
+    [activeTab, subScreen, screenParams],
   );
 
   const getActiveComponent = () => {
+    // Create a mock route object for web screens
+    const mockRoute = { params: screenParams };
+
     switch (activeTab) {
       case 'Home':
         return <HomeStack />;
       case 'Medications':
-        if (subScreen === 'AddMedication') return <AddMedicationScreen />;
+        if (subScreen === 'AddMedication')
+          return <AddMedicationScreen route={mockRoute} />;
         if (subScreen === 'MedicationDetails')
-          return <MedicationDetailsScreen />;
+          return <MedicationDetailsScreen route={mockRoute} />;
         return <MedicationsStack />;
       case 'Appointments':
-        if (subScreen === 'AddAppointment') return <AddAppointmentScreen />;
+        if (subScreen === 'AddAppointment')
+          return <AddAppointmentScreen route={mockRoute} />;
         if (subScreen === 'AppointmentDetails')
-          return <AppointmentDetailsScreen />;
+          return <AppointmentDetailsScreen route={mockRoute} />;
         return <AppointmentsStack />;
       case 'Analytics':
         return <AnalyticsScreen />;
       case 'Prescriptions':
+        if (subScreen === 'AddPrescription')
+          return <AddPrescriptionScreen route={mockRoute} />;
+        if (subScreen === 'PrescriptionDetails')
+          return <PrescriptionDetailsScreen route={mockRoute} />;
         return <PrescriptionsStack />;
       case 'Doctors':
+        if (subScreen === 'AddDoctor')
+          return <AddDoctorScreen route={mockRoute} />;
+        if (subScreen === 'DoctorDetails')
+          return <DoctorDetailsScreen route={mockRoute} />;
         return <DoctorsStack />;
       case 'Profile':
         return <ProfileStack />;

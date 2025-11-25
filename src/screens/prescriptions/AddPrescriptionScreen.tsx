@@ -24,9 +24,10 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
   const prescriptionId = route?.params?.prescriptionId;
   const isEdit = !!prescriptionId;
+  const initialDoctorName = route?.params?.doctorName || '';
 
   const [medicationName, setMedicationName] = useState('');
-  const [doctorName, setDoctorName] = useState(route?.params?.doctorName || '');
+  const [doctorName, setDoctorName] = useState(initialDoctorName);
   const [issueDate, setIssueDate] = useState(
     new Date().toISOString().split('T')[0],
   );
@@ -47,7 +48,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? useContext(WebNavigationContext)
-    : { setActiveTab: () => {} }; // fallback pour mobile
+    : { setActiveTab: () => { } }; // fallback pour mobile
 
   const loadPrescription = async () => {
     if (!prescriptionId) return;
@@ -148,7 +149,13 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
       }
 
       if (Platform.OS === 'web') {
-        setActiveTab('Doctors');
+        // If came from DoctorDetails (has initialDoctorName), return to Doctors
+        // Otherwise return to Prescriptions
+        if (initialDoctorName) {
+          setActiveTab('Doctors');
+        } else {
+          setActiveTab('Prescriptions');
+        }
       } else {
         navigation.goBack();
       }

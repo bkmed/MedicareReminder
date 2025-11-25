@@ -21,7 +21,10 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
 
   const handleReset = async () => {
     if (!email) {
-      Alert.alert(t('forgotPassword.errorTitle'), t('forgotPassword.errorEmptyEmail'));
+      Alert.alert(
+        t('forgotPassword.errorTitle'),
+        t('forgotPassword.errorEmptyEmail'),
+      );
       return;
     }
 
@@ -41,9 +44,7 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
     <View style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.title}>{t('forgotPassword.title')}</Text>
-        <Text style={styles.subtitle}>
-          {t('forgotPassword.subtitle')}
-        </Text>
+        <Text style={styles.subtitle}>{t('forgotPassword.subtitle')}</Text>
 
         <View style={styles.inputContainer}>
           <Text style={styles.label}>{t('forgotPassword.emailLabel')}</Text>
@@ -66,7 +67,9 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
           {loading ? (
             <ActivityIndicator color="#FFF" />
           ) : (
-            <Text style={styles.buttonText}>{t('forgotPassword.sendInstructionsButton')}</Text>
+            <Text style={styles.buttonText}>
+              {t('forgotPassword.sendInstructionsButton')}
+            </Text>
           )}
         </TouchableOpacity>
 
@@ -74,7 +77,9 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Text style={styles.backButtonText}>{t('forgotPassword.backToLogin')}</Text>
+          <Text style={styles.backButtonText}>
+            {t('forgotPassword.backToLogin')}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
