@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   Switch,
+  Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { medicationsDb } from '../../database/medicationsDb';
@@ -19,7 +20,8 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const medicationId = route.params?.medicationId;
+
+  const medicationId = route?.params?.medicationId;
   const isEdit = !!medicationId;
 
   const [name, setName] = useState('');
@@ -36,23 +38,31 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isEdit) {
-      loadMedication();
-    }
+    if (isEdit) loadMedication();
   }, [medicationId]);
 
+  const WebNavigationContext =
+    Platform.OS === 'web'
+      ? require('../../navigation/AppNavigator').WebNavigationContext
+      : null;
+
+  const { setActiveTab } = WebNavigationContext
+    ? useContext(WebNavigationContext)
+    : { setActiveTab: () => {} }; // fallback pour mobile
+
   const loadMedication = async () => {
+    if (!medicationId) return;
     try {
       const med = await medicationsDb.getById(medicationId);
       if (med) {
-        setName(med.name);
-        setDosage(med.dosage);
-        setFrequency(med.frequency);
-        setTimes(JSON.parse(med.times));
-        setStartDate(med.startDate);
+        setName(med.name || '');
+        setDosage(med.dosage || '');
+        setFrequency(med.frequency || 'Daily');
+        setTimes(med.times ? JSON.parse(med.times) : ['08:00', '20:00']);
+        setStartDate(med.startDate || new Date().toISOString().split('T')[0]);
         setEndDate(med.endDate || '');
         setNotes(med.notes || '');
-        setReminderEnabled(med.reminderEnabled);
+        setReminderEnabled(!!med.reminderEnabled);
       }
     } catch (error) {
       Alert.alert(t('common.error'), t('medications.loadError'));
@@ -61,17 +71,10 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
 
   const handleSave = async () => {
     const newErrors: { [key: string]: string } = {};
-    if (!name.trim()) {
-      newErrors.name = t('common.required');
-    }
-    if (!dosage.trim()) {
-      newErrors.dosage = t('common.required');
-    }
-
+    if (!name.trim()) newErrors.name = t('common.required');
+    if (!dosage.trim()) newErrors.dosage = t('common.required');
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) {
-      return;
-    }
+    if (Object.keys(newErrors).length > 0) return;
 
     setLoading(true);
     try {
@@ -87,37 +90,34 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
       };
 
       let id: number;
-      if (isEdit) {
+      if (isEdit && medicationId) {
         await medicationsDb.update(medicationId, medicationData);
         id = medicationId;
       } else {
         id = await medicationsDb.add(medicationData);
       }
 
-      // Schedule notifications
       if (reminderEnabled) {
-        const medication = await medicationsDb.getById(id);
-        if (medication) {
-          await notificationService.scheduleMedicationReminders(medication);
-        }
+        const med = await medicationsDb.getById(id);
+        if (med) await notificationService.scheduleMedicationReminders(med);
       }
 
-      navigation.goBack();
+      if (Platform.OS === 'web') {
+        setActiveTab('Prescriptions');
+      } else {
+        navigation.goBack();
+      }
     } catch (error) {
+      console.error('Error saving medication:', error);
       Alert.alert(t('common.error'), t('medications.saveError'));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddTime = () => {
-    setTimes([...times, '12:00']);
-  };
-
-  const handleRemoveTime = (index: number) => {
+  const handleAddTime = () => setTimes([...times, '12:00']);
+  const handleRemoveTime = (index: number) =>
     setTimes(times.filter((_, i) => i !== index));
-  };
-
   const handleTimeChange = (index: number, value: string) => {
     const newTimes = [...times];
     newTimes[index] = value;
@@ -125,20 +125,15 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   };
 
   return (
-    <View>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
-      >
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.label}>{t('medications.name')} *</Text>
         <TextInput
           style={[styles.input, errors.name && styles.inputError]}
           value={name}
           onChangeText={text => {
             setName(text);
-            if (errors.name) {
-              setErrors({ ...errors, name: '' });
-            }
+            if (errors.name) setErrors({ ...errors, name: '' });
           }}
           placeholder={t('medications.namePlaceholder')}
           placeholderTextColor={theme.colors.subText}
@@ -151,9 +146,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
           value={dosage}
           onChangeText={text => {
             setDosage(text);
-            if (errors.dosage) {
-              setErrors({ ...errors, dosage: '' });
-            }
+            if (errors.dosage) setErrors({ ...errors, dosage: '' });
           }}
           placeholder={t('medications.dosagePlaceholder')}
           placeholderTextColor={theme.colors.subText}
@@ -268,13 +261,8 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    content: {
-      padding: theme.spacing.m,
-    },
+    container: { backgroundColor: theme.colors.background },
+    content: { padding: theme.spacing.m },
     label: {
       ...theme.textVariants.body,
       fontWeight: '600',
@@ -291,10 +279,7 @@ const createStyles = (theme: Theme) =>
       borderColor: theme.colors.border,
       color: theme.colors.text,
     },
-    notesInput: {
-      minHeight: 100,
-      textAlignVertical: 'top',
-    },
+    notesInput: { minHeight: 100, textAlignVertical: 'top' },
     frequencyContainer: {
       flexDirection: 'row',
       gap: theme.spacing.s,
@@ -313,23 +298,15 @@ const createStyles = (theme: Theme) =>
       backgroundColor: theme.colors.primary,
       borderColor: theme.colors.primary,
     },
-    frequencyText: {
-      ...theme.textVariants.body,
-      color: theme.colors.subText,
-    },
-    frequencyTextActive: {
-      color: theme.colors.surface,
-      fontWeight: '600',
-    },
+    frequencyText: { ...theme.textVariants.body, color: theme.colors.subText },
+    frequencyTextActive: { color: theme.colors.surface, fontWeight: '600' },
     timeRow: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: theme.spacing.s,
       marginBottom: theme.spacing.s,
     },
-    timeInput: {
-      flex: 1,
-    },
+    timeInput: { flex: 1 },
     removeButton: {
       width: 32,
       height: 32,
@@ -371,16 +348,12 @@ const createStyles = (theme: Theme) =>
       marginBottom: theme.spacing.xl,
       ...theme.shadows.small,
     },
-    saveButtonDisabled: {
-      opacity: 0.5,
-    },
+    saveButtonDisabled: { opacity: 0.5 },
     saveButtonText: {
       ...theme.textVariants.button,
       color: theme.colors.surface,
     },
-    inputError: {
-      borderColor: theme.colors.error,
-    },
+    inputError: { borderColor: theme.colors.error },
     errorText: {
       color: theme.colors.error,
       fontSize: 12,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   Switch,
+  Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { appointmentsDb } from '../../database/appointmentsDb';
@@ -20,7 +21,19 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const appointmentId = route.params?.appointmentId;
+
+  // Web Navigation context
+  const WebNavigationContext =
+    Platform.OS === 'web'
+      ? require('../../navigation/AppNavigator').WebNavigationContext
+      : null;
+
+  const { setActiveTab } = WebNavigationContext
+    ? useContext(WebNavigationContext)
+    : { setActiveTab: () => {} }; // fallback pour mobile
+
+  // Get appointmentId only if route exists (mobile)
+  const appointmentId = route?.params?.appointmentId;
   const isEdit = !!appointmentId;
 
   const [title, setTitle] = useState('');
@@ -34,9 +47,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isEdit) {
-      loadAppointment();
-    }
+    if (isEdit) loadAppointment();
   }, [appointmentId]);
 
   const loadAppointment = async () => {
@@ -46,11 +57,9 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
         setTitle(appt.title);
         setDoctorName(appt.doctorName || '');
         setLocation(appt.location || '');
-
         const dateTime = new Date(appt.dateTime);
         setDate(dateTime.toISOString().split('T')[0]);
         setTime(dateTime.toTimeString().substring(0, 5));
-
         setNotes(appt.notes || '');
         setReminderEnabled(appt.reminderEnabled);
       }
@@ -61,20 +70,12 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
 
   const handleSave = async () => {
     const newErrors: { [key: string]: string } = {};
-    if (!title.trim()) {
-      newErrors.title = t('common.required');
-    }
-    if (!date.trim()) {
-      newErrors.date = t('common.required');
-    }
-    if (!time.trim()) {
-      newErrors.time = t('common.required');
-    }
+    if (!title.trim()) newErrors.title = t('common.required');
+    if (!date.trim()) newErrors.date = t('common.required');
+    if (!time.trim()) newErrors.time = t('common.required');
 
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) {
-      return;
-    }
+    if (Object.keys(newErrors).length > 0) return;
 
     setLoading(true);
     try {
@@ -93,13 +94,11 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
       if (isEdit) {
         await appointmentsDb.update(appointmentId, appointmentData);
         id = appointmentId;
-        // Cancel old reminder
         await notificationService.cancelAppointmentReminder(appointmentId);
       } else {
         id = await appointmentsDb.add(appointmentData);
       }
 
-      // Schedule new reminder
       if (reminderEnabled) {
         await notificationService.scheduleAppointmentReminder(
           id,
@@ -108,7 +107,12 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
         );
       }
 
-      navigation.goBack();
+      // Go back: Mobile stack or Web tab
+      if (Platform.OS === 'web') {
+        setActiveTab('Appointments'); // retourne à la liste
+      } else {
+        navigation.goBack();
+      }
     } catch (error) {
       console.error('Error saving appointment:', error);
       Alert.alert(t('common.error'), t('appointments.saveError'));
@@ -118,26 +122,23 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   };
 
   return (
-    <View>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
-      >
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        {/* Title */}
         <Text style={styles.label}>{t('appointments.appointmentTitle')} *</Text>
         <TextInput
           style={[styles.input, errors.title && styles.inputError]}
           value={title}
           onChangeText={text => {
             setTitle(text);
-            if (errors.title) {
-              setErrors({ ...errors, title: '' });
-            }
+            if (errors.title) setErrors({ ...errors, title: '' });
           }}
           placeholder={t('appointments.titlePlaceholder')}
           placeholderTextColor={theme.colors.subText}
         />
         {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
 
+        {/* Doctor */}
         <Text style={styles.label}>{t('appointments.doctor')}</Text>
         <TextInput
           style={styles.input}
@@ -147,6 +148,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
           placeholderTextColor={theme.colors.subText}
         />
 
+        {/* Location */}
         <Text style={styles.label}>{t('appointments.location')}</Text>
         <TextInput
           style={styles.input}
@@ -156,36 +158,35 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
           placeholderTextColor={theme.colors.subText}
         />
 
+        {/* Date */}
         <Text style={styles.label}>{t('appointments.date')} *</Text>
         <TextInput
           style={[styles.input, errors.date && styles.inputError]}
           value={date}
           onChangeText={text => {
             setDate(text);
-            if (errors.date) {
-              setErrors({ ...errors, date: '' });
-            }
+            if (errors.date) setErrors({ ...errors, date: '' });
           }}
           placeholder="YYYY-MM-DD"
           placeholderTextColor={theme.colors.subText}
         />
         {errors.date && <Text style={styles.errorText}>{errors.date}</Text>}
 
+        {/* Time */}
         <Text style={styles.label}>{t('appointments.time')} *</Text>
         <TextInput
           style={[styles.input, errors.time && styles.inputError]}
           value={time}
           onChangeText={text => {
             setTime(text);
-            if (errors.time) {
-              setErrors({ ...errors, time: '' });
-            }
+            if (errors.time) setErrors({ ...errors, time: '' });
           }}
           placeholder="HH:MM"
           placeholderTextColor={theme.colors.subText}
         />
         {errors.time && <Text style={styles.errorText}>{errors.time}</Text>}
 
+        {/* Notes */}
         <Text style={styles.label}>{t('appointments.notes')}</Text>
         <TextInput
           style={[styles.input, styles.notesInput]}
@@ -197,6 +198,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
           numberOfLines={4}
         />
 
+        {/* Reminder Switch */}
         <View style={styles.switchRow}>
           <Text style={styles.label}>{t('appointments.enableReminder')}</Text>
           <Switch
@@ -210,6 +212,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
           />
         </View>
 
+        {/* Save Button */}
         <TouchableOpacity
           style={[styles.saveButton, loading && styles.saveButtonDisabled]}
           onPress={handleSave}
@@ -220,6 +223,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
           </Text>
         </TouchableOpacity>
 
+        {/* Calendar Button */}
         <CalendarButton
           title={title}
           date={date}
@@ -235,7 +239,6 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
-      flex: 1,
       backgroundColor: theme.colors.background,
     },
     content: {

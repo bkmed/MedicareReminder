@@ -26,7 +26,7 @@ export const LoginScreen = ({ navigation }: any) => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter email and password');
+      Alert.alert(t('login.errorTitle'), t('login.errorEmptyFields'));
       return;
     }
 
@@ -34,7 +34,7 @@ export const LoginScreen = ({ navigation }: any) => {
     try {
       await authService.login(email, password);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Login failed');
+      Alert.alert(t('login.errorTitle'), error.message || t('login.errorLoginFailed'));
     } finally {
       setLoading(false);
     }

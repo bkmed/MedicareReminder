@@ -90,126 +90,132 @@ export const AnalyticsScreen = () => {
   const chartWidth = Math.min(screenWidth - 32, 800); // Max 800px on web,
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>{t('analytics.healthAnalytics')}</Text>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.title}>{t('analytics.healthAnalytics')}</Text>
 
-      {/* Summary Cards */}
-      <View style={styles.cardsRow}>
-        <View style={[styles.card, styles.cardBlue]}>
-          <Text style={styles.cardNumber}>{analytics.totalMedications}</Text>
-          <Text style={styles.cardLabel}>{t('analytics.medications')}</Text>
-        </View>
+        {/* Summary Cards */}
+        <View style={styles.cardsRow}>
+          <View style={[styles.card, styles.cardBlue]}>
+            <Text style={styles.cardNumber}>{analytics.totalMedications}</Text>
+            <Text style={styles.cardLabel}>{t('analytics.medications')}</Text>
+          </View>
 
-        <View style={[styles.card, styles.cardGreen]}>
-          <Text style={styles.cardNumber}>
-            {analytics.upcomingAppointments}
-          </Text>
-          <Text style={styles.cardLabel}>{t('analytics.appointments')}</Text>
-        </View>
-      </View>
-
-      <View style={styles.cardsRow}>
-        <View style={[styles.card, styles.cardOrange]}>
-          <Text style={styles.cardNumber}>
-            {analytics.expiringPrescriptions}
-          </Text>
-          <Text style={styles.cardLabel}>{t('analytics.expiringSoon')}</Text>
-        </View>
-
-        <View style={[styles.card, styles.cardPurple]}>
-          <Text style={styles.cardNumber}>
-            {analytics.medicationAdherence}%
-          </Text>
-          <Text style={styles.cardLabel}>{t('analytics.adherence')}</Text>
-        </View>
-      </View>
-
-      {/* Medication Adherence Chart */}
-      {adherenceChart && adherenceChart.data.length > 0 && (
-        <View style={styles.chartSection}>
-          <Text style={styles.chartTitle}>{t('analytics.adherenceChart')}</Text>
-          <LineChart
-            data={{
-              labels: adherenceChart.labels,
-              datasets: [{ data: adherenceChart.data }],
-            }}
-            width={chartWidth}
-            height={220}
-            chartConfig={chartConfig}
-            bezier
-            style={styles.chart}
-            withInnerLines={false}
-            withOuterLines={true}
-            withVerticalLabels={true}
-            withHorizontalLabels={true}
-          />
-        </View>
-      )}
-
-      {/* Upcoming Appointments Chart */}
-      {appointmentsChart && appointmentsChart.data.some(val => val > 0) && (
-        <View style={styles.chartSection}>
-          <Text style={styles.chartTitle}>
-            {t('analytics.upcomingAppointmentsChart')}
-          </Text>
-          <BarChart
-            data={{
-              labels: appointmentsChart.labels,
-              datasets: [{ data: appointmentsChart.data }],
-            }}
-            width={chartWidth}
-            height={220}
-            yAxisLabel=""
-            yAxisSuffix=""
-            chartConfig={{
-              ...chartConfig,
-              color: (opacity = 1) => `rgba(52, 199, 89, ${opacity})`,
-            }}
-            style={styles.chart}
-            showValuesOnTopOfBars
-            withInnerLines={false}
-          />
-        </View>
-      )}
-
-      {/* Health Insights */}
-      <View style={styles.insightsSection}>
-        <Text style={styles.sectionTitle}>{t('analytics.healthInsights')}</Text>
-
-        {analytics.medicationAdherence >= 90 && (
-          <View style={[styles.insightCard, styles.insightGood]}>
-            <Text style={styles.insightEmoji}>✅</Text>
-            <Text style={styles.insightText}>
-              {t('analytics.excellentAdherence', {
-                adherence: analytics.medicationAdherence,
-              })}
+          <View style={[styles.card, styles.cardGreen]}>
+            <Text style={styles.cardNumber}>
+              {analytics.upcomingAppointments}
             </Text>
+            <Text style={styles.cardLabel}>{t('analytics.appointments')}</Text>
+          </View>
+        </View>
+
+        <View style={styles.cardsRow}>
+          <View style={[styles.card, styles.cardOrange]}>
+            <Text style={styles.cardNumber}>
+              {analytics.expiringPrescriptions}
+            </Text>
+            <Text style={styles.cardLabel}>{t('analytics.expiringSoon')}</Text>
+          </View>
+
+          <View style={[styles.card, styles.cardPurple]}>
+            <Text style={styles.cardNumber}>
+              {analytics.medicationAdherence}%
+            </Text>
+            <Text style={styles.cardLabel}>{t('analytics.adherence')}</Text>
+          </View>
+        </View>
+
+        {/* Medication Adherence Chart */}
+        {adherenceChart && adherenceChart.data.length > 0 && (
+          <View style={styles.chartSection}>
+            <Text style={styles.chartTitle}>
+              {t('analytics.adherenceChart')}
+            </Text>
+            <LineChart
+              data={{
+                labels: adherenceChart.labels,
+                datasets: [{ data: adherenceChart.data }],
+              }}
+              width={chartWidth}
+              height={220}
+              chartConfig={chartConfig}
+              bezier
+              style={styles.chart}
+              withInnerLines={false}
+              withOuterLines={true}
+              withVerticalLabels={true}
+              withHorizontalLabels={true}
+            />
           </View>
         )}
 
-        {analytics.expiringPrescriptions > 0 && (
-          <View style={[styles.insightCard, styles.insightWarning]}>
-            <Text style={styles.insightEmoji}>⚠️</Text>
-            <Text style={styles.insightText}>
-              {t('analytics.prescriptionsExpiring', {
-                count: analytics.expiringPrescriptions,
-              })}
+        {/* Upcoming Appointments Chart */}
+        {appointmentsChart && appointmentsChart.data.some(val => val > 0) && (
+          <View style={styles.chartSection}>
+            <Text style={styles.chartTitle}>
+              {t('analytics.upcomingAppointmentsChart')}
             </Text>
+            <BarChart
+              data={{
+                labels: appointmentsChart.labels,
+                datasets: [{ data: appointmentsChart.data }],
+              }}
+              width={chartWidth}
+              height={220}
+              yAxisLabel=""
+              yAxisSuffix=""
+              chartConfig={{
+                ...chartConfig,
+                color: (opacity = 1) => `rgba(52, 199, 89, ${opacity})`,
+              }}
+              style={styles.chart}
+              showValuesOnTopOfBars
+              withInnerLines={false}
+            />
           </View>
         )}
 
-        {analytics.upcomingAppointments > 0 && (
-          <View style={[styles.insightCard, styles.insightInfo]}>
-            <Text style={styles.insightEmoji}>📅</Text>
-            <Text style={styles.insightText}>
-              {t('analytics.upcomingAppointmentsInsight', {
-                count: analytics.upcomingAppointments,
-              })}
-            </Text>
-          </View>
-        )}
-      </View>
-    </ScrollView>
+        {/* Health Insights */}
+        <View style={styles.insightsSection}>
+          <Text style={styles.sectionTitle}>
+            {t('analytics.healthInsights')}
+          </Text>
+
+          {analytics.medicationAdherence >= 90 && (
+            <View style={[styles.insightCard, styles.insightGood]}>
+              <Text style={styles.insightEmoji}>✅</Text>
+              <Text style={styles.insightText}>
+                {t('analytics.excellentAdherence', {
+                  adherence: analytics.medicationAdherence,
+                })}
+              </Text>
+            </View>
+          )}
+
+          {analytics.expiringPrescriptions > 0 && (
+            <View style={[styles.insightCard, styles.insightWarning]}>
+              <Text style={styles.insightEmoji}>⚠️</Text>
+              <Text style={styles.insightText}>
+                {t('analytics.prescriptionsExpiring', {
+                  count: analytics.expiringPrescriptions,
+                })}
+              </Text>
+            </View>
+          )}
+
+          {analytics.upcomingAppointments > 0 && (
+            <View style={[styles.insightCard, styles.insightInfo]}>
+              <Text style={styles.insightEmoji}>📅</Text>
+              <Text style={styles.insightText}>
+                {t('analytics.upcomingAppointmentsInsight', {
+                  count: analytics.upcomingAppointments,
+                })}
+              </Text>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 

@@ -24,25 +24,46 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
-  const { setActiveTab } =
+  // Déclare le contexte Web uniquement si on est sur web
+  const WebNavigationContext =
     Platform.OS === 'web'
-      ? useContext(require('../../navigation/AppNavigator').WebNavigationContext)
-      : { setActiveTab: () => {} };
+      ? require('../../navigation/AppNavigator').WebNavigationContext
+      : null;
 
-    const navigateToAddAppointment = () => {
-      if (Platform.OS === 'web') {
-        setActiveTab('appointments', 'AddAppointment');
-      } else {
-        navigation.navigate('Main', {
-          screen: 'AppointmentsTab',
-          params: { screen: 'AddAppointment' },
+  const { setActiveTab } = WebNavigationContext
+    ? useContext(WebNavigationContext)
+    : { setActiveTab: () => {} }; // fallback pour mobile
+
+  const navigateToAddAppointment = () => {
+    if (Platform.OS === 'web') {
+      if (setActiveTab) {
+        setActiveTab('Appointments', 'AddAppointment');
+      }
+    } else {
+      navigation.navigate('Main', {
+        screen: 'AppointmentsTab',
+        params: { screen: 'AddAppointment' },
+      });
+    }
+  };
+
+  const navigationBack = () => {
+    if (Platform.OS === 'web') {
+      if (setActiveTab) {
+        setActiveTab('Doctors');
+      }
+    } else {
+      navigation.goBack();
+    }
+  };
+
+  const navigateToAddPrescription = (doctor: Doctor) => {
+    if (Platform.OS === 'web') {
+      if (setActiveTab) {
+        setActiveTab('Prescriptions', 'AddPrescription', {
+          doctorName: doctor.name,
         });
       }
-    };
-
-  const navigateToAddPrescription = (doctor: any) => {
-    if (Platform.OS === 'web') {
-      setActiveTab('prescriptions', 'AddPrescription', { doctorName: doctor.name });
     } else {
       navigation.navigate('Main', {
         screen: 'AddPrescription',
@@ -60,7 +81,7 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
         setDoctor(doctorData);
       } else {
         Alert.alert(t('common.error'), t('doctors.notFound'));
-        navigation.goBack();
+        navigationBack();
       }
 
       setAppointments(appointmentsData);
@@ -94,7 +115,7 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
           onPress: async () => {
             try {
               await doctorsDb.delete(doctorId);
-              navigation.goBack();
+              navigationBack();
             } catch (error) {
               console.error('Error deleting doctor:', error);
               Alert.alert(t('common.error'), t('doctors.deleteError'));

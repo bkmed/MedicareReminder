@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { doctorsDb } from '../../database/doctorsDb';
@@ -20,7 +21,8 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const doctorId = route.params?.doctorId;
+
+  const doctorId = route?.params?.doctorId;
   const isEdit = !!doctorId;
 
   const [name, setName] = useState('');
@@ -32,12 +34,29 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
 
+  const WebNavigationContext =
+    Platform.OS === 'web'
+      ? require('../../navigation/AppNavigator').WebNavigationContext
+      : null;
+
+  const { setActiveTab } = WebNavigationContext
+    ? useContext(WebNavigationContext)
+    : { setActiveTab: () => {} }; // fallback pour mobile
+
   const specialtyOptions = useMemo(() => {
     return MEDICAL_SPECIALTIES.map(key => ({
       label: t(`specialties.${key}`),
       value: key,
     }));
   }, [t]);
+
+  const navigateBack = () => {
+    if (Platform.OS === 'web') {
+      setActiveTab('Doctors');
+    } else {
+      navigation.goBack();
+    }
+  };
 
   useEffect(() => {
     if (isEdit) {
@@ -46,10 +65,11 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
   }, [doctorId]);
 
   const loadDoctor = async () => {
+    if (!doctorId) return;
     try {
       const doctor = await doctorsDb.getById(doctorId);
       if (doctor) {
-        setName(doctor.name);
+        setName(doctor.name || '');
         setSpecialty(doctor.specialty || '');
         setPhone(doctor.phone || '');
         setEmail(doctor.email || '');
@@ -63,41 +83,33 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
 
   const handleSave = async () => {
     const newErrors: { [key: string]: string } = {};
-    if (!name.trim()) {
-      newErrors.name = t('common.required');
-    }
-
-    if (email.trim() && !isValidEmail(email.trim())) {
+    if (!name.trim()) newErrors.name = t('common.required');
+    if (email.trim() && !isValidEmail(email.trim()))
       newErrors.email = t('common.invalidEmail');
-    }
-
-    if (phone.trim() && !isValidPhone(phone.trim())) {
+    if (phone.trim() && !isValidPhone(phone.trim()))
       newErrors.phone = t('common.invalidPhone');
-    }
 
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) {
-      return;
-    }
+    if (Object.keys(newErrors).length > 0) return;
 
     setLoading(true);
     try {
       const doctorData = {
         name: name.trim(),
-        specialty: specialty.trim() || undefined,
-        phone: phone.trim() || undefined,
-        email: email.trim() || undefined,
-        address: address.trim() || undefined,
-        notes: notes.trim() || undefined,
+        specialty: specialty || undefined,
+        phone: phone || undefined,
+        email: email || undefined,
+        address: address || undefined,
+        notes: notes || undefined,
       };
 
-      if (isEdit) {
+      if (isEdit && doctorId) {
         await doctorsDb.update(doctorId, doctorData);
       } else {
         await doctorsDb.add(doctorData);
       }
 
-      navigation.goBack();
+      navigateBack();
     } catch (error) {
       console.error('Error saving doctor:', error);
       Alert.alert(t('common.error'), t('doctors.saveError'));
@@ -106,7 +118,8 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
     }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    if (!doctorId) return;
     Alert.alert(
       t('doctors.deleteConfirmTitle'),
       t('doctors.deleteConfirmMessage'),
@@ -118,7 +131,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
           onPress: async () => {
             try {
               await doctorsDb.delete(doctorId);
-              navigation.goBack();
+              navigateBack();
             } catch (error) {
               Alert.alert(t('common.error'), t('doctors.deleteError'));
             }
@@ -129,20 +142,15 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
   };
 
   return (
-    <View>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
-      >
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.label}>{t('doctors.name')} *</Text>
         <TextInput
           style={[styles.input, errors.name && styles.inputError]}
           value={name}
           onChangeText={text => {
             setName(text);
-            if (errors.name) {
-              setErrors({ ...errors, name: '' });
-            }
+            if (errors.name) setErrors({ ...errors, name: '' });
           }}
           placeholder={t('doctors.namePlaceholder')}
           placeholderTextColor={theme.colors.subText}
@@ -163,9 +171,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
           value={phone}
           onChangeText={text => {
             setPhone(text);
-            if (errors.phone) {
-              setErrors({ ...errors, phone: '' });
-            }
+            if (errors.phone) setErrors({ ...errors, phone: '' });
           }}
           placeholder={t('doctors.phonePlaceholder')}
           placeholderTextColor={theme.colors.subText}
@@ -179,9 +185,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
           value={email}
           onChangeText={text => {
             setEmail(text);
-            if (errors.email) {
-              setErrors({ ...errors, email: '' });
-            }
+            if (errors.email) setErrors({ ...errors, email: '' });
           }}
           placeholder={t('doctors.emailPlaceholder')}
           placeholderTextColor={theme.colors.subText}
@@ -199,7 +203,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
           placeholderTextColor={theme.colors.subText}
         />
 
-        <Text style={styles.label}>{t('appointments.notes')}</Text>
+        <Text style={styles.label}>{t('doctors.notes')}</Text>
         <TextInput
           style={[styles.input, styles.notesInput]}
           value={notes}
@@ -234,12 +238,8 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    container: {
-      backgroundColor: theme.colors.background,
-    },
-    content: {
-      padding: theme.spacing.m,
-    },
+    container: { backgroundColor: theme.colors.background },
+    content: { padding: theme.spacing.m },
     label: {
       ...theme.textVariants.caption,
       fontWeight: '600',
@@ -256,10 +256,7 @@ const createStyles = (theme: Theme) =>
       borderWidth: 1,
       borderColor: theme.colors.border,
     },
-    notesInput: {
-      minHeight: 100,
-      textAlignVertical: 'top',
-    },
+    notesInput: { minHeight: 100, textAlignVertical: 'top' },
     saveButton: {
       backgroundColor: theme.colors.primary,
       padding: theme.spacing.m,
@@ -267,9 +264,7 @@ const createStyles = (theme: Theme) =>
       alignItems: 'center',
       marginTop: theme.spacing.l,
     },
-    saveButtonDisabled: {
-      opacity: 0.5,
-    },
+    saveButtonDisabled: { opacity: 0.5 },
     saveButtonText: {
       ...theme.textVariants.button,
       color: theme.colors.surface,
@@ -286,9 +281,7 @@ const createStyles = (theme: Theme) =>
       ...theme.textVariants.button,
       color: theme.colors.surface,
     },
-    inputError: {
-      borderColor: theme.colors.error,
-    },
+    inputError: { borderColor: theme.colors.error },
     errorText: {
       color: theme.colors.error,
       fontSize: 12,

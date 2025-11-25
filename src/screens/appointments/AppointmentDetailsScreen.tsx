@@ -10,12 +10,14 @@ import {
 import { appointmentsDb } from '../../database/appointmentsDb';
 import { notificationService } from '../../services/notificationService';
 import { Appointment } from '../../database/schema';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 
 export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
   const { appointmentId } = route.params;
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
@@ -29,7 +31,7 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
       const appt = await appointmentsDb.getById(appointmentId);
       setAppointment(appt);
     } catch (error) {
-      Alert.alert('Error', 'Failed to load appointment');
+      Alert.alert(t('appointmentDetails.errorLoadFailed'));
     } finally {
       setLoading(false);
     }
@@ -37,12 +39,12 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
 
   const handleDelete = () => {
     Alert.alert(
-      'Delete Appointment',
-      'Are you sure you want to delete this appointment?',
+      t('appointmentDetails.deleteConfirmTitle'),
+      t('appointmentDetails.deleteConfirmMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -52,7 +54,7 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
               );
               navigation.goBack();
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete appointment');
+              Alert.alert(t('appointmentDetails.errorDeleteFailed'));
             }
           },
         },
@@ -67,7 +69,7 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
   if (loading || !appointment) {
     return (
       <View style={styles.container}>
-        <Text style={{ color: theme.colors.text }}>Loading...</Text>
+        <Text style={{ color: theme.colors.text }}>{t('appointmentDetails.loading')}</Text>
       </View>
     );
   }
@@ -97,29 +99,29 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
 
         {appointment.doctorName && (
           <View style={styles.section}>
-            <Text style={styles.label}>Doctor</Text>
+            <Text style={styles.label}>{t('appointmentDetails.doctorLabel')}</Text>
             <Text style={styles.value}>Dr. {appointment.doctorName}</Text>
           </View>
         )}
 
         {appointment.location && (
           <View style={styles.section}>
-            <Text style={styles.label}>Location</Text>
+            <Text style={styles.label}>{t('appointmentDetails.locationLabel')}</Text>
             <Text style={styles.value}>{appointment.location}</Text>
           </View>
         )}
 
         {appointment.notes && (
           <View style={styles.section}>
-            <Text style={styles.label}>Notes</Text>
+            <Text style={styles.label}>{t('appointmentDetails.notesLabel')}</Text>
             <Text style={styles.value}>{appointment.notes}</Text>
           </View>
         )}
 
         <View style={styles.section}>
-          <Text style={styles.label}>Reminder</Text>
+          <Text style={styles.label}>{t('appointmentDetails.reminderLabel')}</Text>
           <Text style={styles.value}>
-            {appointment.reminderEnabled ? '1 hour before' : 'Disabled'}
+            {appointment.reminderEnabled ? t('appointmentDetails.reminderTimeText') : t('appointmentDetails.reminderDisabled')}
           </Text>
         </View>
 
@@ -127,14 +129,14 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
           style={[styles.button, styles.editButton]}
           onPress={handleEdit}
         >
-          <Text style={styles.buttonText}>Edit</Text>
+          <Text style={styles.buttonText}>{t('appointmentDetails.editButton')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, styles.deleteButton]}
           onPress={handleDelete}
         >
-          <Text style={styles.buttonText}>Delete</Text>
+          <Text style={styles.buttonText}>{t('appointmentDetails.deleteButton')}</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

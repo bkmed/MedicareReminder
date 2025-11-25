@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import {
   View,
   Text,
@@ -21,11 +21,12 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const prescriptionId = route.params?.prescriptionId;
+
+  const prescriptionId = route?.params?.prescriptionId;
   const isEdit = !!prescriptionId;
 
   const [medicationName, setMedicationName] = useState('');
-  const [doctorName, setDoctorName] = useState('');
+  const [doctorName, setDoctorName] = useState(route?.params?.doctorName || '');
   const [issueDate, setIssueDate] = useState(
     new Date().toISOString().split('T')[0],
   );
@@ -36,18 +37,28 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (isEdit) {
-      loadPrescription();
-    }
+    if (isEdit) loadPrescription();
   }, [prescriptionId]);
 
+  const WebNavigationContext =
+    Platform.OS === 'web'
+      ? require('../../navigation/AppNavigator').WebNavigationContext
+      : null;
+
+  const { setActiveTab } = WebNavigationContext
+    ? useContext(WebNavigationContext)
+    : { setActiveTab: () => {} }; // fallback pour mobile
+
   const loadPrescription = async () => {
+    if (!prescriptionId) return;
     try {
       const prescription = await prescriptionsDb.getById(prescriptionId);
       if (prescription) {
-        setMedicationName(prescription.medicationName);
+        setMedicationName(prescription.medicationName || '');
         setDoctorName(prescription.doctorName || '');
-        setIssueDate(prescription.issueDate);
+        setIssueDate(
+          prescription.issueDate || new Date().toISOString().split('T')[0],
+        );
         setExpiryDate(prescription.expiryDate || '');
         setPhotoUri(prescription.photoUri || '');
         setNotes(prescription.notes || '');
@@ -56,12 +67,6 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
       Alert.alert(t('common.error'), t('prescriptions.loadError'));
     }
   };
-
-  useEffect(() => {
-    if (route.params?.doctorName) {
-      setDoctorName(route.params.doctorName);
-    }
-  }, [route.params?.doctorName]);
 
   const handleTakePhoto = async () => {
     if (Platform.OS === 'web') {
@@ -72,9 +77,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         const file = e.target.files[0];
         if (file) {
           const reader = new FileReader();
-          reader.onload = (event: any) => {
-            setPhotoUri(event.target.result);
-          };
+          reader.onload = (event: any) => setPhotoUri(event.target.result);
           reader.readAsDataURL(file);
         }
       };
@@ -87,7 +90,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         text: t('prescriptions.takePhoto'),
         onPress: () => {
           launchCamera({ mediaType: 'photo', quality: 0.8 }, response => {
-            if (response.assets && response.assets[0].uri) {
+            if (response.assets && response.assets[0]?.uri) {
               setPhotoUri(response.assets[0].uri);
             }
           });
@@ -97,7 +100,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         text: t('prescriptions.chooseFromLibrary'),
         onPress: () => {
           launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, response => {
-            if (response.assets && response.assets[0].uri) {
+            if (response.assets && response.assets[0]?.uri) {
               setPhotoUri(response.assets[0].uri);
             }
           });
@@ -109,17 +112,10 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
   const handleSave = async () => {
     const newErrors: { [key: string]: string } = {};
-    if (!medicationName.trim()) {
-      newErrors.medicationName = t('common.required');
-    }
-    if (!issueDate.trim()) {
-      newErrors.issueDate = t('common.required');
-    }
-
+    if (!medicationName.trim()) newErrors.medicationName = t('common.required');
+    if (!issueDate.trim()) newErrors.issueDate = t('common.required');
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) {
-      return;
-    }
+    if (Object.keys(newErrors).length > 0) return;
 
     setLoading(true);
     try {
@@ -134,13 +130,13 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
       let id = prescriptionId;
 
-      if (isEdit) {
+      if (isEdit && prescriptionId) {
         await prescriptionsDb.update(prescriptionId, prescriptionData);
       } else {
         id = await prescriptionsDb.add(prescriptionData);
       }
 
-      // Schedule reminder if expiry date is set
+      // Notifications
       if (expiryDate) {
         await notificationService.schedulePrescriptionExpiryReminder(
           id,
@@ -148,11 +144,14 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
           expiryDate,
         );
       } else if (isEdit) {
-        // If expiry date removed, cancel reminder
         await notificationService.cancelPrescriptionReminder(id);
       }
 
-      navigation.goBack();
+      if (Platform.OS === 'web') {
+        setActiveTab('Doctors');
+      } else {
+        navigation.goBack();
+      }
     } catch (error) {
       console.error('Error saving prescription:', error);
       Alert.alert(t('common.error'), t('prescriptions.saveError'));
@@ -162,11 +161,8 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   };
 
   return (
-    <View>
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.content}
-      >
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
         <TouchableOpacity style={styles.photoButton} onPress={handleTakePhoto}>
           {photoUri ? (
             <Image source={{ uri: photoUri }} style={styles.photo} />
@@ -187,9 +183,8 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
           value={medicationName}
           onChangeText={text => {
             setMedicationName(text);
-            if (errors.medicationName) {
+            if (errors.medicationName)
               setErrors({ ...errors, medicationName: '' });
-            }
           }}
           placeholder={t('prescriptions.medicationPlaceholder')}
           placeholderTextColor={theme.colors.subText}
@@ -213,9 +208,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
           value={issueDate}
           onChangeText={text => {
             setIssueDate(text);
-            if (errors.issueDate) {
-              setErrors({ ...errors, issueDate: '' });
-            }
+            if (errors.issueDate) setErrors({ ...errors, issueDate: '' });
           }}
           placeholder="YYYY-MM-DD"
           placeholderTextColor={theme.colors.subText}
@@ -262,22 +255,10 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    content: {
-      padding: theme.spacing.m,
-    },
-    photoButton: {
-      alignItems: 'center',
-      marginBottom: theme.spacing.l,
-    },
-    photo: {
-      width: 200,
-      height: 200,
-      borderRadius: theme.spacing.m,
-    },
+    container: { backgroundColor: theme.colors.background },
+    content: { padding: theme.spacing.m },
+    photoButton: { alignItems: 'center', marginBottom: theme.spacing.l },
+    photo: { width: 200, height: 200, borderRadius: theme.spacing.m },
     photoPlaceholder: {
       width: 200,
       height: 200,
@@ -309,10 +290,7 @@ const createStyles = (theme: Theme) =>
       borderColor: theme.colors.border,
       color: theme.colors.text,
     },
-    notesInput: {
-      minHeight: 100,
-      textAlignVertical: 'top',
-    },
+    notesInput: { minHeight: 100, textAlignVertical: 'top' },
     saveButton: {
       backgroundColor: theme.colors.primary,
       padding: theme.spacing.m,
@@ -322,16 +300,12 @@ const createStyles = (theme: Theme) =>
       marginBottom: theme.spacing.xl,
       ...theme.shadows.small,
     },
-    saveButtonDisabled: {
-      opacity: 0.5,
-    },
+    saveButtonDisabled: { opacity: 0.5 },
     saveButtonText: {
       ...theme.textVariants.button,
       color: theme.colors.surface,
     },
-    inputError: {
-      borderColor: theme.colors.error,
-    },
+    inputError: { borderColor: theme.colors.error },
     errorText: {
       color: theme.colors.error,
       fontSize: 12,

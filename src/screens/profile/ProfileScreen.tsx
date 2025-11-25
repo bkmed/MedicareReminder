@@ -185,134 +185,138 @@ export const ProfileScreen = ({ navigation }: any) => {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Language Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('profile.language')}</Text>
-        {LANGUAGES.map(lang => (
-          <TouchableOpacity
-            key={lang.code}
-            style={[
-              styles.languageRow,
-              currentLanguage === lang.code && styles.languageRowActive,
-            ]}
-            onPress={() => handleLanguageChange(lang.code)}
-          >
-            <View style={styles.languageInfo}>
-              <Text style={styles.languageFlag}>{lang.flag}</Text>
-              <Text style={styles.languageName}>{lang.name}</Text>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        {/* Language Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('profile.language')}</Text>
+          {LANGUAGES.map(lang => (
+            <TouchableOpacity
+              key={lang.code}
+              style={[
+                styles.languageRow,
+                currentLanguage === lang.code && styles.languageRowActive,
+              ]}
+              onPress={() => handleLanguageChange(lang.code)}
+            >
+              <View style={styles.languageInfo}>
+                <Text style={styles.languageFlag}>{lang.flag}</Text>
+                <Text style={styles.languageName}>{lang.name}</Text>
+              </View>
+              {currentLanguage === lang.code && (
+                <Text style={styles.checkmark}>✓</Text>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Permissions Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('profile.permissions')}</Text>
+
+          <View style={styles.permissionRow}>
+            <View style={styles.permissionInfo}>
+              <Text style={styles.permissionLabel}>{t('profile.camera')}</Text>
+              <Text
+                style={[
+                  styles.permissionStatus,
+                  { color: getPermissionStatusColor(cameraPermission) },
+                ]}
+              >
+                {getPermissionStatusText(cameraPermission)}
+              </Text>
             </View>
-            {currentLanguage === lang.code && (
-              <Text style={styles.checkmark}>✓</Text>
+            {cameraPermission !== 'unavailable' && (
+              <Switch
+                value={cameraPermission === 'granted'}
+                onValueChange={handleCameraPermission}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={theme.colors.surface}
+              />
             )}
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Permissions Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('profile.permissions')}</Text>
-
-        <View style={styles.permissionRow}>
-          <View style={styles.permissionInfo}>
-            <Text style={styles.permissionLabel}>{t('profile.camera')}</Text>
-            <Text
-              style={[
-                styles.permissionStatus,
-                { color: getPermissionStatusColor(cameraPermission) },
-              ]}
-            >
-              {getPermissionStatusText(cameraPermission)}
-            </Text>
           </View>
-          {cameraPermission !== 'unavailable' && (
+
+          <View style={styles.permissionRow}>
+            <View style={styles.permissionInfo}>
+              <Text style={styles.permissionLabel}>
+                {t('profile.notifications')}
+              </Text>
+              <Text
+                style={[
+                  styles.permissionStatus,
+                  { color: getPermissionStatusColor(notificationPermission) },
+                ]}
+              >
+                {getPermissionStatusText(notificationPermission)}
+              </Text>
+            </View>
+            {notificationPermission !== 'unavailable' && (
+              <Switch
+                value={notificationPermission === 'granted'}
+                onValueChange={handleNotificationPermission}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={theme.colors.surface}
+              />
+            )}
+          </View>
+
+          <View style={styles.permissionRow}>
+            <View style={styles.permissionInfo}>
+              <Text style={styles.permissionLabel}>
+                {t('profile.calendar')}
+              </Text>
+              <Text
+                style={[
+                  styles.permissionStatus,
+                  { color: getPermissionStatusColor(calendarPermission) },
+                ]}
+              >
+                {getPermissionStatusText(calendarPermission)}
+              </Text>
+            </View>
+            {calendarPermission !== 'unavailable' && (
+              <Switch
+                value={calendarPermission === 'granted'}
+                onValueChange={handleCalendarPermission}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={theme.colors.surface}
+              />
+            )}
+          </View>
+        </View>
+
+        {/* Appearance Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('profile.appearance')}</Text>
+          <View style={styles.row}>
+            <Text style={styles.label}>{t('profile.darkMode')}</Text>
             <Switch
-              value={cameraPermission === 'granted'}
-              onValueChange={handleCameraPermission}
+              value={isDark}
+              onValueChange={toggleTheme}
               trackColor={{
                 false: theme.colors.border,
                 true: theme.colors.primary,
               }}
               thumbColor={theme.colors.surface}
             />
-          )}
-        </View>
-
-        <View style={styles.permissionRow}>
-          <View style={styles.permissionInfo}>
-            <Text style={styles.permissionLabel}>
-              {t('profile.notifications')}
-            </Text>
-            <Text
-              style={[
-                styles.permissionStatus,
-                { color: getPermissionStatusColor(notificationPermission) },
-              ]}
-            >
-              {getPermissionStatusText(notificationPermission)}
-            </Text>
           </View>
-          {notificationPermission !== 'unavailable' && (
-            <Switch
-              value={notificationPermission === 'granted'}
-              onValueChange={handleNotificationPermission}
-              trackColor={{
-                false: theme.colors.border,
-                true: theme.colors.primary,
-              }}
-              thumbColor={theme.colors.surface}
-            />
-          )}
         </View>
 
-        <View style={styles.permissionRow}>
-          <View style={styles.permissionInfo}>
-            <Text style={styles.permissionLabel}>{t('profile.calendar')}</Text>
-            <Text
-              style={[
-                styles.permissionStatus,
-                { color: getPermissionStatusColor(calendarPermission) },
-              ]}
-            >
-              {getPermissionStatusText(calendarPermission)}
-            </Text>
-          </View>
-          {calendarPermission !== 'unavailable' && (
-            <Switch
-              value={calendarPermission === 'granted'}
-              onValueChange={handleCalendarPermission}
-              trackColor={{
-                false: theme.colors.border,
-                true: theme.colors.primary,
-              }}
-              thumbColor={theme.colors.surface}
-            />
-          )}
-        </View>
-      </View>
-
-      {/* Appearance Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('profile.appearance')}</Text>
-        <View style={styles.row}>
-          <Text style={styles.label}>{t('profile.darkMode')}</Text>
-          <Switch
-            value={isDark}
-            onValueChange={toggleTheme}
-            trackColor={{
-              false: theme.colors.border,
-              true: theme.colors.primary,
-            }}
-            thumbColor={theme.colors.surface}
-          />
-        </View>
-      </View>
-
-      {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>{t('profile.logout')}</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        {/* Logout Button */}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>{t('profile.logout')}</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
   );
 };
 

@@ -8,18 +8,20 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 
 export const ForgotPasswordScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleReset = async () => {
     if (!email) {
-      Alert.alert('Error', 'Please enter your email');
+      Alert.alert(t('forgotPassword.errorTitle'), t('forgotPassword.errorEmptyEmail'));
       return;
     }
 
@@ -28,8 +30,8 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
     setTimeout(() => {
       setLoading(false);
       Alert.alert(
-        'Success',
-        'If an account exists with this email, you will receive password reset instructions.',
+        t('forgotPassword.successTitle'),
+        t('forgotPassword.successMessage'),
         [{ text: 'OK', onPress: () => navigation.goBack() }],
       );
     }, 1500);
@@ -38,18 +40,18 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.title}>Reset Password</Text>
+        <Text style={styles.title}>{t('forgotPassword.title')}</Text>
         <Text style={styles.subtitle}>
-          Enter your email to receive instructions
+          {t('forgotPassword.subtitle')}
         </Text>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>{t('forgotPassword.emailLabel')}</Text>
           <TextInput
             style={styles.input}
             value={email}
             onChangeText={setEmail}
-            placeholder="Enter your email"
+            placeholder={t('forgotPassword.emailPlaceholder')}
             placeholderTextColor={theme.colors.subText}
             autoCapitalize="none"
             keyboardType="email-address"
@@ -64,7 +66,7 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
           {loading ? (
             <ActivityIndicator color="#FFF" />
           ) : (
-            <Text style={styles.buttonText}>Send Instructions</Text>
+            <Text style={styles.buttonText}>{t('forgotPassword.sendInstructionsButton')}</Text>
           )}
         </TouchableOpacity>
 
@@ -72,7 +74,7 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
           onPress={() => navigation.goBack()}
           style={styles.backButton}
         >
-          <Text style={styles.backButtonText}>Back to Login</Text>
+          <Text style={styles.backButtonText}>{t('forgotPassword.backToLogin')}</Text>
         </TouchableOpacity>
       </View>
     </View>

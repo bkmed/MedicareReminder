@@ -10,12 +10,14 @@ import {
 import { medicationsDb } from '../../database/medicationsDb';
 import { notificationService } from '../../services/notificationService';
 import { Medication } from '../../database/schema';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 
 export const MedicationDetailsScreen = ({ navigation, route }: any) => {
   const { medicationId } = route.params;
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [medication, setMedication] = useState<Medication | null>(null);
   const [loading, setLoading] = useState(true);
@@ -29,7 +31,7 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
       const med = await medicationsDb.getById(medicationId);
       setMedication(med);
     } catch (error) {
-      Alert.alert('Error', 'Failed to load medication');
+      Alert.alert(t('medicationDetails.errorLoadFailed'));
     } finally {
       setLoading(false);
     }
@@ -37,12 +39,12 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
 
   const handleDelete = () => {
     Alert.alert(
-      'Delete Medication',
-      'Are you sure you want to delete this medication?',
+      t('medicationDetails.deleteConfirmTitle'),
+      t('medicationDetails.deleteConfirmMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -50,7 +52,7 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
               await notificationService.cancelMedicationReminders(medicationId);
               navigation.goBack();
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete medication');
+              Alert.alert(t('medicationDetails.errorDeleteFailed'));
             }
           },
         },
@@ -69,7 +71,7 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
   if (loading || !medication) {
     return (
       <View style={styles.container}>
-        <Text style={{ color: theme.colors.text }}>Loading...</Text>
+        <Text style={{ color: theme.colors.text }}>{t('medicationDetails.loading')}</Text>
       </View>
     );
   }
@@ -85,12 +87,12 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.label}>Frequency</Text>
+          <Text style={styles.label}>{t('medicationDetails.frequencyLabel')}</Text>
           <Text style={styles.value}>{medication.frequency}</Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.label}>Reminder Times</Text>
+          <Text style={styles.label}>{t('medicationDetails.reminderTimesLabel')}</Text>
           <View style={styles.timesContainer}>
             {times.map((time, index) => (
               <View key={index} style={styles.timeBadge}>
@@ -101,47 +103,47 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.label}>Start Date</Text>
+          <Text style={styles.label}>{t('medicationDetails.startDateLabel')}</Text>
           <Text style={styles.value}>{medication.startDate}</Text>
         </View>
 
         {medication.endDate && (
           <View style={styles.section}>
-            <Text style={styles.label}>End Date</Text>
+            <Text style={styles.label}>{t('medicationDetails.endDateLabel')}</Text>
             <Text style={styles.value}>{medication.endDate}</Text>
           </View>
         )}
 
         {medication.notes && (
           <View style={styles.section}>
-            <Text style={styles.label}>Notes</Text>
+            <Text style={styles.label}>{t('medicationDetails.notesLabel')}</Text>
             <Text style={styles.value}>{medication.notes}</Text>
           </View>
         )}
 
         <View style={styles.section}>
-          <Text style={styles.label}>Reminders</Text>
+          <Text style={styles.label}>{t('medicationDetails.remindersLabel')}</Text>
           <Text style={styles.value}>
-            {medication.reminderEnabled ? 'Enabled' : 'Disabled'}
+            {medication.reminderEnabled ? t('medicationDetails.reminderEnabled') : t('medicationDetails.reminderDisabled')}
           </Text>
         </View>
 
         <TouchableOpacity style={styles.button} onPress={handleViewHistory}>
-          <Text style={styles.buttonText}>View History</Text>
+          <Text style={styles.buttonText}>{t('medicationDetails.viewHistoryButton')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, styles.editButton]}
           onPress={handleEdit}
         >
-          <Text style={styles.buttonText}>Edit</Text>
+          <Text style={styles.buttonText}>{t('medicationDetails.editButton')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, styles.deleteButton]}
           onPress={handleDelete}
         >
-          <Text style={styles.buttonText}>Delete</Text>
+          <Text style={styles.buttonText}>{t('medicationDetails.deleteButton')}</Text>
         </TouchableOpacity>
       </ScrollView>{' '}
     </View>

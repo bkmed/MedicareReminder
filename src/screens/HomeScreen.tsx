@@ -9,7 +9,6 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import type { DrawerNavigationProp } from '@react-navigation/drawer';
 import { useTranslation } from 'react-i18next';
 import { medicationsDb } from '../database/medicationsDb';
 import { appointmentsDb } from '../database/appointmentsDb';
@@ -54,54 +53,35 @@ export const HomeScreen = () => {
     }
   };
 
-  const { setActiveTab } =
+  // Safe access à WebNavigationContext
+  const webContext =
     Platform.OS === 'web'
       ? useContext(require('../navigation/AppNavigator').WebNavigationContext)
-      : { setActiveTab: () => {} };
+      : null;
 
-  const navigateToMedications = () => {
-    if (Platform.OS === 'web') {
-      setActiveTab('medications');
-    } else {
-      navigation.navigate('Main', { screen: 'MedicationsTab' });
-    }
-  };
+  const setActiveTab = webContext?.setActiveTab || (() => {});
 
-  const navigateToAppointments = () => {
+  const navigateToTab = (tab: string, screen?: string) => {
     if (Platform.OS === 'web') {
-      setActiveTab('appointments');
+      setActiveTab(tab, screen);
     } else {
-      navigation.navigate('Main', { screen: 'AppointmentsTab' });
-    }
-  };
+      const stackScreen =
+        tab === 'medications'
+          ? 'MedicationsTab'
+          : tab === 'appointments'
+          ? 'AppointmentsTab'
+          : tab === 'analytics'
+          ? 'Analytics'
+          : undefined;
 
-  const navigateToAddMedication = () => {
-    if (Platform.OS === 'web') {
-      setActiveTab('medications', 'AddMedication');
-    } else {
-      navigation.navigate('Main', {
-        screen: 'MedicationsTab',
-        params: { screen: 'AddMedication' },
-      });
-    }
-  };
-
-  const navigateToAddAppointment = () => {
-    if (Platform.OS === 'web') {
-      setActiveTab('appointments', 'AddAppointment');
-    } else {
-      navigation.navigate('Main', {
-        screen: 'AppointmentsTab',
-        params: { screen: 'AddAppointment' },
-      });
-    }
-  };
-
-  const navigateToAnalytics = () => {
-    if (Platform.OS === 'web') {
-      setActiveTab('analytics');
-    } else {
-      navigation.navigate('Analytics');
+      if (stackScreen) {
+        navigation.navigate(
+          stackScreen === 'Analytics' ? stackScreen : 'Main',
+          stackScreen === 'Analytics'
+            ? undefined
+            : { screen: stackScreen, params: screen ? { screen } : undefined },
+        );
+      }
     }
   };
 
@@ -114,104 +94,113 @@ export const HomeScreen = () => {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.greeting}>{t('home.greeting')}</Text>
-        <Text style={styles.appName}>{t('home.appName')}</Text>
-        <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
-      </View>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.greeting}>{t('home.greeting')}</Text>
+          <Text style={styles.appName}>{t('home.appName')}</Text>
+          <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
+        </View>
 
-      {/* Quick Stats */}
-      <View style={styles.statsContainer}>
+        {/* Quick Stats */}
+        <View style={styles.statsContainer}>
+          <TouchableOpacity
+            style={[styles.statCard, styles.statCardBlue]}
+            onPress={() => navigateToTab('medications')}
+          >
+            <Text style={styles.statNumber}>{summary.medications}</Text>
+            <Text style={styles.statLabel}>{t('home.activeMedications')}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.statCard, styles.statCardGreen]}
+            onPress={() => navigateToTab('appointments')}
+          >
+            <Text style={styles.statNumber}>
+              {summary.upcomingAppointments}
+            </Text>
+            <Text style={styles.statLabel}>
+              {t('home.upcomingAppointments')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Alerts */}
+        {summary.expiringPrescriptions > 0 && (
+          <View style={styles.alertCard}>
+            <Text style={styles.alertIcon}>⚠️</Text>
+            <View style={styles.alertContent}>
+              <Text style={styles.alertTitle}>
+                {t('home.prescriptionAlert')}
+              </Text>
+              <Text style={styles.alertMessage}>
+                {t('home.prescriptionsExpiring', {
+                  count: summary.expiringPrescriptions,
+                })}
+              </Text>
+            </View>
+          </View>
+        )}
+
+        {/* Quick Actions */}
+        <Text style={styles.sectionTitle}>{t('home.quickActions')}</Text>
+
         <TouchableOpacity
-          style={[styles.statCard, styles.statCardBlue]}
-          onPress={navigateToMedications}
+          style={styles.actionButton}
+          onPress={() => navigateToTab('Medications', 'AddMedication')}
         >
-          <Text style={styles.statNumber}>{summary.medications}</Text>
-          <Text style={styles.statLabel}>{t('home.activeMedications')}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.statCard, styles.statCardGreen]}
-          onPress={navigateToAppointments}
-        >
-          <Text style={styles.statNumber}>{summary.upcomingAppointments}</Text>
-          <Text style={styles.statLabel}>{t('home.upcomingAppointments')}</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Alerts */}
-      {summary.expiringPrescriptions > 0 && (
-        <View style={styles.alertCard}>
-          <Text style={styles.alertIcon}>⚠️</Text>
-          <View style={styles.alertContent}>
-            <Text style={styles.alertTitle}>{t('home.prescriptionAlert')}</Text>
-            <Text style={styles.alertMessage}>
-              {t('home.prescriptionsExpiring', {
-                count: summary.expiringPrescriptions,
-              })}
+          <Text style={styles.actionIcon}>💊</Text>
+          <View style={styles.actionContent}>
+            <Text style={styles.actionTitle}>{t('home.addMedication')}</Text>
+            <Text style={styles.actionSubtitle}>
+              {t('home.addMedicationSubtitle')}
             </Text>
           </View>
+          <Text style={styles.actionArrow}>›</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigateToTab('Appointments', 'AddAppointment')}
+        >
+          <Text style={styles.actionIcon}>📅</Text>
+          <View style={styles.actionContent}>
+            <Text style={styles.actionTitle}>
+              {t('home.scheduleAppointment')}
+            </Text>
+            <Text style={styles.actionSubtitle}>
+              {t('home.scheduleAppointmentSubtitle')}
+            </Text>
+          </View>
+          <Text style={styles.actionArrow}>›</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigateToTab('Analytics')}
+        >
+          <Text style={styles.actionIcon}>📊</Text>
+          <View style={styles.actionContent}>
+            <Text style={styles.actionTitle}>{t('home.viewAnalytics')}</Text>
+            <Text style={styles.actionSubtitle}>
+              {t('home.viewAnalyticsSubtitle')}
+            </Text>
+          </View>
+          <Text style={styles.actionArrow}>›</Text>
+        </TouchableOpacity>
+
+        {/* Tips Section */}
+        <View style={styles.tipCard}>
+          <Text style={styles.tipIcon}>💡</Text>
+          <Text style={styles.tipText}>{t('home.tip')}</Text>
         </View>
-      )}
-
-      {/* Quick Actions */}
-      <Text style={styles.sectionTitle}>{t('home.quickActions')}</Text>
-
-      <TouchableOpacity
-        style={styles.actionButton}
-        onPress={navigateToAddMedication}
-      >
-        <Text style={styles.actionIcon}>💊</Text>
-        <View style={styles.actionContent}>
-          <Text style={styles.actionTitle}>{t('home.addMedication')}</Text>
-          <Text style={styles.actionSubtitle}>
-            {t('home.addMedicationSubtitle')}
-          </Text>
-        </View>
-        <Text style={styles.actionArrow}>›</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.actionButton}
-        onPress={navigateToAddAppointment}
-      >
-        <Text style={styles.actionIcon}>📅</Text>
-        <View style={styles.actionContent}>
-          <Text style={styles.actionTitle}>
-            {t('home.scheduleAppointment')}
-          </Text>
-          <Text style={styles.actionSubtitle}>
-            {t('home.scheduleAppointmentSubtitle')}
-          </Text>
-        </View>
-        <Text style={styles.actionArrow}>›</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.actionButton}
-        onPress={navigateToAnalytics}
-      >
-        <Text style={styles.actionIcon}>📊</Text>
-        <View style={styles.actionContent}>
-          <Text style={styles.actionTitle}>{t('home.viewAnalytics')}</Text>
-          <Text style={styles.actionSubtitle}>
-            {t('home.viewAnalyticsSubtitle')}
-          </Text>
-        </View>
-        <Text style={styles.actionArrow}>›</Text>
-      </TouchableOpacity>
-
-      {/* Tips Section */}
-      <View style={styles.tipCard}>
-        <Text style={styles.tipIcon}>💡</Text>
-        <Text style={styles.tipText}>{t('home.tip')}</Text>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
+// Styles remain unchanged
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {

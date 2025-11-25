@@ -1,4 +1,4 @@
-import React, { useState, createContext } from 'react';
+import React, { useState, useMemo, createContext } from 'react';
 import {
   Platform,
   View,
@@ -29,27 +29,22 @@ import { DoctorDetailsScreen } from '../screens/doctors/DoctorDetailsScreen';
 import { AnalyticsScreen } from '../screens/analytics/AnalyticsScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 
-// Web navigation context - allows setting active tab and initial screen
-export const WebNavigationContext = createContext({
-  setActiveTab: (tab: string, initialScreen?: string) => {},
-  activeTab: 'main',
-  initialScreen: undefined as string | undefined,
-});
 enableScreens();
 
-const Tab = createBottomTabNavigator();
-const Drawer = createDrawerNavigator();
+// ======= Web Navigation Context (avec subScreen) =======
+export const WebNavigationContext = createContext({
+  activeTab: 'Home',
+  subScreen: '',
+  setActiveTab: (tab: string, subScreen?: string) => {},
+});
+
+// ======= Stacks =======
 const Stack = createNativeStackNavigator();
 
-// ----------- Stacks -----------
 const MedicationsStack = () => {
   const { t } = useTranslation();
-  const webNav =
-    Platform.OS === 'web' ? React.useContext(WebNavigationContext) : null;
-  const initialRouteName = webNav?.initialScreen || 'MedicationList';
-
   return (
-    <Stack.Navigator initialRouteName={initialRouteName}>
+    <Stack.Navigator>
       <Stack.Screen
         name="MedicationList"
         component={MedicationListScreen}
@@ -71,12 +66,8 @@ const MedicationsStack = () => {
 
 const AppointmentsStack = () => {
   const { t } = useTranslation();
-  const webNav =
-    Platform.OS === 'web' ? React.useContext(WebNavigationContext) : null;
-  const initialRouteName = webNav?.initialScreen || 'AppointmentList';
-
   return (
-    <Stack.Navigator initialRouteName={initialRouteName}>
+    <Stack.Navigator>
       <Stack.Screen
         name="AppointmentList"
         component={AppointmentListScreen}
@@ -142,85 +133,129 @@ const DoctorsStack = () => {
   );
 };
 
-const ProfileStack = () => {
-  const { t } = useTranslation();
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{ title: t('navigation.profile') }}
-      />
-    </Stack.Navigator>
-  );
-};
+const ProfileStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Profile" component={ProfileScreen} />
+  </Stack.Navigator>
+);
 
-export const HomeStack = () => {
-  const { t } = useTranslation();
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{ title: t('navigation.home') }}
-      />
-    </Stack.Navigator>
-  );
-};
+const HomeStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Home" component={HomeScreen} />
+  </Stack.Navigator>
+);
 
-// ----------- Tabs for Native -----------
+// ======= Tabs (Mobile) =======
+const Tab = createBottomTabNavigator();
+
 const TabNavigator = () => (
   <Tab.Navigator screenOptions={{ headerShown: false }}>
-    <Tab.Screen name="HomeTab" component={HomeScreen} />
+    <Tab.Screen name="HomeTab" component={HomeStack} />
     <Tab.Screen name="MedicationsTab" component={MedicationsStack} />
     <Tab.Screen name="AppointmentsTab" component={AppointmentsStack} />
   </Tab.Navigator>
 );
 
-// ----------- Web Navigation -----------
+// ======= Drawer (Mobile) =======
+const Drawer = createDrawerNavigator();
+
+const DrawerNavigator = () => (
+  <Drawer.Navigator screenOptions={{ headerShown: false }}>
+    <Drawer.Screen name="Main" component={TabNavigator} />
+    <Drawer.Screen name="Analytics" component={AnalyticsScreen} />
+    <Drawer.Screen name="Prescriptions" component={PrescriptionsStack} />
+    <Drawer.Screen name="Doctors" component={DoctorsStack} />
+    <Drawer.Screen name="Profile" component={ProfileStack} />
+  </Drawer.Navigator>
+);
+
+// ======= Web Navigator avec subScreen =======
 const WebNavigator = () => {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const [activeTab, setActiveTab] = useState('main');
-  const [initialScreen, setInitialScreen] = useState<string | undefined>(
-    undefined,
+  const [activeTab, setActiveTab] = useState('Home');
+  const [subScreen, setSubScreen] = useState('');
+
+  const contextValue = useMemo(
+    () => ({
+      activeTab,
+      subScreen,
+      setActiveTab: (tab: string, screen?: string) => {
+        setActiveTab(tab);
+        setSubScreen(screen || '');
+      },
+    }),
+    [activeTab, subScreen],
   );
 
-  const handleSetActiveTab = (tab: string, screen?: string) => {
-    setActiveTab(tab);
-    setInitialScreen(screen);
-    // Clear initialScreen after a short delay to allow navigation
-    if (screen) {
-      setTimeout(() => setInitialScreen(undefined), 100);
+  const getActiveComponent = () => {
+    switch (activeTab) {
+      case 'Home':
+        return <HomeStack />;
+      case 'Medications':
+        if (subScreen === 'AddMedication') return <AddMedicationScreen />;
+        if (subScreen === 'MedicationDetails')
+          return <MedicationDetailsScreen />;
+        return <MedicationsStack />;
+      case 'Appointments':
+        if (subScreen === 'AddAppointment') return <AddAppointmentScreen />;
+        if (subScreen === 'AppointmentDetails')
+          return <AppointmentDetailsScreen />;
+        return <AppointmentsStack />;
+      case 'Analytics':
+        return <AnalyticsScreen />;
+      case 'Prescriptions':
+        return <PrescriptionsStack />;
+      case 'Doctors':
+        return <DoctorsStack />;
+      case 'Profile':
+        return <ProfileStack />;
+      default:
+        return <HomeStack />;
     }
   };
 
   return (
-    <WebNavigationContext.Provider
-      value={{ setActiveTab: handleSetActiveTab, activeTab, initialScreen }}
-    >
+    <WebNavigationContext.Provider value={contextValue}>
       <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-        <View style={[webStyles.navbar, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border, borderBottomWidth: 1 }]}>
-          <Text style={[webStyles.title, { color: theme.colors.text }]}>{t('home.appName')}</Text>
+        {/* Navbar */}
+        <View
+          style={[
+            webStyles.navbar,
+            {
+              backgroundColor: theme.colors.surface,
+              borderBottomColor: theme.colors.border,
+              borderBottomWidth: 1,
+            },
+          ]}
+        >
+          <Text style={[webStyles.title, { color: theme.colors.text }]}>
+            {t('home.appName')}
+          </Text>
           <View style={webStyles.navButtons}>
             {[
-              ['main', t('navigation.home')],
-              ['medications', t('navigation.medications')],
-              ['appointments', t('navigation.appointments')],
-              ['analytics', t('navigation.analytics')],
-              ['prescriptions', t('navigation.prescriptions')],
-              ['doctors', t('navigation.doctors')],
-              ['profile', t('navigation.profile')],
+              ['Home', t('navigation.home')],
+              ['Medications', t('navigation.medications')],
+              ['Appointments', t('navigation.appointments')],
+              ['Analytics', t('navigation.analytics')],
+              ['Prescriptions', t('navigation.prescriptions')],
+              ['Doctors', t('navigation.doctors')],
+              ['Profile', t('navigation.profile')],
             ].map(([key, label]) => (
               <TouchableOpacity
-                key={key}
-                onPress={() => handleSetActiveTab(key)}
+                key={key as string}
+                onPress={() => setActiveTab(key as string)}
                 style={webStyles.navButton}
               >
                 <Text
                   style={[
                     webStyles.navButtonText,
-                    { color: activeTab === key ? theme.colors.primary : theme.colors.subText },
+                    {
+                      color:
+                        activeTab === key
+                          ? theme.colors.primary
+                          : theme.colors.subText,
+                    },
                     activeTab === key && webStyles.activeNavButton,
                   ]}
                 >
@@ -231,67 +266,28 @@ const WebNavigator = () => {
           </View>
         </View>
 
-        <View style={{ flex: 1, position: 'relative' }}>
-          {activeTab === 'main' && <HomeScreen />}
-          {activeTab === 'medications' && <MedicationsStack />}
-          {activeTab === 'appointments' && <AppointmentsStack />}
-          {activeTab === 'analytics' && <AnalyticsScreen />}
-          {activeTab === 'prescriptions' && <PrescriptionsStack />}
-          {activeTab === 'doctors' && <DoctorsStack />}
-          {activeTab === 'profile' && <ProfileScreen />}
-        </View>
+        {/* Content */}
+        <View style={{ flex: 1 }}>{getActiveComponent()}</View>
       </View>
     </WebNavigationContext.Provider>
   );
 };
 
-// -------- Drawer for Native --------
-const DrawerNavigator = () => (
-  <Drawer.Navigator>
-    <Drawer.Screen name="Main" component={TabNavigator} />
-    <Drawer.Screen name="Analytics" component={AnalyticsScreen} />
-    <Drawer.Screen name="Prescriptions" component={PrescriptionsStack} />
-    <Drawer.Screen name="Doctors" component={DoctorsStack} />
-    <Drawer.Screen name="Profile" component={ProfileScreen} />
-  </Drawer.Navigator>
-);
-
-// -------- Root Export --------
+// ======= Root Export =======
 export const AppNavigator = () => {
   const linking: LinkingOptions<any> = {
     prefixes: ['http://localhost:8080', 'medicarereminder://'],
-    config: {
-      screens: {
-        Root: {
-          screens: {
-            Main: {
-              screens: {
-                HomeTab: '',
-              },
-            },
-          },
-        },
-      },
-    },
+    config: { screens: {} },
   };
-
-  if (Platform.OS === 'web') {
-    return (
-      <NavigationContainer linking={linking}>
-        <WebNavigator />
-      </NavigationContainer>
-    );
-  }
 
   return (
     <NavigationContainer linking={linking}>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Root" component={DrawerNavigator} />
-      </Stack.Navigator>
+      {Platform.OS === 'web' ? <WebNavigator /> : <DrawerNavigator />}
     </NavigationContainer>
   );
 };
 
+// ======= Web Styles =======
 const webStyles = StyleSheet.create({
   navbar: {
     height: 60,
@@ -300,23 +296,9 @@ const webStyles = StyleSheet.create({
     paddingHorizontal: 20,
     elevation: 3,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginRight: 40,
-  },
-  navButtons: {
-    flexDirection: 'row',
-    gap: 20,
-  },
-  navButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  navButtonText: {
-    fontSize: 16,
-  },
-  activeNavButton: {
-    fontWeight: '600',
-  },
+  title: { fontSize: 20, fontWeight: 'bold', marginRight: 40 },
+  navButtons: { flexDirection: 'row', gap: 20 },
+  navButton: { paddingVertical: 8, paddingHorizontal: 16 },
+  navButtonText: { fontSize: 16 },
+  activeNavButton: { fontWeight: '600' },
 });

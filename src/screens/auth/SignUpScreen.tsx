@@ -11,12 +11,14 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { authService } from '../../services/authService';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 
 export const SignUpScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -25,7 +27,7 @@ export const SignUpScreen = ({ navigation }: any) => {
 
   const handleSignUp = async () => {
     if (!name || !email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(t('signUp.errorTitle'), t('signUp.errorEmptyFields'));
       return;
     }
 
@@ -33,7 +35,7 @@ export const SignUpScreen = ({ navigation }: any) => {
     try {
       await authService.register(name, email, password);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Registration failed');
+      Alert.alert(t('signUp.errorTitle'), error.message || t('signUp.errorRegistrationFailed'));
     } finally {
       setLoading(false);
     }
@@ -49,27 +51,27 @@ export const SignUpScreen = ({ navigation }: any) => {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.card}>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Sign up to get started</Text>
+          <Text style={styles.title}>{t('signUp.title')}</Text>
+          <Text style={styles.subtitle}>{t('signUp.subtitle')}</Text>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Full Name</Text>
+            <Text style={styles.label}>{t('signUp.nameLabel')}</Text>
             <TextInput
               style={styles.input}
               value={name}
               onChangeText={setName}
-              placeholder="Enter your full name"
+              placeholder={t('signUp.namePlaceholder')}
               placeholderTextColor={theme.colors.subText}
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t('signUp.emailLabel')}</Text>
             <TextInput
               style={styles.input}
               value={email}
               onChangeText={setEmail}
-              placeholder="Enter your email"
+              placeholder={t('signUp.emailPlaceholder')}
               placeholderTextColor={theme.colors.subText}
               autoCapitalize="none"
               keyboardType="email-address"
@@ -77,12 +79,12 @@ export const SignUpScreen = ({ navigation }: any) => {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>{t('signUp.passwordLabel')}</Text>
             <TextInput
               style={styles.input}
               value={password}
               onChangeText={setPassword}
-              placeholder="Create a password"
+              placeholder={t('signUp.passwordPlaceholder')}
               placeholderTextColor={theme.colors.subText}
               secureTextEntry
             />
@@ -96,14 +98,14 @@ export const SignUpScreen = ({ navigation }: any) => {
             {loading ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Text style={styles.buttonText}>Sign Up</Text>
+              <Text style={styles.buttonText}>{t('signUp.signUpButton')}</Text>
             )}
           </TouchableOpacity>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Already have an account? </Text>
+            <Text style={styles.footerText}>{t('signUp.hasAccount')} </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.link}>Sign In</Text>
+              <Text style={styles.link}>{t('signUp.signIn')}</Text>
             </TouchableOpacity>
           </View>
         </View>
