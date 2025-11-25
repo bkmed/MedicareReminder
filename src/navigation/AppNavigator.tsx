@@ -6,11 +6,13 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
+import { enableScreens } from 'react-native-screens';
 import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '../context/ThemeContext';
 import { HomeScreen } from '../screens/HomeScreen';
 import { MedicationListScreen } from '../screens/medications/MedicationListScreen';
 import { AddMedicationScreen } from '../screens/medications/AddMedicationScreen';
@@ -29,10 +31,11 @@ import { ProfileScreen } from '../screens/profile/ProfileScreen';
 
 // Web navigation context - allows setting active tab and initial screen
 export const WebNavigationContext = createContext({
-  setActiveTab: (tab: string, initialScreen?: string) => { },
+  setActiveTab: (tab: string, initialScreen?: string) => {},
   activeTab: 'main',
   initialScreen: undefined as string | undefined,
 });
+enableScreens();
 
 const Tab = createBottomTabNavigator();
 const Drawer = createDrawerNavigator();
@@ -177,6 +180,7 @@ const TabNavigator = () => (
 // ----------- Web Navigation -----------
 const WebNavigator = () => {
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('main');
   const [initialScreen, setInitialScreen] = useState<string | undefined>(
     undefined,
@@ -195,9 +199,9 @@ const WebNavigator = () => {
     <WebNavigationContext.Provider
       value={{ setActiveTab: handleSetActiveTab, activeTab, initialScreen }}
     >
-      <View>
-        <View style={webStyles.navbar}>
-          <Text style={webStyles.title}>{t('home.appName')}</Text>
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+        <View style={[webStyles.navbar, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border, borderBottomWidth: 1 }]}>
+          <Text style={[webStyles.title, { color: theme.colors.text }]}>{t('home.appName')}</Text>
           <View style={webStyles.navButtons}>
             {[
               ['main', t('navigation.home')],
@@ -216,6 +220,7 @@ const WebNavigator = () => {
                 <Text
                   style={[
                     webStyles.navButtonText,
+                    { color: activeTab === key ? theme.colors.primary : theme.colors.subText },
                     activeTab === key && webStyles.activeNavButton,
                   ]}
                 >
@@ -290,7 +295,6 @@ export const AppNavigator = () => {
 const webStyles = StyleSheet.create({
   navbar: {
     height: 60,
-    backgroundColor: '#007AFF',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 20,
@@ -299,7 +303,6 @@ const webStyles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFF',
     marginRight: 40,
   },
   navButtons: {
@@ -311,12 +314,9 @@ const webStyles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   navButtonText: {
-    color: '#FFF',
     fontSize: 16,
-    opacity: 0.8,
   },
   activeNavButton: {
-    opacity: 1,
     fontWeight: '600',
   },
 });

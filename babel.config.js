@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 plugins = () => {
   const defaultPlugins = [
+    ["module-resolver", {"root": ["./"], "alias": {"src": "./src"}}],
     [
       'babel-plugin-inline-import',
       {

@@ -7,8 +7,6 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
-  Platform,
-  I18nManager,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { storageService } from '../../services/storage';
@@ -58,16 +56,8 @@ export const ProfileScreen = ({ navigation }: any) => {
       storageService.setString('user-language', langCode);
       setCurrentLanguage(langCode);
 
-      // Set RTL for Arabic on native platforms
-      const shouldBeRTL = langCode === 'ar';
-      if (I18nManager.isRTL !== shouldBeRTL) {
-        I18nManager.forceRTL(shouldBeRTL);
-        Alert.alert(
-          t('profile.restartRequired'),
-          t('profile.restartRequiredMessage'),
-          [{ text: t('common.ok') }],
-        );
-      }
+      // Web doesn't need RTL handling via I18nManager
+      // CSS direction is handled automatically by the browser
     } catch (error) {
       Alert.alert(t('common.error'), t('profile.languageChangeError'));
     }
@@ -75,7 +65,6 @@ export const ProfileScreen = ({ navigation }: any) => {
 
   const handleCameraPermission = async (value: boolean) => {
     if (!value) {
-      // User is trying to disable - just update UI
       setCameraPermission('denied');
       return;
     }
@@ -100,7 +89,6 @@ export const ProfileScreen = ({ navigation }: any) => {
 
   const handleNotificationPermission = async (value: boolean) => {
     if (!value) {
-      // User is trying to disable - just update UI
       setNotificationPermission('denied');
       return;
     }
@@ -125,7 +113,6 @@ export const ProfileScreen = ({ navigation }: any) => {
 
   const handleCalendarPermission = async (value: boolean) => {
     if (!value) {
-      // User is trying to disable - just update UI
       setCalendarPermission('denied');
       return;
     }

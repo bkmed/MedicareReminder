@@ -16,14 +16,12 @@ import { appointmentsDb } from '../database/appointmentsDb';
 import { prescriptionsDb } from '../database/prescriptionsDb';
 import { useTheme } from '../context/ThemeContext';
 import { Theme } from '../theme';
-import { WebNavigationContext } from '../navigation/AppNavigator';
 
 export const HomeScreen = () => {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const webNav = useContext(WebNavigationContext);
 
   const [summary, setSummary] = useState({
     medications: 0,
@@ -56,9 +54,14 @@ export const HomeScreen = () => {
     }
   };
 
+  const { setActiveTab } =
+    Platform.OS === 'web'
+      ? useContext(require('../navigation/AppNavigator').WebNavigationContext)
+      : { setActiveTab: () => {} };
+
   const navigateToMedications = () => {
     if (Platform.OS === 'web') {
-      webNav.setActiveTab('medications');
+      setActiveTab('medications');
     } else {
       navigation.navigate('Main', { screen: 'MedicationsTab' });
     }
@@ -66,7 +69,7 @@ export const HomeScreen = () => {
 
   const navigateToAppointments = () => {
     if (Platform.OS === 'web') {
-      webNav.setActiveTab('appointments');
+      setActiveTab('appointments');
     } else {
       navigation.navigate('Main', { screen: 'AppointmentsTab' });
     }
@@ -74,7 +77,7 @@ export const HomeScreen = () => {
 
   const navigateToAddMedication = () => {
     if (Platform.OS === 'web') {
-      webNav.setActiveTab('medications', 'AddMedication');
+      setActiveTab('medications', 'AddMedication');
     } else {
       navigation.navigate('Main', {
         screen: 'MedicationsTab',
@@ -85,7 +88,7 @@ export const HomeScreen = () => {
 
   const navigateToAddAppointment = () => {
     if (Platform.OS === 'web') {
-      webNav.setActiveTab('appointments', 'AddAppointment');
+      setActiveTab('appointments', 'AddAppointment');
     } else {
       navigation.navigate('Main', {
         screen: 'AppointmentsTab',
@@ -96,7 +99,7 @@ export const HomeScreen = () => {
 
   const navigateToAnalytics = () => {
     if (Platform.OS === 'web') {
-      webNav.setActiveTab('analytics');
+      setActiveTab('analytics');
     } else {
       navigation.navigate('Analytics');
     }
@@ -145,7 +148,9 @@ export const HomeScreen = () => {
           <View style={styles.alertContent}>
             <Text style={styles.alertTitle}>{t('home.prescriptionAlert')}</Text>
             <Text style={styles.alertMessage}>
-              {t('home.prescriptionsExpiring', { count: summary.expiringPrescriptions })}
+              {t('home.prescriptionsExpiring', {
+                count: summary.expiringPrescriptions,
+              })}
             </Text>
           </View>
         </View>
@@ -161,7 +166,9 @@ export const HomeScreen = () => {
         <Text style={styles.actionIcon}>💊</Text>
         <View style={styles.actionContent}>
           <Text style={styles.actionTitle}>{t('home.addMedication')}</Text>
-          <Text style={styles.actionSubtitle}>{t('home.addMedicationSubtitle')}</Text>
+          <Text style={styles.actionSubtitle}>
+            {t('home.addMedicationSubtitle')}
+          </Text>
         </View>
         <Text style={styles.actionArrow}>›</Text>
       </TouchableOpacity>
@@ -172,8 +179,12 @@ export const HomeScreen = () => {
       >
         <Text style={styles.actionIcon}>📅</Text>
         <View style={styles.actionContent}>
-          <Text style={styles.actionTitle}>{t('home.scheduleAppointment')}</Text>
-          <Text style={styles.actionSubtitle}>{t('home.scheduleAppointmentSubtitle')}</Text>
+          <Text style={styles.actionTitle}>
+            {t('home.scheduleAppointment')}
+          </Text>
+          <Text style={styles.actionSubtitle}>
+            {t('home.scheduleAppointmentSubtitle')}
+          </Text>
         </View>
         <Text style={styles.actionArrow}>›</Text>
       </TouchableOpacity>
@@ -185,7 +196,9 @@ export const HomeScreen = () => {
         <Text style={styles.actionIcon}>📊</Text>
         <View style={styles.actionContent}>
           <Text style={styles.actionTitle}>{t('home.viewAnalytics')}</Text>
-          <Text style={styles.actionSubtitle}>{t('home.viewAnalyticsSubtitle')}</Text>
+          <Text style={styles.actionSubtitle}>
+            {t('home.viewAnalyticsSubtitle')}
+          </Text>
         </View>
         <Text style={styles.actionArrow}>›</Text>
       </TouchableOpacity>
@@ -193,9 +206,7 @@ export const HomeScreen = () => {
       {/* Tips Section */}
       <View style={styles.tipCard}>
         <Text style={styles.tipIcon}>💡</Text>
-        <Text style={styles.tipText}>
-          {t('home.tip')}
-        </Text>
+        <Text style={styles.tipText}>{t('home.tip')}</Text>
       </View>
     </ScrollView>
   );

@@ -158,9 +158,7 @@
     "addFirst": "Add your first doctor",
     "empty": "No doctors",
     "emptySubtitle": "Tap + to add a doctor",
-    "loadError": "Failed to load doctors",
     "saveError": "Failed to save doctor",
-    "deleteError": "Failed to delete doctor",
     "fillRequired": "Please enter doctor name",
     "namePlaceholder": "e.g., John Smith",
     "specialtyPlaceholder": "e.g., Cardiology",
@@ -172,8 +170,14 @@
     "updateButton": "Update Doctor",
     "deleteButton": "Delete Doctor",
     "deleteConfirmTitle": "Delete Doctor",
-    "deleteConfirmMessage": "Are you sure you want to delete this doctor?",
-    "doctor": "Dr."
+    "deleteConfirmMessage": "Are you sure you want to delete this doctor? This action cannot be undone.",
+    "doctor": "Dr.",
+    "notFound": "Doctor not found",
+    "loadError": "Failed to load details",
+    "deleteError": "Failed to delete doctor",
+    "noAppointments": "No appointments scheduled",
+    "addAppointment": "Add Appointment",
+    "addPrescription": "Add Prescription"
   },
   "analytics": {
     "title": "Analytics",
@@ -232,6 +236,38 @@
   },
   "specialties": {
     "general_practice": "General Practice",
+    "login": {
+      "welcomeBack": "Welcome Back",
+      "signInSubtitle": "Sign in to continue",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "forgotPassword": "Forgot Password?",
+      "signInButton": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign Up"
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email to receive instructions",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter your email",
+      "sendInstructionsButton": "Send Instructions",
+      "backToLogin": "Back to Login"
+    },
+    "medicationDetails": {
+      "frequencyLabel": "Frequency",
+      "reminderTimesLabel": "Reminder Times",
+      "startDateLabel": "Start Date",
+      "endDateLabel": "End Date",
+      "notesLabel": "Notes",
+      "remindersLabel": "Reminders",
+      "viewHistoryButton": "View History",
+      "editButton": "Edit",
+      "deleteButton": "Delete",
+      "loading": "Loading..."
+    },
     "cardiology": "Cardiology",
     "dermatology": "Dermatology",
     "endocrinology": "Endocrinology",

@@ -1,70 +1,31 @@
-import { Platform } from 'react-native';
+/**
+ * Native Storage Service using React Native MMKV  
+ * Platform-specific implementation for iOS and Android
+ */
 
-// Platform-specific storage implementation
-let storage: any = null;
+import { createMMKV } from 'react-native-mmkv';
 
-if (Platform.OS !== 'web') {
-    // Only import MMKV on native platforms
-    const { MMKV } = require('react-native-mmkv');
-    storage = new MMKV();
+export interface StorageService {
+    getString: (key: string) => string | undefined;
+    setString: (key: string, value: string) => void;
+    getNumber: (key: string) => number | undefined;
+    setNumber: (key: string, value: number) => void;
+    getBoolean: (key: string) => boolean | undefined;
+    setBoolean: (key: string, value: boolean) => void;
+    delete: (key: string) => void;
+    clearAll: () => void;
 }
 
-// Web-compatible storage using localStorage
-const webStorage = {
-    getString: (key: string): string | undefined => {
-        if (typeof window !== 'undefined' && window.localStorage) {
-            return window.localStorage.getItem(key) || undefined;
-        }
-        return undefined;
-    },
-    setString: (key: string, value: string): void => {
-        if (typeof window !== 'undefined' && window.localStorage) {
-            window.localStorage.setItem(key, value);
-        }
-    },
-    getNumber: (key: string): number | undefined => {
-        if (typeof window !== 'undefined' && window.localStorage) {
-            const value = window.localStorage.getItem(key);
-            return value ? parseFloat(value) : undefined;
-        }
-        return undefined;
-    },
-    setNumber: (key: string, value: number): void => {
-        if (typeof window !== 'undefined' && window.localStorage) {
-            window.localStorage.setItem(key, value.toString());
-        }
-    },
-    getBoolean: (key: string): boolean | undefined => {
-        if (typeof window !== 'undefined' && window.localStorage) {
-            const value = window.localStorage.getItem(key);
-            return value === 'true' ? true : value === 'false' ? false : undefined;
-        }
-        return undefined;
-    },
-    setBoolean: (key: string, value: boolean): void => {
-        if (typeof window !== 'undefined' && window.localStorage) {
-            window.localStorage.setItem(key, value.toString());
-        }
-    },
-    delete: (key: string): void => {
-        if (typeof window !== 'undefined' && window.localStorage) {
-            window.localStorage.removeItem(key);
-        }
-    },
-    clearAll: (): void => {
-        if (typeof window !== 'undefined' && window.localStorage) {
-            window.localStorage.clear();
-        }
-    },
-};
+// Initialize MMKV storage instance for native platforms
+const mmkvStorage = createMMKV();
 
-export const storageService = {
-    getString: (key: string) => Platform.OS === 'web' ? webStorage.getString(key) : storage?.getString(key),
-    setString: (key: string, value: string) => Platform.OS === 'web' ? webStorage.setString(key, value) : storage?.set(key, value),
-    getNumber: (key: string) => Platform.OS === 'web' ? webStorage.getNumber(key) : storage?.getNumber(key),
-    setNumber: (key: string, value: number) => Platform.OS === 'web' ? webStorage.setNumber(key, value) : storage?.set(key, value),
-    getBoolean: (key: string) => Platform.OS === 'web' ? webStorage.getBoolean(key) : storage?.getBoolean(key),
-    setBoolean: (key: string, value: boolean) => Platform.OS === 'web' ? webStorage.setBoolean(key, value) : storage?.set(key, value),
-    delete: (key: string) => Platform.OS === 'web' ? webStorage.delete(key) : storage?.delete(key),
-    clearAll: () => Platform.OS === 'web' ? webStorage.clearAll() : storage?.clearAll(),
+export const storageService: StorageService = {
+    getString: (key: string) => mmkvStorage.getString(key),
+    setString: (key: string, value: string) => mmkvStorage.set(key, value),
+    getNumber: (key: string) => mmkvStorage.getNumber(key),
+    setNumber: (key: string, value: number) => mmkvStorage.set(key, value),
+    getBoolean: (key: string) => mmkvStorage.getBoolean(key),
+    setBoolean: (key: string, value: boolean) => mmkvStorage.set(key, value),
+    delete: (key: string) => mmkvStorage.remove(key),
+    clearAll: () => mmkvStorage.clearAll(),
 };

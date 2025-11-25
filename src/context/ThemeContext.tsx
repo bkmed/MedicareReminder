@@ -6,47 +6,49 @@ import { storageService } from '../services/storage';
 const THEME_KEY = 'user_theme_preference';
 
 type ThemeContextType = {
-    theme: Theme;
-    isDark: boolean;
-    toggleTheme: () => void;
+  theme: Theme;
+  isDark: boolean;
+  toggleTheme: () => void;
 };
 
 const ThemeContext = createContext<ThemeContextType>({
-    theme: lightTheme,
-    isDark: false,
-    toggleTheme: () => { },
+  theme: lightTheme,
+  isDark: false,
+  toggleTheme: () => {},
 });
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const systemScheme = useColorScheme();
-    const [isDark, setIsDark] = useState(systemScheme === 'dark');
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const systemScheme = useColorScheme();
+  const [isDark, setIsDark] = useState(systemScheme === 'dark');
 
-    useEffect(() => {
-        loadThemePreference();
-    }, []);
+  useEffect(() => {
+    loadThemePreference();
+  }, []);
 
-    const loadThemePreference = async () => {
-        const savedTheme = storageService.getString(THEME_KEY);
-        if (savedTheme) {
-            setIsDark(savedTheme === 'dark');
-        } else {
-            setIsDark(systemScheme === 'dark');
-        }
-    };
+  const loadThemePreference = async () => {
+    const savedTheme = storageService.getString(THEME_KEY);
+    if (savedTheme) {
+      setIsDark(savedTheme === 'dark');
+    } else {
+      setIsDark(systemScheme === 'dark');
+    }
+  };
 
-    const toggleTheme = () => {
-        const newMode = !isDark;
-        setIsDark(newMode);
-        storageService.setString(THEME_KEY, newMode ? 'dark' : 'light');
-    };
+  const toggleTheme = () => {
+    const newMode = !isDark;
+    setIsDark(newMode);
+    storageService.setString(THEME_KEY, newMode ? 'dark' : 'light');
+  };
 
-    const theme = isDark ? darkTheme : lightTheme;
+  const theme = isDark ? darkTheme : lightTheme;
 
-    return (
-        <ThemeContext.Provider value={{ theme, isDark, toggleTheme }}>
-            {children}
-        </ThemeContext.Provider>
-    );
+  return (
+    <ThemeContext.Provider value={{ theme, isDark, toggleTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
 };
 
 export const useTheme = () => useContext(ThemeContext);

@@ -1,13 +1,13 @@
-import {AppRegistry} from 'react-native';
+import { AppRegistry, Platform } from 'react-native';
 import App from './App';
-import appConfig from './app.json';
+import { name as appName } from './app.json';
 
-const appName = appConfig.name;
-
+// Register the app
 AppRegistry.registerComponent(appName, () => App);
 
+const rootTag =
+  document.getElementById('app-root') || document.getElementById('root');
 AppRegistry.runApplication(appName, {
   initialProps: {},
-  rootTag: document.getElementById('app-root'),
+  rootTag,
 });
-

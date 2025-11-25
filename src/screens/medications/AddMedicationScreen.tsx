@@ -125,139 +125,144 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.label}>{t('medications.name')} *</Text>
-      <TextInput
-        style={[styles.input, errors.name && styles.inputError]}
-        value={name}
-        onChangeText={text => {
-          setName(text);
-          if (errors.name) {
-            setErrors({ ...errors, name: '' });
-          }
-        }}
-        placeholder={t('medications.namePlaceholder')}
-        placeholderTextColor={theme.colors.subText}
-      />
-      {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
-
-      <Text style={styles.label}>{t('medications.dosage')} *</Text>
-      <TextInput
-        style={[styles.input, errors.dosage && styles.inputError]}
-        value={dosage}
-        onChangeText={text => {
-          setDosage(text);
-          if (errors.dosage) {
-            setErrors({ ...errors, dosage: '' });
-          }
-        }}
-        placeholder={t('medications.dosagePlaceholder')}
-        placeholderTextColor={theme.colors.subText}
-      />
-      {errors.dosage && <Text style={styles.errorText}>{errors.dosage}</Text>}
-
-      <Text style={styles.label}>{t('medications.frequency')}</Text>
-      <View style={styles.frequencyContainer}>
-        {['Daily', 'Twice a day', 'Weekly'].map(freq => (
-          <TouchableOpacity
-            key={freq}
-            style={[
-              styles.frequencyButton,
-              frequency === freq && styles.frequencyButtonActive,
-            ]}
-            onPress={() => setFrequency(freq)}
-          >
-            <Text
-              style={[
-                styles.frequencyText,
-                frequency === freq && styles.frequencyTextActive,
-              ]}
-            >
-              {t(`medications.freq${freq.replace(/\s+/g, '')}`)}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Text style={styles.label}>{t('medications.reminderTimes')}</Text>
-      {times.map((time, index) => (
-        <View key={index} style={styles.timeRow}>
-          <TextInput
-            style={[styles.input, styles.timeInput]}
-            value={time}
-            onChangeText={value => handleTimeChange(index, value)}
-            placeholder="HH:MM"
-            placeholderTextColor={theme.colors.subText}
-          />
-          {times.length > 1 && (
-            <TouchableOpacity
-              onPress={() => handleRemoveTime(index)}
-              style={styles.removeButton}
-            >
-              <Text style={styles.removeButtonText}>✕</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      ))}
-      <TouchableOpacity onPress={handleAddTime} style={styles.addTimeButton}>
-        <Text style={styles.addTimeButtonText}>
-          + {t('medications.addTime')}
-        </Text>
-      </TouchableOpacity>
-
-      <Text style={styles.label}>{t('medications.startDate')}</Text>
-      <TextInput
-        style={styles.input}
-        value={startDate}
-        onChangeText={setStartDate}
-        placeholder="YYYY-MM-DD"
-        placeholderTextColor={theme.colors.subText}
-      />
-
-      <Text style={styles.label}>{t('medications.endDate')}</Text>
-      <TextInput
-        style={styles.input}
-        value={endDate}
-        onChangeText={setEndDate}
-        placeholder="YYYY-MM-DD"
-        placeholderTextColor={theme.colors.subText}
-      />
-
-      <Text style={styles.label}>{t('medications.notes')}</Text>
-      <TextInput
-        style={[styles.input, styles.notesInput]}
-        value={notes}
-        onChangeText={setNotes}
-        placeholder={t('medications.notesPlaceholder')}
-        placeholderTextColor={theme.colors.subText}
-        multiline
-        numberOfLines={4}
-      />
-
-      <View style={styles.switchRow}>
-        <Text style={styles.label}>{t('medications.enableReminders')}</Text>
-        <Switch
-          value={reminderEnabled}
-          onValueChange={setReminderEnabled}
-          trackColor={{
-            false: theme.colors.border,
-            true: theme.colors.primary,
-          }}
-          thumbColor={theme.colors.surface}
-        />
-      </View>
-
-      <TouchableOpacity
-        style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-        onPress={handleSave}
-        disabled={loading}
+    <View>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
       >
-        <Text style={styles.saveButtonText}>
-          {isEdit ? t('medications.update') : t('common.save')}{' '}
-          {t('medications.medication')}
-        </Text>
-      </TouchableOpacity>
-    </ScrollView>
+        <Text style={styles.label}>{t('medications.name')} *</Text>
+        <TextInput
+          style={[styles.input, errors.name && styles.inputError]}
+          value={name}
+          onChangeText={text => {
+            setName(text);
+            if (errors.name) {
+              setErrors({ ...errors, name: '' });
+            }
+          }}
+          placeholder={t('medications.namePlaceholder')}
+          placeholderTextColor={theme.colors.subText}
+        />
+        {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+
+        <Text style={styles.label}>{t('medications.dosage')} *</Text>
+        <TextInput
+          style={[styles.input, errors.dosage && styles.inputError]}
+          value={dosage}
+          onChangeText={text => {
+            setDosage(text);
+            if (errors.dosage) {
+              setErrors({ ...errors, dosage: '' });
+            }
+          }}
+          placeholder={t('medications.dosagePlaceholder')}
+          placeholderTextColor={theme.colors.subText}
+        />
+        {errors.dosage && <Text style={styles.errorText}>{errors.dosage}</Text>}
+
+        <Text style={styles.label}>{t('medications.frequency')}</Text>
+        <View style={styles.frequencyContainer}>
+          {['Daily', 'Twice a day', 'Weekly'].map(freq => (
+            <TouchableOpacity
+              key={freq}
+              style={[
+                styles.frequencyButton,
+                frequency === freq && styles.frequencyButtonActive,
+              ]}
+              onPress={() => setFrequency(freq)}
+            >
+              <Text
+                style={[
+                  styles.frequencyText,
+                  frequency === freq && styles.frequencyTextActive,
+                ]}
+              >
+                {t(`medications.freq${freq.replace(/\s+/g, '')}`)}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <Text style={styles.label}>{t('medications.reminderTimes')}</Text>
+        {times.map((time, index) => (
+          <View key={index} style={styles.timeRow}>
+            <TextInput
+              style={[styles.input, styles.timeInput]}
+              value={time}
+              onChangeText={value => handleTimeChange(index, value)}
+              placeholder="HH:MM"
+              placeholderTextColor={theme.colors.subText}
+            />
+            {times.length > 1 && (
+              <TouchableOpacity
+                onPress={() => handleRemoveTime(index)}
+                style={styles.removeButton}
+              >
+                <Text style={styles.removeButtonText}>✕</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ))}
+        <TouchableOpacity onPress={handleAddTime} style={styles.addTimeButton}>
+          <Text style={styles.addTimeButtonText}>
+            + {t('medications.addTime')}
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={styles.label}>{t('medications.startDate')}</Text>
+        <TextInput
+          style={styles.input}
+          value={startDate}
+          onChangeText={setStartDate}
+          placeholder="YYYY-MM-DD"
+          placeholderTextColor={theme.colors.subText}
+        />
+
+        <Text style={styles.label}>{t('medications.endDate')}</Text>
+        <TextInput
+          style={styles.input}
+          value={endDate}
+          onChangeText={setEndDate}
+          placeholder="YYYY-MM-DD"
+          placeholderTextColor={theme.colors.subText}
+        />
+
+        <Text style={styles.label}>{t('medications.notes')}</Text>
+        <TextInput
+          style={[styles.input, styles.notesInput]}
+          value={notes}
+          onChangeText={setNotes}
+          placeholder={t('medications.notesPlaceholder')}
+          placeholderTextColor={theme.colors.subText}
+          multiline
+          numberOfLines={4}
+        />
+
+        <View style={styles.switchRow}>
+          <Text style={styles.label}>{t('medications.enableReminders')}</Text>
+          <Switch
+            value={reminderEnabled}
+            onValueChange={setReminderEnabled}
+            trackColor={{
+              false: theme.colors.border,
+              true: theme.colors.primary,
+            }}
+            thumbColor={theme.colors.surface}
+          />
+        </View>
+
+        <TouchableOpacity
+          style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+          onPress={handleSave}
+          disabled={loading}
+        >
+          <Text style={styles.saveButtonText}>
+            {isEdit ? t('medications.update') : t('common.save')}{' '}
+            {t('medications.medication')}
+          </Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </View>
   );
 };
 

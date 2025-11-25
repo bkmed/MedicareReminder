@@ -1,12 +1,12 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useContext } from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
-    ScrollView,
-    TouchableOpacity,
-    Alert,
-    FlatList,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Platform,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { doctorsDb } from '../../database/doctorsDb';
@@ -17,313 +17,384 @@ import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 
 export const DoctorDetailsScreen = ({ navigation, route }: any) => {
-    const { doctorId } = route.params;
-    const { t } = useTranslation();
-    const { theme } = useTheme();
-    const styles = useMemo(() => createStyles(theme), [theme]);
-    const [doctor, setDoctor] = useState<Doctor | null>(null);
-    const [appointments, setAppointments] = useState<Appointment[]>([]);
-    const [loading, setLoading] = useState(true);
+  const { doctorId } = route.params;
+  const { t } = useTranslation();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { setActiveTab } =
+    Platform.OS === 'web'
+      ? useContext(require('../../navigation/AppNavigator').WebNavigationContext)
+      : { setActiveTab: () => {} };
 
-    const loadData = async () => {
-        try {
-            const doctorData = await doctorsDb.getById(doctorId);
-            const appointmentsData = await appointmentsDb.getByDoctorId(doctorId);
-
-            if (doctorData) {
-                setDoctor(doctorData);
-            } else {
-                Alert.alert('Error', 'Doctor not found');
-                navigation.goBack();
-            }
-
-            setAppointments(appointmentsData);
-        } catch (error) {
-            console.error('Error loading doctor details:', error);
-            Alert.alert('Error', 'Failed to load details');
-        } finally {
-            setLoading(false);
-        }
+    const navigateToAddAppointment = () => {
+      if (Platform.OS === 'web') {
+        setActiveTab('appointments', 'AddAppointment');
+      } else {
+        navigation.navigate('Main', {
+          screen: 'AppointmentsTab',
+          params: { screen: 'AddAppointment' },
+        });
+      }
     };
 
-    useFocusEffect(
-        useCallback(() => {
-            loadData();
-        }, [doctorId])
-    );
-
-    const handleEdit = () => {
-        navigation.navigate('AddDoctor', { doctorId });
-    };
-
-    const handleDelete = () => {
-        Alert.alert(
-            'Delete Doctor',
-            'Are you sure you want to delete this doctor? This action cannot be undone.',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Delete',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            await doctorsDb.delete(doctorId);
-                            navigation.goBack();
-                        } catch (error) {
-                            console.error('Error deleting doctor:', error);
-                            Alert.alert('Error', 'Failed to delete doctor');
-                        }
-                    },
-                },
-            ]
-        );
-    };
-
-    const renderAppointment = ({ item }: { item: Appointment }) => (
-        <View style={styles.appointmentCard}>
-            <View style={styles.appointmentHeader}>
-                <Text style={styles.appointmentTitle}>{item.title}</Text>
-                <Text style={styles.appointmentDate}>
-                    {new Date(item.dateTime).toLocaleDateString()} {new Date(item.dateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </Text>
-            </View>
-            {item.location && <Text style={styles.appointmentDetail}>📍 {item.location}</Text>}
-            {item.notes && <Text style={styles.appointmentDetail}>📝 {item.notes}</Text>}
-        </View>
-    );
-
-    if (loading) {
-        return (
-            <View style={styles.loadingContainer}>
-                <Text style={{ color: theme.colors.text }}>Loading...</Text>
-            </View>
-        );
+  const navigateToAddPrescription = (doctor: any) => {
+    if (Platform.OS === 'web') {
+      setActiveTab('prescriptions', 'AddPrescription', { doctorName: doctor.name });
+    } else {
+      navigation.navigate('Main', {
+        screen: 'AddPrescription',
+        params: { doctorName: doctor.name },
+      });
     }
+  };
 
-    if (!doctor) return null;
+  const loadData = async () => {
+    try {
+      const doctorData = await doctorsDb.getById(doctorId);
+      const appointmentsData = await appointmentsDb.getByDoctorId(doctorId);
 
-    return (
-        <View style={styles.container}>
-            <ScrollView contentContainerStyle={styles.content}>
-                <View style={styles.card}>
-                    <View style={styles.header}>
-                        <View>
-                            <Text style={styles.name}>Dr. {doctor.name}</Text>
-                            {doctor.specialty && (
-                                <Text style={styles.specialty}>
-                                    {t(`specialties.${doctor.specialty}`, { defaultValue: doctor.specialty })}
-                                </Text>
-                            )}
-                        </View>
-                        <View style={styles.actions}>
-                            <TouchableOpacity onPress={handleEdit} style={styles.actionButton}>
-                                <Text style={styles.actionText}>Edit</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={handleDelete} style={[styles.actionButton, styles.deleteButton]}>
-                                <Text style={[styles.actionText, styles.deleteText]}>Delete</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
+      if (doctorData) {
+        setDoctor(doctorData);
+      } else {
+        Alert.alert(t('common.error'), t('doctors.notFound'));
+        navigation.goBack();
+      }
 
-                    <View style={styles.divider} />
+      setAppointments(appointmentsData);
+    } catch (error) {
+      console.error('Error loading doctor details:', error);
+      Alert.alert(t('common.error'), t('doctors.loadError'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                    <View style={styles.detailsSection}>
-                        {doctor.phone && (
-                            <View style={styles.detailRow}>
-                                <Text style={styles.detailLabel}>Phone</Text>
-                                <Text style={styles.detailValue}>{doctor.phone}</Text>
-                            </View>
-                        )}
-                        {doctor.email && (
-                            <View style={styles.detailRow}>
-                                <Text style={styles.detailLabel}>Email</Text>
-                                <Text style={styles.detailValue}>{doctor.email}</Text>
-                            </View>
-                        )}
-                        {doctor.address && (
-                            <View style={styles.detailRow}>
-                                <Text style={styles.detailLabel}>Address</Text>
-                                <Text style={styles.detailValue}>{doctor.address}</Text>
-                            </View>
-                        )}
-                        {doctor.notes && (
-                            <View style={styles.detailRow}>
-                                <Text style={styles.detailLabel}>Notes</Text>
-                                <Text style={styles.detailValue}>{doctor.notes}</Text>
-                            </View>
-                        )}
-                    </View>
-                </View>
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [doctorId]),
+  );
 
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Appointments</Text>
-                    <TouchableOpacity
-                        onPress={() => navigation.navigate('AddAppointment', { doctorId: doctor.id, doctorName: doctor.name })}
-                        style={styles.addButton}
-                    >
-                        <Text style={styles.addButtonText}>+ Add</Text>
-                    </TouchableOpacity>
-                </View>
+  const handleEdit = () => {
+    navigation.navigate('AddDoctor', { doctorId });
+  };
 
-                {appointments.length > 0 ? (
-                    appointments.map(item => (
-                        <View key={item.id} style={styles.appointmentWrapper}>
-                            {renderAppointment({ item })}
-                        </View>
-                    ))
-                ) : (
-                    <View style={styles.emptyState}>
-                        <Text style={styles.emptyText}>No appointments scheduled</Text>
-                    </View>
-                )}
-            </ScrollView>
-        </View>
+  const handleDelete = () => {
+    Alert.alert(
+      t('doctors.deleteConfirmTitle'),
+      t('doctors.deleteConfirmMessage'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await doctorsDb.delete(doctorId);
+              navigation.goBack();
+            } catch (error) {
+              console.error('Error deleting doctor:', error);
+              Alert.alert(t('common.error'), t('doctors.deleteError'));
+            }
+          },
+        },
+      ],
     );
+  };
+
+  const renderAppointment = ({ item }: { item: Appointment }) => (
+    <View style={styles.appointmentCard}>
+      <View style={styles.appointmentHeader}>
+        <Text style={styles.appointmentTitle}>{item.title}</Text>
+        <Text style={styles.appointmentDate}>
+          {new Date(item.dateTime).toLocaleDateString()}{' '}
+          {new Date(item.dateTime).toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+        </Text>
+      </View>
+      {item.location && (
+        <Text style={styles.appointmentDetail}>📍 {item.location}</Text>
+      )}
+      {item.notes && (
+        <Text style={styles.appointmentDetail}>📝 {item.notes}</Text>
+      )}
+    </View>
+  );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={{ color: theme.colors.text }}>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (!doctor) return null;
+
+  return (
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={styles.card}>
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.name}>
+                {t('doctors.doctor')} {doctor.name}
+              </Text>
+              {doctor.specialty && (
+                <Text style={styles.specialty}>
+                  {t(`specialties.${doctor.specialty}`, {
+                    defaultValue: doctor.specialty,
+                  })}
+                </Text>
+              )}
+            </View>
+            <View style={styles.actions}>
+              <TouchableOpacity
+                onPress={handleEdit}
+                style={styles.actionButton}
+              >
+                <Text style={styles.actionText}>{t('common.edit')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleDelete}
+                style={[styles.actionButton, styles.deleteButton]}
+              >
+                <Text style={[styles.actionText, styles.deleteText]}>
+                  {t('common.delete')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.detailsSection}>
+            {doctor.phone && (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{t('doctors.phone')}</Text>
+                <Text style={styles.detailValue}>{doctor.phone}</Text>
+              </View>
+            )}
+            {doctor.email && (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{t('doctors.email')}</Text>
+                <Text style={styles.detailValue}>{doctor.email}</Text>
+              </View>
+            )}
+            {doctor.address && (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{t('doctors.address')}</Text>
+                <Text style={styles.detailValue}>{doctor.address}</Text>
+              </View>
+            )}
+            {doctor.notes && (
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>{t('medications.notes')}</Text>
+                <Text style={styles.detailValue}>{doctor.notes}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>{t('appointments.title')}</Text>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              onPress={() => navigateToAddPrescription(doctor)}
+              style={[styles.addButton, styles.secondaryButton]}
+            >
+              <Text style={[styles.addButtonText, styles.secondaryButtonText]}>
+                + {t('doctors.addPrescription')}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={navigateToAddAppointment}
+              style={styles.addButton}
+            >
+              <Text style={styles.addButtonText}>
+                + {t('doctors.addAppointment')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {appointments.length > 0 ? (
+          appointments.map(item => (
+            <View key={item.id} style={styles.appointmentWrapper}>
+              {renderAppointment({ item })}
+            </View>
+          ))
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>{t('doctors.noAppointments')}</Text>
+          </View>
+        )}
+      </ScrollView>
+    </View>
+  );
 };
 
-const createStyles = (theme: Theme) => StyleSheet.create({
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
     container: {
-        backgroundColor: theme.colors.background,
+      backgroundColor: theme.colors.background,
     },
     loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: theme.colors.background,
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.colors.background,
     },
     content: {
-        padding: theme.spacing.m,
+      padding: theme.spacing.m,
     },
     card: {
-        backgroundColor: theme.colors.surface,
-        borderRadius: theme.spacing.m,
-        padding: theme.spacing.m,
-        ...theme.shadows.medium,
-        marginBottom: theme.spacing.l,
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.spacing.m,
+      padding: theme.spacing.m,
+      ...theme.shadows.medium,
+      marginBottom: theme.spacing.l,
     },
     header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: theme.spacing.m,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: theme.spacing.m,
     },
     name: {
-        ...theme.textVariants.header,
-        fontSize: 24,
-        marginBottom: theme.spacing.xs,
-        color: theme.colors.text,
+      ...theme.textVariants.header,
+      fontSize: 24,
+      marginBottom: theme.spacing.xs,
+      color: theme.colors.text,
     },
     specialty: {
-        ...theme.textVariants.subheader,
-        color: theme.colors.primary,
-        fontSize: 18,
+      ...theme.textVariants.subheader,
+      color: theme.colors.primary,
+      fontSize: 18,
     },
     actions: {
-        flexDirection: 'row',
-        gap: theme.spacing.s,
+      flexDirection: 'row',
+      gap: theme.spacing.s,
     },
     actionButton: {
-        paddingHorizontal: theme.spacing.s,
-        paddingVertical: theme.spacing.xs,
-        borderRadius: theme.spacing.s,
-        backgroundColor: theme.colors.background,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
+      paddingHorizontal: theme.spacing.s,
+      paddingVertical: theme.spacing.xs,
+      borderRadius: theme.spacing.s,
+      backgroundColor: theme.colors.background,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
     },
     deleteButton: {
-        backgroundColor: theme.colors.surface,
-        borderColor: theme.colors.error,
+      backgroundColor: theme.colors.surface,
+      borderColor: theme.colors.error,
     },
     actionText: {
-        ...theme.textVariants.body,
-        fontSize: 14,
-        color: theme.colors.primary,
+      ...theme.textVariants.body,
+      fontSize: 14,
+      color: theme.colors.primary,
     },
     deleteText: {
-        color: theme.colors.error,
+      color: theme.colors.error,
     },
     divider: {
-        height: 1,
-        backgroundColor: theme.colors.border,
-        marginVertical: theme.spacing.m,
+      height: 1,
+      backgroundColor: theme.colors.border,
+      marginVertical: theme.spacing.m,
     },
     detailsSection: {
-        gap: theme.spacing.m,
+      gap: theme.spacing.m,
     },
     detailRow: {
-        gap: theme.spacing.xs,
+      gap: theme.spacing.xs,
     },
     detailLabel: {
-        ...theme.textVariants.caption,
-        fontWeight: '600',
-        textTransform: 'uppercase',
-        color: theme.colors.subText,
+      ...theme.textVariants.caption,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      color: theme.colors.subText,
     },
     detailValue: {
-        ...theme.textVariants.body,
-        color: theme.colors.text,
+      ...theme.textVariants.body,
+      color: theme.colors.text,
     },
     sectionHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: theme.spacing.m,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: theme.spacing.m,
     },
     sectionTitle: {
-        ...theme.textVariants.subheader,
-        color: theme.colors.text,
+      ...theme.textVariants.subheader,
+      color: theme.colors.text,
     },
     addButton: {
-        backgroundColor: theme.colors.primary,
-        paddingHorizontal: theme.spacing.m,
-        paddingVertical: theme.spacing.xs,
-        borderRadius: theme.spacing.l,
+      backgroundColor: theme.colors.primary,
+      paddingHorizontal: theme.spacing.m,
+      paddingVertical: theme.spacing.xs,
+      borderRadius: theme.spacing.l,
     },
     addButtonText: {
-        ...theme.textVariants.button,
-        fontSize: 14,
-        color: theme.colors.surface,
+      ...theme.textVariants.button,
+      fontSize: 14,
+      color: theme.colors.surface,
     },
     appointmentWrapper: {
-        marginBottom: theme.spacing.m,
+      marginBottom: theme.spacing.m,
     },
     appointmentCard: {
-        backgroundColor: theme.colors.surface,
-        borderRadius: theme.spacing.s,
-        padding: theme.spacing.m,
-        ...theme.shadows.small,
-        borderLeftWidth: 4,
-        borderLeftColor: theme.colors.secondary,
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.spacing.s,
+      padding: theme.spacing.m,
+      ...theme.shadows.small,
+      borderLeftWidth: 4,
+      borderLeftColor: theme.colors.secondary,
     },
     appointmentHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: theme.spacing.s,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: theme.spacing.s,
     },
     appointmentTitle: {
-        ...theme.textVariants.body,
-        fontWeight: '600',
-        color: theme.colors.text,
+      ...theme.textVariants.body,
+      fontWeight: '600',
+      color: theme.colors.text,
     },
     appointmentDate: {
-        ...theme.textVariants.caption,
-        color: theme.colors.primary,
-        fontWeight: '600',
+      ...theme.textVariants.caption,
+      color: theme.colors.primary,
+      fontWeight: '600',
     },
     appointmentDetail: {
-        ...theme.textVariants.caption,
-        marginTop: theme.spacing.xs,
-        color: theme.colors.subText,
+      ...theme.textVariants.caption,
+      marginTop: theme.spacing.xs,
+      color: theme.colors.subText,
     },
     emptyState: {
-        alignItems: 'center',
-        padding: theme.spacing.xl,
-        backgroundColor: theme.colors.surface,
-        borderRadius: theme.spacing.m,
+      alignItems: 'center',
+      padding: theme.spacing.xl,
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.spacing.m,
     },
     emptyText: {
-        ...theme.textVariants.body,
-        color: theme.colors.subText,
+      ...theme.textVariants.body,
+      color: theme.colors.subText,
     },
-});
+    headerActions: {
+      flexDirection: 'row',
+      gap: theme.spacing.s,
+    },
+    secondaryButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: theme.colors.primary,
+    },
+    secondaryButtonText: {
+      color: theme.colors.primary,
+    },
+  });

@@ -118,115 +118,117 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-    >
-      <Text style={styles.label}>{t('appointments.appointmentTitle')} *</Text>
-      <TextInput
-        style={[styles.input, errors.title && styles.inputError]}
-        value={title}
-        onChangeText={(text) => {
-          setTitle(text);
-          if (errors.title) {
-            setErrors({ ...errors, title: '' });
-          }
-        }}
-        placeholder={t('appointments.titlePlaceholder')}
-        placeholderTextColor={theme.colors.subText}
-      />
-      {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
-
-      <Text style={styles.label}>{t('appointments.doctor')}</Text>
-      <TextInput
-        style={styles.input}
-        value={doctorName}
-        onChangeText={setDoctorName}
-        placeholder={t('appointments.doctorPlaceholder')}
-        placeholderTextColor={theme.colors.subText}
-      />
-
-      <Text style={styles.label}>{t('appointments.location')}</Text>
-      <TextInput
-        style={styles.input}
-        value={location}
-        onChangeText={setLocation}
-        placeholder={t('appointments.locationPlaceholder')}
-        placeholderTextColor={theme.colors.subText}
-      />
-
-      <Text style={styles.label}>{t('appointments.date')} *</Text>
-      <TextInput
-        style={[styles.input, errors.date && styles.inputError]}
-        value={date}
-        onChangeText={(text) => {
-          setDate(text);
-          if (errors.date) {
-            setErrors({ ...errors, date: '' });
-          }
-        }}
-        placeholder="YYYY-MM-DD"
-        placeholderTextColor={theme.colors.subText}
-      />
-      {errors.date && <Text style={styles.errorText}>{errors.date}</Text>}
-
-      <Text style={styles.label}>{t('appointments.time')} *</Text>
-      <TextInput
-        style={[styles.input, errors.time && styles.inputError]}
-        value={time}
-        onChangeText={(text) => {
-          setTime(text);
-          if (errors.time) {
-            setErrors({ ...errors, time: '' });
-          }
-        }}
-        placeholder="HH:MM"
-        placeholderTextColor={theme.colors.subText}
-      />
-      {errors.time && <Text style={styles.errorText}>{errors.time}</Text>}
-
-      <Text style={styles.label}>{t('appointments.notes')}</Text>
-      <TextInput
-        style={[styles.input, styles.notesInput]}
-        value={notes}
-        onChangeText={setNotes}
-        placeholder={t('appointments.notesPlaceholder')}
-        placeholderTextColor={theme.colors.subText}
-        multiline
-        numberOfLines={4}
-      />
-
-      <View style={styles.switchRow}>
-        <Text style={styles.label}>{t('appointments.enableReminder')}</Text>
-        <Switch
-          value={reminderEnabled}
-          onValueChange={setReminderEnabled}
-          trackColor={{
-            false: theme.colors.border,
-            true: theme.colors.primary,
-          }}
-          thumbColor={theme.colors.surface}
-        />
-      </View>
-
-      <TouchableOpacity
-        style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-        onPress={handleSave}
-        disabled={loading}
+    <View>
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.content}
       >
-        <Text style={styles.saveButtonText}>
-          {isEdit ? t('appointments.update') : t('appointments.save')}
-        </Text>
-      </TouchableOpacity>
+        <Text style={styles.label}>{t('appointments.appointmentTitle')} *</Text>
+        <TextInput
+          style={[styles.input, errors.title && styles.inputError]}
+          value={title}
+          onChangeText={text => {
+            setTitle(text);
+            if (errors.title) {
+              setErrors({ ...errors, title: '' });
+            }
+          }}
+          placeholder={t('appointments.titlePlaceholder')}
+          placeholderTextColor={theme.colors.subText}
+        />
+        {errors.title && <Text style={styles.errorText}>{errors.title}</Text>}
 
-      <CalendarButton
-        title={title}
-        date={date}
-        time={time}
-        location={location}
-        notes={`Doctor: ${doctorName}\n${notes}`}
-      />
-    </ScrollView>
+        <Text style={styles.label}>{t('appointments.doctor')}</Text>
+        <TextInput
+          style={styles.input}
+          value={doctorName}
+          onChangeText={setDoctorName}
+          placeholder={t('appointments.doctorPlaceholder')}
+          placeholderTextColor={theme.colors.subText}
+        />
+
+        <Text style={styles.label}>{t('appointments.location')}</Text>
+        <TextInput
+          style={styles.input}
+          value={location}
+          onChangeText={setLocation}
+          placeholder={t('appointments.locationPlaceholder')}
+          placeholderTextColor={theme.colors.subText}
+        />
+
+        <Text style={styles.label}>{t('appointments.date')} *</Text>
+        <TextInput
+          style={[styles.input, errors.date && styles.inputError]}
+          value={date}
+          onChangeText={text => {
+            setDate(text);
+            if (errors.date) {
+              setErrors({ ...errors, date: '' });
+            }
+          }}
+          placeholder="YYYY-MM-DD"
+          placeholderTextColor={theme.colors.subText}
+        />
+        {errors.date && <Text style={styles.errorText}>{errors.date}</Text>}
+
+        <Text style={styles.label}>{t('appointments.time')} *</Text>
+        <TextInput
+          style={[styles.input, errors.time && styles.inputError]}
+          value={time}
+          onChangeText={text => {
+            setTime(text);
+            if (errors.time) {
+              setErrors({ ...errors, time: '' });
+            }
+          }}
+          placeholder="HH:MM"
+          placeholderTextColor={theme.colors.subText}
+        />
+        {errors.time && <Text style={styles.errorText}>{errors.time}</Text>}
+
+        <Text style={styles.label}>{t('appointments.notes')}</Text>
+        <TextInput
+          style={[styles.input, styles.notesInput]}
+          value={notes}
+          onChangeText={setNotes}
+          placeholder={t('appointments.notesPlaceholder')}
+          placeholderTextColor={theme.colors.subText}
+          multiline
+          numberOfLines={4}
+        />
+
+        <View style={styles.switchRow}>
+          <Text style={styles.label}>{t('appointments.enableReminder')}</Text>
+          <Switch
+            value={reminderEnabled}
+            onValueChange={setReminderEnabled}
+            trackColor={{
+              false: theme.colors.border,
+              true: theme.colors.primary,
+            }}
+            thumbColor={theme.colors.surface}
+          />
+        </View>
+
+        <TouchableOpacity
+          style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+          onPress={handleSave}
+          disabled={loading}
+        >
+          <Text style={styles.saveButtonText}>
+            {isEdit ? t('appointments.update') : t('appointments.save')}
+          </Text>
+        </TouchableOpacity>
+
+        <CalendarButton
+          title={title}
+          date={date}
+          time={time}
+          location={location}
+          notes={`Doctor: ${doctorName}\n${notes}`}
+        />
+      </ScrollView>
+    </View>
   );
 };
 

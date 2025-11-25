@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
@@ -56,7 +57,31 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
     }
   };
 
-  const handleTakePhoto = () => {
+  useEffect(() => {
+    if (route.params?.doctorName) {
+      setDoctorName(route.params.doctorName);
+    }
+  }, [route.params?.doctorName]);
+
+  const handleTakePhoto = async () => {
+    if (Platform.OS === 'web') {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e: any) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event: any) => {
+            setPhotoUri(event.target.result);
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
+      return;
+    }
+
     Alert.alert(t('prescriptions.addPhoto'), t('prescriptions.chooseOption'), [
       {
         text: t('prescriptions.takePhoto'),

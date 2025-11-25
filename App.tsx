@@ -5,6 +5,7 @@ import { AppNavigator } from './src/navigation/AppNavigator';
 import { notificationService } from './src/services/notificationService';
 import { ThemeProvider } from './src/context/ThemeContext';
 import { OfflineIndicator } from './src/components/OfflineIndicator';
+import { WebThemeHandler } from './src/components/WebThemeHandler';
 import './src/i18n'; // Initialize i18n
 
 const App = () => {
@@ -31,6 +32,7 @@ const App = () => {
   return (
     <ThemeProvider>
       <SafeAreaProvider>
+        <WebThemeHandler />
         <OfflineIndicator />
         <AppNavigator />
       </SafeAreaProvider>

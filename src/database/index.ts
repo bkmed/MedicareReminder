@@ -12,4 +12,3 @@ export * from './schema';
 
 // Note: All database operations use MMKV storage via storageService
 // No initialization needed - MMKV is ready to use on app startup
-
