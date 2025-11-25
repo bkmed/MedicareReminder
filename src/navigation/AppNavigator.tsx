@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
+  Image,
 } from 'react-native';
 import { enableScreens } from 'react-native-screens';
 import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
@@ -246,9 +247,16 @@ const WebNavigator = () => {
             },
           ]}
         >
-          <Text style={[webStyles.title, { color: theme.colors.text }]}>
-            {t('home.appName')}
-          </Text>
+          <View style={webStyles.brandContainer}>
+            <Image
+              source={require('../../public/logo.png')}
+              style={webStyles.logo}
+              resizeMode="contain"
+            />
+            <Text style={[webStyles.title, { color: theme.colors.text }]}>
+              {t('home.appName')}
+            </Text>
+          </View>
           <View style={webStyles.navButtons}>
             {[
               ['Home', t('navigation.home')],
@@ -310,10 +318,20 @@ const webStyles = StyleSheet.create({
     height: 60,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     elevation: 3,
   },
-  title: { fontSize: 20, fontWeight: 'bold', marginRight: 40 },
+  brandContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  logo: {
+    width: 40,
+    height: 40,
+  },
+  title: { fontSize: 20, fontWeight: 'bold' },
   navButtons: { flexDirection: 'row', gap: 20 },
   navButton: { paddingVertical: 8, paddingHorizontal: 16 },
   navButtonText: { fontSize: 16 },

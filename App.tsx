@@ -8,7 +8,11 @@ import { OfflineIndicator } from './src/components/OfflineIndicator';
 import { WebThemeHandler } from './src/components/WebThemeHandler';
 import './src/i18n'; // Initialize i18n
 
+import { LoadingScreen } from './src/components/LoadingScreen';
+
 const App = () => {
+  const [loading, setLoading] = React.useState(true);
+
   useEffect(() => {
     // Initialize notifications (native only)
     // Note: MMKV storage is ready to use immediately, no initialization needed
@@ -23,11 +27,21 @@ const App = () => {
         }
       } catch (error) {
         console.error('Error initializing app:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     initialize();
   }, []);
+
+  if (loading) {
+    return (
+      <ThemeProvider>
+        <LoadingScreen />
+      </ThemeProvider>
+    );
+  }
 
   return (
     <ThemeProvider>

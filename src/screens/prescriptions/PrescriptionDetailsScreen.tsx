@@ -13,6 +13,7 @@ import { Prescription } from '../../database/schema';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
+import { LoadingScreen } from '../../components/LoadingScreen';
 
 export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
   const { prescriptionId } = route.params;
@@ -64,11 +65,7 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
   };
 
   if (loading || !prescription) {
-    return (
-      <View style={styles.container}>
-        <Text style={{ color: theme.colors.text }}>Loading...</Text>
-      </View>
-    );
+    return <LoadingScreen />;
   }
 
   return (

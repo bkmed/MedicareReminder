@@ -10,6 +10,7 @@ import {
   Platform,
   I18nManager,
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
 import { storageService } from '../../services/storage';
 import { useTheme } from '../../context/ThemeContext';
@@ -190,24 +191,23 @@ export const ProfileScreen = ({ navigation }: any) => {
         {/* Language Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('profile.language')}</Text>
-          {LANGUAGES.map(lang => (
-            <TouchableOpacity
-              key={lang.code}
-              style={[
-                styles.languageRow,
-                currentLanguage === lang.code && styles.languageRowActive,
-              ]}
-              onPress={() => handleLanguageChange(lang.code)}
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={currentLanguage}
+              onValueChange={(itemValue) => handleLanguageChange(itemValue)}
+              style={styles.picker}
+              dropdownIconColor={theme.colors.text}
             >
-              <View style={styles.languageInfo}>
-                <Text style={styles.languageFlag}>{lang.flag}</Text>
-                <Text style={styles.languageName}>{lang.name}</Text>
-              </View>
-              {currentLanguage === lang.code && (
-                <Text style={styles.checkmark}>✓</Text>
-              )}
-            </TouchableOpacity>
-          ))}
+              {LANGUAGES.map(lang => (
+                <Picker.Item
+                  key={lang.code}
+                  label={`${lang.flag} ${lang.name}`}
+                  value={lang.code}
+                  color={Platform.OS === 'ios' ? theme.colors.text : undefined}
+                />
+              ))}
+            </Picker>
+          </View>
         </View>
 
         {/* Permissions Section */}
@@ -352,36 +352,16 @@ const createStyles = (theme: Theme) =>
       ...theme.textVariants.body,
       color: theme.colors.text,
     },
-    languageRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: theme.spacing.m,
-      paddingHorizontal: theme.spacing.s,
+    pickerContainer: {
+      backgroundColor: theme.colors.background,
       borderRadius: theme.spacing.s,
-      marginBottom: theme.spacing.xs,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      overflow: 'hidden',
     },
-    languageRowActive: {
-      backgroundColor: theme.colors.primaryBackground,
-    },
-    languageInfo: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    languageFlag: {
-      fontSize: 24,
-      marginRight: theme.spacing.m,
-    },
-    languageName: {
-      ...theme.textVariants.body,
+    picker: {
       color: theme.colors.text,
-      fontSize: 16,
-    },
-    checkmark: {
-      ...theme.textVariants.body,
-      color: theme.colors.primary,
-      fontSize: 20,
-      fontWeight: 'bold',
+      backgroundColor: theme.colors.background,
     },
     permissionRow: {
       flexDirection: 'row',

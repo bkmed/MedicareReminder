@@ -15,6 +15,7 @@ import { Doctor, Appointment } from '../../database/schema';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
+import { LoadingScreen } from '../../components/LoadingScreen';
 
 export const DoctorDetailsScreen = ({ navigation, route }: any) => {
   const { doctorId } = route.params;
@@ -32,7 +33,7 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? useContext(WebNavigationContext)
-    : { setActiveTab: () => {} }; // fallback pour mobile
+    : { setActiveTab: () => { } }; // fallback pour mobile
 
   const navigateToAddAppointment = () => {
     if (Platform.OS === 'web') {
@@ -148,11 +149,7 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
   );
 
   if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={{ color: theme.colors.text }}>Loading...</Text>
-      </View>
-    );
+    return <LoadingScreen />;
   }
 
   if (!doctor) return null;
