@@ -42,7 +42,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   }, [medicationId]);
 
   useEffect(() => {
-    navigation.setOptions({
+    navigation?.setOptions({
       title: isEdit ? t('medications.edit') : t('medications.add'),
     });
   }, [isEdit, navigation, t]);

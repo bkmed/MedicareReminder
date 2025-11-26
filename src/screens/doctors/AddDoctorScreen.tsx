@@ -65,7 +65,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
   }, [doctorId]);
 
   useEffect(() => {
-    navigation.setOptions({
+    navigation?.setOptions({
       title: isEdit ? t('doctors.edit') : t('doctors.add'),
     });
   }, [isEdit, navigation, t]);

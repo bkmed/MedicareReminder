@@ -51,7 +51,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   }, [appointmentId]);
 
   useEffect(() => {
-    navigation.setOptions({
+    navigation?.setOptions({
       title: isEdit ? t('appointments.edit') : t('appointments.add'),
     });
   }, [isEdit, navigation, t]);
