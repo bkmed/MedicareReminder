@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  Platform,
 } from 'react-native';
 import { prescriptionsDb } from '../../database/prescriptionsDb';
 import { Prescription } from '../../database/schema';
@@ -22,6 +23,23 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [prescription, setPrescription] = useState<Prescription | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const WebNavigationContext =
+    Platform.OS === 'web'
+      ? require('../../navigation/AppNavigator').WebNavigationContext
+      : null;
+
+  const { setActiveTab } = WebNavigationContext
+    ? useContext(WebNavigationContext)
+    : { setActiveTab: () => { } };
+
+  const navigateBack = () => {
+    if (Platform.OS === 'web') {
+      setActiveTab('Prescriptions');
+    } else {
+      navigation.goBack();
+    }
+  };
 
   useEffect(() => {
     loadPrescription();
@@ -50,7 +68,7 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
           onPress: async () => {
             try {
               await prescriptionsDb.delete(prescriptionId);
-              navigation.goBack();
+              navigateBack();
             } catch (error) {
               Alert.alert('Error', 'Failed to delete prescription');
             }

@@ -50,6 +50,12 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
     if (isEdit) loadAppointment();
   }, [appointmentId]);
 
+  useEffect(() => {
+    navigation.setOptions({
+      title: isEdit ? t('appointments.edit') : t('appointments.add'),
+    });
+  }, [isEdit, navigation, t]);
+
   const loadAppointment = async () => {
     try {
       const appt = await appointmentsDb.getById(appointmentId);

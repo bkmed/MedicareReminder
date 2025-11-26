@@ -41,6 +41,12 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
     if (isEdit) loadMedication();
   }, [medicationId]);
 
+  useEffect(() => {
+    navigation.setOptions({
+      title: isEdit ? t('medications.edit') : t('medications.add'),
+    });
+  }, [isEdit, navigation, t]);
+
   const WebNavigationContext =
     Platform.OS === 'web'
       ? require('../../navigation/AppNavigator').WebNavigationContext
@@ -48,7 +54,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? useContext(WebNavigationContext)
-    : { setActiveTab: () => {} }; // fallback pour mobile
+    : { setActiveTab: () => { } }; // fallback pour mobile
 
   const loadMedication = async () => {
     if (!medicationId) return;

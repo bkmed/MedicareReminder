@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useMemo, useContext } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useContext,
+  useCallback,
+} from 'react';
 import {
   View,
   Text,
@@ -8,7 +14,7 @@ import {
   ActivityIndicator,
   Platform,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { medicationsDb } from '../database/medicationsDb';
 import { appointmentsDb } from '../database/appointmentsDb';
@@ -29,9 +35,11 @@ export const HomeScreen = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadSummary();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadSummary();
+    }, []),
+  );
 
   const loadSummary = async () => {
     try {
@@ -59,20 +67,22 @@ export const HomeScreen = () => {
       ? useContext(require('../navigation/AppNavigator').WebNavigationContext)
       : null;
 
-  const setActiveTab = webContext?.setActiveTab || (() => {});
+  const setActiveTab = webContext?.setActiveTab || (() => { });
 
   const navigateToTab = (tab: string, screen?: string) => {
     if (Platform.OS === 'web') {
+      // For web, clear subScreen to go to the list view
       setActiveTab(tab, screen);
     } else {
+      // For native, navigate to the appropriate tab
       const stackScreen =
-        tab === 'medications'
+        tab === 'medications' || tab === 'Medications'
           ? 'MedicationsTab'
-          : tab === 'appointments'
-          ? 'AppointmentsTab'
-          : tab === 'analytics'
-          ? 'Analytics'
-          : undefined;
+          : tab === 'appointments' || tab === 'Appointments'
+            ? 'AppointmentsTab'
+            : tab === 'analytics'
+              ? 'Analytics'
+              : undefined;
 
       if (stackScreen) {
         navigation.navigate(
@@ -107,7 +117,7 @@ export const HomeScreen = () => {
         <View style={styles.statsContainer}>
           <TouchableOpacity
             style={[styles.statCard, styles.statCardBlue]}
-            onPress={() => navigateToTab('medications')}
+            onPress={() => navigateToTab('Medications')}
           >
             <Text style={styles.statNumber}>{summary.medications}</Text>
             <Text style={styles.statLabel}>{t('home.activeMedications')}</Text>
@@ -115,7 +125,7 @@ export const HomeScreen = () => {
 
           <TouchableOpacity
             style={[styles.statCard, styles.statCardGreen]}
-            onPress={() => navigateToTab('appointments')}
+            onPress={() => navigateToTab('Appointments')}
           >
             <Text style={styles.statNumber}>
               {summary.upcomingAppointments}

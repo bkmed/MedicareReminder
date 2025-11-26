@@ -247,7 +247,10 @@ const WebNavigator = () => {
             },
           ]}
         >
-          <View style={webStyles.brandContainer}>
+          <TouchableOpacity
+            style={webStyles.brandContainer}
+            onPress={() => setActiveTab('Home')}
+          >
             <Image
               source={require('../../public/logo.png')}
               style={webStyles.logo}
@@ -256,7 +259,7 @@ const WebNavigator = () => {
             <Text style={[webStyles.title, { color: theme.colors.text }]}>
               {t('home.appName')}
             </Text>
-          </View>
+          </TouchableOpacity>
           <View style={webStyles.navButtons}>
             {[
               ['Home', t('navigation.home')],

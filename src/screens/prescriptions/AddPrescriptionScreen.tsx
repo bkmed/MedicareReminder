@@ -41,6 +41,12 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
     if (isEdit) loadPrescription();
   }, [prescriptionId]);
 
+  useEffect(() => {
+    navigation.setOptions({
+      title: isEdit ? t('prescriptions.edit') : t('prescriptions.add'),
+    });
+  }, [isEdit, navigation, t]);
+
   const WebNavigationContext =
     Platform.OS === 'web'
       ? require('../../navigation/AppNavigator').WebNavigationContext

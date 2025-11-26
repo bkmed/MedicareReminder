@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
 import { medicationsDb } from '../../database/medicationsDb';
 import { notificationService } from '../../services/notificationService';
@@ -21,6 +22,23 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [medication, setMedication] = useState<Medication | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const WebNavigationContext =
+    Platform.OS === 'web'
+      ? require('../../navigation/AppNavigator').WebNavigationContext
+      : null;
+
+  const { setActiveTab } = WebNavigationContext
+    ? useContext(WebNavigationContext)
+    : { setActiveTab: () => { } };
+
+  const navigateBack = () => {
+    if (Platform.OS === 'web') {
+      setActiveTab('Medications');
+    } else {
+      navigation.goBack();
+    }
+  };
 
   useEffect(() => {
     loadMedication();
@@ -50,7 +68,7 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
             try {
               await medicationsDb.delete(medicationId);
               await notificationService.cancelMedicationReminders(medicationId);
-              navigation.goBack();
+              navigateBack();
             } catch (error) {
               Alert.alert(t('medicationDetails.errorDeleteFailed'));
             }

@@ -41,7 +41,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? useContext(WebNavigationContext)
-    : { setActiveTab: () => {} }; // fallback pour mobile
+    : { setActiveTab: () => { } }; // fallback pour mobile
 
   const specialtyOptions = useMemo(() => {
     return MEDICAL_SPECIALTIES.map(key => ({
@@ -63,6 +63,12 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
       loadDoctor();
     }
   }, [doctorId]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: isEdit ? t('doctors.edit') : t('doctors.add'),
+    });
+  }, [isEdit, navigation, t]);
 
   const loadDoctor = async () => {
     if (!doctorId) return;

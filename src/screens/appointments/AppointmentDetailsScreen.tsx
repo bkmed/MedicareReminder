@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useContext } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
 import { appointmentsDb } from '../../database/appointmentsDb';
 import { notificationService } from '../../services/notificationService';
@@ -21,6 +22,23 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const WebNavigationContext =
+    Platform.OS === 'web'
+      ? require('../../navigation/AppNavigator').WebNavigationContext
+      : null;
+
+  const { setActiveTab } = WebNavigationContext
+    ? useContext(WebNavigationContext)
+    : { setActiveTab: () => { } };
+
+  const navigateBack = () => {
+    if (Platform.OS === 'web') {
+      setActiveTab('Appointments');
+    } else {
+      navigation.goBack();
+    }
+  };
 
   useEffect(() => {
     loadAppointment();
@@ -52,7 +70,7 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
               await notificationService.cancelAppointmentReminder(
                 appointmentId,
               );
-              navigation.goBack();
+              navigateBack();
             } catch (error) {
               Alert.alert(t('appointmentDetails.errorDeleteFailed'));
             }
