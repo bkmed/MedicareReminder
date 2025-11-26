@@ -18,6 +18,7 @@ import { HomeScreen } from '../screens/HomeScreen';
 import { MedicationListScreen } from '../screens/medications/MedicationListScreen';
 import { AddMedicationScreen } from '../screens/medications/AddMedicationScreen';
 import { MedicationDetailsScreen } from '../screens/medications/MedicationDetailsScreen';
+import { MedicationHistoryScreen } from '../screens/medications/MedicationHistoryScreen';
 import { AppointmentListScreen } from '../screens/appointments/AppointmentListScreen';
 import { AddAppointmentScreen } from '../screens/appointments/AddAppointmentScreen';
 import { AppointmentDetailsScreen } from '../screens/appointments/AppointmentDetailsScreen';
@@ -61,6 +62,11 @@ const MedicationsStack = () => {
         name="MedicationDetails"
         component={MedicationDetailsScreen}
         options={{ title: t('medications.details') }}
+      />
+      <Stack.Screen
+        name="MedicationHistory"
+        component={MedicationHistoryScreen}
+        options={{ title: 'Medication History' }}
       />
     </Stack.Navigator>
   );

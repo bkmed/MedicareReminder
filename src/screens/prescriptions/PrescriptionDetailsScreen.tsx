@@ -136,6 +136,13 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
         )}
 
         <TouchableOpacity
+          style={styles.button}
+          onPress={() => Alert.alert('View History', 'Prescription history tracking is not available yet.')}
+        >
+          <Text style={styles.buttonText}>View History</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           style={[styles.button, styles.editButton]}
           onPress={handleEdit}
         >
