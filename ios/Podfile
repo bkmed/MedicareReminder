@@ -49,6 +49,19 @@ target 'MedicareReminder' do
       # :ccache_enabled => true
     )
 
+    # Fix for Xcode User Script Sandboxing causing Hermes build errors
+    # Disable for main project
+    installer.pods_project.build_configurations.each do |config|
+      config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
+    end
+    
+    # Disable for all pod targets
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        config.build_settings['ENABLE_USER_SCRIPT_SANDBOXING'] = 'NO'
+      end
+    end
+
     # Détection du type de machine
     arch = `uname -m`.strip
 
