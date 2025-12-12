@@ -96,8 +96,9 @@
         "details": "تفاصيل الدواء",
         "active": "نشط",
         "inactive": "غير نشط",
-        "noMedications": "لا توجد أدوية",
-        "addFirst": "أضف دوائك الأول للبدء"
+        "noMedications": "لم يتم العثور على أدوية",
+        "addFirst": "أضف دواءك الأول للبدء",
+        "urgent": "عاجل"
     },
     "appointments": {
         "title": "المواعيد",

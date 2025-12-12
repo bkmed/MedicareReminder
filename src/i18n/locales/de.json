@@ -97,7 +97,8 @@
         "active": "Aktiv",
         "inactive": "Inaktiv",
         "noMedications": "Keine Medikamente gefunden",
-        "addFirst": "Fügen Sie Ihr erstes Medikament hinzu, um zu beginnen"
+        "addFirst": "Fügen Sie Ihr erstes Medikament hinzu, um zu beginnen",
+        "urgent": "DRINGEND"
     },
     "appointments": {
         "title": "Termine",

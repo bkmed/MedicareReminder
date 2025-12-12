@@ -98,7 +98,8 @@
     "active": "Active",
     "inactive": "Inactive",
     "noMedications": "No medications found",
-    "addFirst": "Add your first medication to get started"
+    "addFirst": "Add your first medication to get started",
+    "urgent": "URGENT"
   },
   "appointments": {
     "title": "Appointments",

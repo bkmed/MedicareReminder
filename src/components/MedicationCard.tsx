@@ -1,5 +1,5 @@
-import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Medication } from '../database/schema';
 
 interface MedicationCardProps {
@@ -11,6 +11,7 @@ export const MedicationCard: React.FC<MedicationCardProps> = ({
   medication,
   onPress,
 }) => {
+  const { t } = useTranslation();
   const times = JSON.parse(medication.times) as string[];
 
   return (
@@ -20,7 +21,7 @@ export const MedicationCard: React.FC<MedicationCardProps> = ({
           <Text style={styles.name}>{medication.name}</Text>
           {medication.isUrgent && (
             <View style={styles.urgentBadge}>
-              <Text style={styles.urgentText}>URGENT</Text>
+              <Text style={styles.urgentText}>{t('medications.urgent')}</Text>
             </View>
           )}
         </View>
