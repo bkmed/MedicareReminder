@@ -25,7 +25,7 @@ setup_permissions([
   'Calendars'
 ])
 
-target 'MedicareReminder' do
+target 'medicarereminder' do
   config = use_native_modules!
   
   use_frameworks! :linkage => :static

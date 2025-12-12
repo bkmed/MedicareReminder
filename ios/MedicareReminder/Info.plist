@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>MedicareReminder</string>
+	<string>medicarereminder</string>
 	<key>CFBundleDocumentTypes</key>
     <array/>
 	<key>CFBundleExecutable</key>

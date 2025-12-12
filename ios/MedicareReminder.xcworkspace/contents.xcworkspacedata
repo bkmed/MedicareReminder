@@ -2,9 +2,12 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:MedicareReminder.xcodeproj">
+      location = "group:medicarereminder.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:Pods/Pods.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:MedicareReminder.xcodeproj">
    </FileRef>
 </Workspace>
