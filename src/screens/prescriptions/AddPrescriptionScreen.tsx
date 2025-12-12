@@ -13,6 +13,8 @@ import {
 import { useTranslation } from 'react-i18next';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { prescriptionsDb } from '../../database/prescriptionsDb';
+import { medicationsDb } from '../../database/medicationsDb';
+import { Medication } from '../../database/schema';
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
@@ -27,7 +29,9 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const isEdit = !!prescriptionId;
   const initialDoctorName = route?.params?.doctorName || '';
 
-  const [medicationName, setMedicationName] = useState('');
+  const [allMedications, setAllMedications] = useState<Medication[]>([]);
+  const [selectedMedicationIds, setSelectedMedicationIds] = useState<number[]>([]);
+  const [medicationName, setMedicationName] = useState(''); // Fallback or computed
   const [doctorName, setDoctorName] = useState(initialDoctorName);
   const [issueDate, setIssueDate] = useState<Date | null>(new Date());
   const [expiryDate, setExpiryDate] = useState<Date | null>(null);
@@ -35,6 +39,10 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadMedications();
+  }, []);
 
   useEffect(() => {
     if (isEdit) loadPrescription();
@@ -55,6 +63,15 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
     ? useContext(WebNavigationContext)
     : { setActiveTab: () => { } };
 
+  const loadMedications = async () => {
+    try {
+      const data = await medicationsDb.getAll();
+      setAllMedications(data);
+    } catch (error) {
+      console.error('Error loading medications', error);
+    }
+  };
+
   const loadPrescription = async () => {
     if (!prescriptionId) return;
     try {
@@ -68,6 +85,14 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         setExpiryDate(prescription.expiryDate ? new Date(prescription.expiryDate) : null);
         setPhotoUri(prescription.photoUri || '');
         setNotes(prescription.notes || '');
+
+        if (prescription.medicationIds) {
+          try {
+            setSelectedMedicationIds(JSON.parse(prescription.medicationIds));
+          } catch (e) {
+            console.error('Error parsing medicationIds', e);
+          }
+        }
       }
     } catch (error) {
       Alert.alert(t('common.error'), t('prescriptions.loadError'));
@@ -116,9 +141,19 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
     ]);
   };
 
+  const toggleMedicationSelection = (id: number) => {
+    if (selectedMedicationIds.includes(id)) {
+      setSelectedMedicationIds(selectedMedicationIds.filter(mid => mid !== id));
+    } else {
+      setSelectedMedicationIds([...selectedMedicationIds, id]);
+    }
+  };
+
   const handleSave = async () => {
     const newErrors: { [key: string]: string } = {};
-    if (!medicationName.trim()) newErrors.medicationName = t('common.required');
+    if (selectedMedicationIds.length === 0 && !medicationName.trim()) {
+      newErrors.medicationName = t('common.required');
+    }
     if (!issueDate) newErrors.issueDate = t('common.required');
 
     // Validate Expiry Date > Issue Date
@@ -131,8 +166,18 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
     setLoading(true);
     try {
+      // Compute medication name from selected IDs if available
+      let computedMedicationName = medicationName.trim();
+      if (selectedMedicationIds.length > 0) {
+        const selectedNames = allMedications
+          .filter(m => m.id && selectedMedicationIds.includes(m.id))
+          .map(m => m.name);
+        computedMedicationName = selectedNames.join(', ');
+      }
+
       const prescriptionData = {
-        medicationName: medicationName.trim(),
+        medicationName: computedMedicationName,
+        medicationIds: JSON.stringify(selectedMedicationIds),
         doctorName: doctorName.trim() || undefined,
         issueDate: issueDate!.toISOString().split('T')[0],
         expiryDate: expiryDate ? expiryDate.toISOString().split('T')[0] : undefined,
@@ -196,6 +241,39 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         <Text style={styles.label}>
           {t('prescriptions.medicationNameLabel')} *
         </Text>
+
+        {/* Medication Selection List */}
+        <View style={styles.medicationListContainer}>
+          {allMedications.map(med => {
+            const isSelected = med.id ? selectedMedicationIds.includes(med.id) : false;
+            return (
+              <TouchableOpacity
+                key={med.id}
+                style={[
+                  styles.medicationItem,
+                  isSelected && styles.medicationItemSelected,
+                ]}
+                onPress={() => med.id && toggleMedicationSelection(med.id)}
+              >
+                <Text
+                  style={[
+                    styles.medicationItemText,
+                    isSelected && styles.medicationItemTextSelected,
+                  ]}
+                >
+                  {med.name} {med.dosage ? `(${med.dosage})` : ''}
+                </Text>
+                {isSelected && <Text style={styles.checkmark}>✓</Text>}
+              </TouchableOpacity>
+            );
+          })}
+          {allMedications.length === 0 && (
+            <Text style={styles.noMedicationsText}>{t('medications.empty')}</Text>
+          )}
+        </View>
+
+        <Text style={styles.orLabel}>- {t('common.or')} -</Text>
+
         <TextInput
           style={[styles.input, errors.medicationName && styles.inputError]}
           value={medicationName}
@@ -204,7 +282,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
             if (errors.medicationName)
               setErrors({ ...errors, medicationName: '' });
           }}
-          placeholder={t('prescriptions.medicationPlaceholder')}
+          placeholder={t('prescriptions.medicationPlaceholder')} // "Or type manually..."
           placeholderTextColor={theme.colors.subText}
         />
         {errors.medicationName && (
@@ -325,5 +403,49 @@ const createStyles = (theme: Theme) =>
       fontSize: 12,
       marginTop: 4,
       marginLeft: 4,
+    },
+    medicationListContainer: {
+      backgroundColor: theme.colors.surface,
+      borderRadius: theme.spacing.s,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      maxHeight: 200, // Scrollable if needed, but wrapper is ScrollView
+      overflow: 'hidden',
+    },
+    medicationItem: {
+      padding: theme.spacing.m,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    medicationItemSelected: {
+      backgroundColor: theme.colors.primaryBackground,
+    },
+    medicationItemText: {
+      ...theme.textVariants.body,
+      color: theme.colors.text,
+    },
+    medicationItemTextSelected: {
+      color: theme.colors.primary,
+      fontWeight: '600',
+    },
+    checkmark: {
+      color: theme.colors.primary,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    noMedicationsText: {
+      padding: theme.spacing.m,
+      textAlign: 'center',
+      color: theme.colors.subText,
+      fontStyle: 'italic',
+    },
+    orLabel: {
+      textAlign: 'center',
+      marginVertical: theme.spacing.m,
+      color: theme.colors.subText,
+      fontWeight: '600',
     },
   });

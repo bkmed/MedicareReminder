@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
+  Image,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { doctorsDb } from '../../database/doctorsDb';
@@ -159,17 +160,28 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.card}>
           <View style={styles.header}>
-            <View>
-              <Text style={styles.name}>
-                {t('doctors.doctor')} {doctor.name}
-              </Text>
-              {doctor.specialty && (
-                <Text style={styles.specialty}>
-                  {t(`specialties.${doctor.specialty}`, {
-                    defaultValue: doctor.specialty,
-                  })}
-                </Text>
+            <View style={styles.doctorInfoContainer}>
+              {doctor.photoUri ? (
+                <Image source={{ uri: doctor.photoUri }} style={styles.doctorPhoto} />
+              ) : (
+                <View style={[styles.doctorPhoto, styles.doctorPhotoPlaceholder]}>
+                  <Text style={styles.doctorPhotoPlaceholderText}>
+                    {doctor.name.charAt(0)}
+                  </Text>
+                </View>
               )}
+              <View>
+                <Text style={styles.name}>
+                  {t('doctors.doctor')} {doctor.name}
+                </Text>
+                {doctor.specialty && (
+                  <Text style={styles.specialty}>
+                    {t(`specialties.${doctor.specialty}`, {
+                      defaultValue: doctor.specialty,
+                    })}
+                  </Text>
+                )}
+              </View>
             </View>
             <View style={styles.actions}>
               <TouchableOpacity
@@ -283,6 +295,27 @@ const createStyles = (theme: Theme) =>
       justifyContent: 'space-between',
       alignItems: 'flex-start',
       marginBottom: theme.spacing.m,
+    },
+    doctorInfoContainer: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing.m,
+    },
+    doctorPhoto: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+    },
+    doctorPhotoPlaceholder: {
+      backgroundColor: theme.colors.primaryBackground,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    doctorPhotoPlaceholderText: {
+      color: theme.colors.primary,
+      fontSize: 24,
+      fontWeight: 'bold',
     },
     name: {
       ...theme.textVariants.header,

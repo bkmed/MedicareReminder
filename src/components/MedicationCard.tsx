@@ -16,7 +16,14 @@ export const MedicationCard: React.FC<MedicationCardProps> = ({
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={styles.header}>
-        <Text style={styles.name}>{medication.name}</Text>
+        <View style={styles.nameContainer}>
+          <Text style={styles.name}>{medication.name}</Text>
+          {medication.isUrgent && (
+            <View style={styles.urgentBadge}>
+              <Text style={styles.urgentText}>URGENT</Text>
+            </View>
+          )}
+        </View>
         <Text style={styles.dosage}>{medication.dosage}</Text>
       </View>
 
@@ -62,6 +69,23 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
     flex: 1,
+  },
+  nameContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  urgentBadge: {
+    backgroundColor: '#FF3B30', // Red
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  urgentText: {
+    color: '#FFF',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   dosage: {
     fontSize: 14,

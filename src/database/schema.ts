@@ -8,6 +8,7 @@ export interface Medication {
   endDate?: string; // ISO date string, optional for ongoing medications
   notes?: string;
   reminderEnabled: boolean;
+  isUrgent?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -36,6 +37,7 @@ export interface Appointment {
 export interface Prescription {
   id?: number;
   medicationName: string;
+  medicationIds?: string; // JSON string of number[] linking to Medication.id
   doctorName?: string;
   doctorId?: number;
   issueDate: string;
@@ -61,6 +63,7 @@ export interface Doctor {
   phone?: string;
   email?: string;
   address?: string;
+  photoUri?: string;
   notes?: string;
   createdAt: string;
   updatedAt: string;

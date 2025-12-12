@@ -7,9 +7,11 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Image,
   Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { doctorsDb } from '../../database/doctorsDb';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
@@ -30,6 +32,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
+  const [photoUri, setPhotoUri] = useState('');
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
@@ -80,11 +83,54 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
         setPhone(doctor.phone || '');
         setEmail(doctor.email || '');
         setAddress(doctor.address || '');
+        setPhotoUri(doctor.photoUri || '');
         setNotes(doctor.notes || '');
       }
     } catch (error) {
       Alert.alert(t('common.error'), t('doctors.loadError'));
     }
+  };
+
+  const handleTakePhoto = async () => {
+    if (Platform.OS === 'web') {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e: any) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event: any) => setPhotoUri(event.target.result);
+          reader.readAsDataURL(file);
+        }
+      };
+      input.click();
+      return;
+    }
+
+    Alert.alert(t('prescriptions.addPhoto'), t('prescriptions.chooseOption'), [
+      {
+        text: t('prescriptions.takePhoto'),
+        onPress: () => {
+          launchCamera({ mediaType: 'photo', quality: 0.8 }, response => {
+            if (response.assets && response.assets[0]?.uri) {
+              setPhotoUri(response.assets[0].uri);
+            }
+          });
+        },
+      },
+      {
+        text: t('prescriptions.chooseFromLibrary'),
+        onPress: () => {
+          launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, response => {
+            if (response.assets && response.assets[0]?.uri) {
+              setPhotoUri(response.assets[0].uri);
+            }
+          });
+        },
+      },
+      { text: t('common.cancel'), style: 'cancel' },
+    ]);
   };
 
   const handleSave = async () => {
@@ -106,6 +152,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
         phone: phone || undefined,
         email: email || undefined,
         address: address || undefined,
+        photoUri: photoUri || undefined,
         notes: notes || undefined,
       };
 
@@ -150,6 +197,18 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
+        <TouchableOpacity style={styles.photoButton} onPress={handleTakePhoto}>
+          {photoUri ? (
+            <Image source={{ uri: photoUri }} style={styles.photo} />
+          ) : (
+            <View style={styles.photoPlaceholder}>
+              <Text style={styles.photoPlaceholderText}>
+                {t('prescriptions.photoButton')}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
         <Text style={styles.label}>{t('doctors.name')} *</Text>
         <TextInput
           style={[styles.input, errors.name && styles.inputError]}
@@ -246,6 +305,26 @@ const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: { backgroundColor: theme.colors.background },
     content: { padding: theme.spacing.m },
+    photoButton: { alignItems: 'center', marginBottom: theme.spacing.l },
+    photo: { width: 120, height: 120, borderRadius: 60 },
+    photoPlaceholder: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      backgroundColor: theme.colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderWidth: 2,
+      borderColor: theme.colors.primary,
+      borderStyle: 'dashed',
+    },
+    photoPlaceholderText: {
+      ...theme.textVariants.body,
+      color: theme.colors.primary,
+      textAlign: 'center',
+      fontSize: 12,
+      padding: 4,
+    },
     label: {
       ...theme.textVariants.caption,
       fontWeight: '600',

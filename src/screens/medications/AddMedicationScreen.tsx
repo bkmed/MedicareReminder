@@ -33,6 +33,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [notes, setNotes] = useState('');
   const [reminderEnabled, setReminderEnabled] = useState(true);
+  const [isUrgent, setIsUrgent] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
 
@@ -85,6 +86,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
         setEndDate(med.endDate ? new Date(med.endDate) : null);
         setNotes(med.notes || '');
         setReminderEnabled(!!med.reminderEnabled);
+        setIsUrgent(!!med.isUrgent);
       }
     } catch (error) {
       Alert.alert(t('common.error'), t('medications.loadError'));
@@ -121,6 +123,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
         endDate: endDate ? endDate.toISOString().split('T')[0] : undefined,
         notes: notes.trim() || undefined,
         reminderEnabled,
+        isUrgent,
       };
 
       let id: number;
@@ -280,6 +283,19 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
             trackColor={{
               false: theme.colors.border,
               true: theme.colors.primary,
+            }}
+            thumbColor={theme.colors.surface}
+          />
+        </View>
+
+        <View style={styles.switchRow}>
+          <Text style={styles.label}>{t('medications.isUrgent')}</Text>
+          <Switch
+            value={isUrgent}
+            onValueChange={setIsUrgent}
+            trackColor={{
+              false: theme.colors.border,
+              true: theme.colors.error,
             }}
             thumbColor={theme.colors.surface}
           />

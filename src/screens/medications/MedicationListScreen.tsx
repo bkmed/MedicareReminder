@@ -49,7 +49,13 @@ export const MedicationListScreen = ({ navigation }: any) => {
       med =>
         med.name.toLowerCase().includes(lowerQuery) ||
         med.dosage.toLowerCase().includes(lowerQuery),
-    );
+    ).sort((a, b) => {
+      // Sort by urgency first
+      if (a.isUrgent && !b.isUrgent) return -1;
+      if (!a.isUrgent && b.isUrgent) return 1;
+      // Then by name
+      return a.name.localeCompare(b.name);
+    });
   }, [medications, searchQuery]);
 
   const handleMedicationPress = (medication: Medication) => {

@@ -29,6 +29,18 @@ export const notificationService = {
         });
     },
 
+    checkPermissions: async () => {
+        if (Platform.OS === 'web') return false;
+        const settings = await notifee.getNotificationSettings();
+        return settings.authorizationStatus >= 1; // 1 = Authorized, 2 = Provisional
+    },
+
+    requestPermission: async () => {
+        if (Platform.OS === 'web') return false;
+        const settings = await notifee.requestPermission();
+        return settings.authorizationStatus >= 1;
+    },
+
     // Schedule medication reminders
     scheduleMedicationReminders: async (medication: Medication) => {
         if (Platform.OS === 'web') return;

@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { medicationsDb } from '../database/medicationsDb';
 import { appointmentsDb } from '../database/appointmentsDb';
 import { prescriptionsDb } from '../database/prescriptionsDb';
+import { notificationService } from '../services/notificationService';
 import { useTheme } from '../context/ThemeContext';
 import { Theme } from '../theme';
 
@@ -34,12 +35,25 @@ export const HomeScreen = () => {
     expiringPrescriptions: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [hasNotificationPermission, setHasNotificationPermission] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
       loadSummary();
+      checkPermission();
     }, []),
   );
+
+  const checkPermission = async () => {
+    if (Platform.OS === 'web') return;
+    const hasPermission = await notificationService.checkPermissions();
+    setHasNotificationPermission(hasPermission);
+  };
+
+  const handleEnableNotifications = async () => {
+    const granted = await notificationService.requestPermission();
+    setHasNotificationPermission(granted);
+  };
 
   const loadSummary = async () => {
     try {
@@ -201,10 +215,15 @@ export const HomeScreen = () => {
         </TouchableOpacity>
 
         {/* Tips Section */}
-        <View style={styles.tipCard}>
-          <Text style={styles.tipIcon}>💡</Text>
-          <Text style={styles.tipText}>{t('home.tip')}</Text>
-        </View>
+        {!hasNotificationPermission && (
+          <TouchableOpacity
+            style={styles.tipCard}
+            onPress={handleEnableNotifications}
+          >
+            <Text style={styles.tipIcon}>💡</Text>
+            <Text style={styles.tipText}>{t('home.tip')}</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
     </View>
   );
