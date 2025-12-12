@@ -31,7 +31,7 @@ jobs:
         run: npm ci --legacy-peer-deps
 
       - name: Build Web
-        run: npm run build-web-prod
+        run: npm run build-gh-pages
         env:
           CI: false
 

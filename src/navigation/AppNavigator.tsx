@@ -352,7 +352,7 @@ const WebNavigator = () => {
 // ======= Root Export =======
 export const AppNavigator = () => {
   const linking: LinkingOptions<any> = {
-    prefixes: ['http://localhost:8080', 'medicarereminder://'],
+    prefixes: ['http://localhost:8080', 'medicarereminder://', 'https://bkmed.github.io/MedicareReminder/'],
     config: { screens: {} },
   };
 

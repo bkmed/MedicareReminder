@@ -14,6 +14,7 @@
     "webpack-web-prod": "NODE_ENV=production webpack --mode=production",
     "prod:build-web-server": "NODE_ENV=production webpack --config webpack.server.js --mode=production -w",
     "prod:start-web": "node ./server-build/index.js",
+    "build-gh-pages": "npm run webpack-web-prod",
     "start-web-dev-nossr": "webpack-dev-server --mode development --open --hot",
     "start-android": "react-native run-android && adb reverse tcp:12030 tcp:12030",
     "start-ios": "react-native run-ios",

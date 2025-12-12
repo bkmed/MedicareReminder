@@ -9,7 +9,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, './build'),
     filename: 'index_bundle.js',
-    publicPath: 'auto',
+    publicPath: process.env.NODE_ENV === 'production' ? '/MedicareReminder/' : '/',
     clean: true,
   },
   devServer: {
