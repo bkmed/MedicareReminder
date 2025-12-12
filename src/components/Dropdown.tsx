@@ -7,6 +7,7 @@ import {
   FlatList,
   StyleSheet,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
 import { Theme } from '../theme';
@@ -34,6 +35,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   error,
 }) => {
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const styles = createStyles(theme);
   const [visible, setVisible] = useState(false);
 
@@ -66,7 +68,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
         onPress={() => setVisible(true)}
       >
         <Text style={[styles.valueText, !value && styles.placeholderText]}>
-          {selectedItem ? selectedItem.label : placeholder || 'Select...'}
+          {selectedItem ? selectedItem.label : placeholder || t('common.select')}
         </Text>
         <Text style={styles.chevron}>▼</Text>
       </TouchableOpacity>
@@ -78,7 +80,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
             <View style={styles.header}>
               <Text style={styles.headerTitle}>{label}</Text>
               <TouchableOpacity onPress={() => setVisible(false)}>
-                <Text style={styles.closeButton}>Close</Text>
+                <Text style={styles.closeButton}>{t('common.close')}</Text>
               </TouchableOpacity>
             </View>
             <FlatList

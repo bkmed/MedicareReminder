@@ -16,6 +16,7 @@ import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 import { CalendarButton } from '../../components/CalendarButton';
+import { DateTimePickerField } from '../../components/DateTimePickerField';
 
 export const AddAppointmentScreen = ({ navigation, route }: any) => {
   const { t } = useTranslation();
@@ -30,7 +31,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? useContext(WebNavigationContext)
-    : { setActiveTab: () => {} }; // fallback pour mobile
+    : { setActiveTab: () => { } }; // fallback pour mobile
 
   // Get appointmentId only if route exists (mobile)
   const appointmentId = route?.params?.appointmentId;
@@ -39,8 +40,8 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   const [title, setTitle] = useState('');
   const [doctorName, setDoctorName] = useState('');
   const [location, setLocation] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [time, setTime] = useState('09:00');
+  const [date, setDate] = useState<Date | null>(new Date());
+  const [time, setTime] = useState<Date | null>(new Date());
   const [notes, setNotes] = useState('');
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -64,8 +65,8 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
         setDoctorName(appt.doctorName || '');
         setLocation(appt.location || '');
         const dateTime = new Date(appt.dateTime);
-        setDate(dateTime.toISOString().split('T')[0]);
-        setTime(dateTime.toTimeString().substring(0, 5));
+        setDate(dateTime);
+        setTime(dateTime);
         setNotes(appt.notes || '');
         setReminderEnabled(appt.reminderEnabled);
       }
@@ -77,21 +78,26 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   const handleSave = async () => {
     const newErrors: { [key: string]: string } = {};
     if (!title.trim()) newErrors.title = t('common.required');
-    if (!date.trim()) newErrors.date = t('common.required');
-    if (!time.trim()) newErrors.time = t('common.required');
+    if (!date) newErrors.date = t('common.required');
+    if (!time) newErrors.time = t('common.required');
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
     setLoading(true);
     try {
-      const dateTime = `${date}T${time}:00.000Z`;
+      // Create combined DateTime
+      const finalDateTime = new Date(date!);
+      finalDateTime.setHours(time!.getHours());
+      finalDateTime.setMinutes(time!.getMinutes());
+      finalDateTime.setSeconds(0);
+      finalDateTime.setMilliseconds(0);
 
       const appointmentData = {
         title: title.trim(),
         doctorName: doctorName.trim() || undefined,
         location: location.trim() || undefined,
-        dateTime,
+        dateTime: finalDateTime.toISOString(),
         notes: notes.trim() || undefined,
         reminderEnabled,
       };
@@ -109,7 +115,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
         await notificationService.scheduleAppointmentReminder(
           id,
           title,
-          dateTime,
+          finalDateTime.toISOString(),
         );
       }
 
@@ -165,32 +171,27 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
         />
 
         {/* Date */}
-        <Text style={styles.label}>{t('appointments.date')} *</Text>
-        <TextInput
-          style={[styles.input, errors.date && styles.inputError]}
+        <DateTimePickerField
+          label={t('appointments.date')}
           value={date}
-          onChangeText={text => {
-            setDate(text);
-            if (errors.date) setErrors({ ...errors, date: '' });
-          }}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor={theme.colors.subText}
+          onChange={setDate}
+          mode="date"
+          minimumDate={new Date()}
+          required
+          error={errors.date}
+          placeholder={t('appointments.date')}
         />
-        {errors.date && <Text style={styles.errorText}>{errors.date}</Text>}
 
         {/* Time */}
-        <Text style={styles.label}>{t('appointments.time')} *</Text>
-        <TextInput
-          style={[styles.input, errors.time && styles.inputError]}
+        <DateTimePickerField
+          label={t('appointments.time')}
           value={time}
-          onChangeText={text => {
-            setTime(text);
-            if (errors.time) setErrors({ ...errors, time: '' });
-          }}
-          placeholder="HH:MM"
-          placeholderTextColor={theme.colors.subText}
+          onChange={setTime}
+          mode="time"
+          required
+          error={errors.time}
+          placeholder={t('appointments.time')}
         />
-        {errors.time && <Text style={styles.errorText}>{errors.time}</Text>}
 
         {/* Notes */}
         <Text style={styles.label}>{t('appointments.notes')}</Text>
@@ -232,8 +233,8 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
         {/* Calendar Button */}
         <CalendarButton
           title={title}
-          date={date}
-          time={time}
+          date={date ? date.toISOString().split('T')[0] : ''}
+          time={time ? time.toTimeString().substring(0, 5) : ''}
           location={location}
           notes={`Doctor: ${doctorName}\n${notes}`}
         />

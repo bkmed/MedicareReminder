@@ -15,6 +15,7 @@ import { medicationsDb } from '../../database/medicationsDb';
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
+import { DateTimePickerField } from '../../components/DateTimePickerField';
 
 export const AddMedicationScreen = ({ navigation, route }: any) => {
   const { theme } = useTheme();
@@ -27,11 +28,9 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   const [name, setName] = useState('');
   const [dosage, setDosage] = useState('');
   const [frequency, setFrequency] = useState('Daily');
-  const [times, setTimes] = useState(['08:00', '20:00']);
-  const [startDate, setStartDate] = useState(
-    new Date().toISOString().split('T')[0],
-  );
-  const [endDate, setEndDate] = useState('');
+  const [times, setTimes] = useState<Date[]>([new Date(new Date().setHours(8, 0, 0, 0)), new Date(new Date().setHours(20, 0, 0, 0))]);
+  const [startDate, setStartDate] = useState<Date | null>(new Date());
+  const [endDate, setEndDate] = useState<Date | null>(null);
   const [notes, setNotes] = useState('');
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -54,7 +53,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? useContext(WebNavigationContext)
-    : { setActiveTab: () => { } }; // fallback pour mobile
+    : { setActiveTab: () => { } };
 
   const loadMedication = async () => {
     if (!medicationId) return;
@@ -64,9 +63,26 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
         setName(med.name || '');
         setDosage(med.dosage || '');
         setFrequency(med.frequency || 'Daily');
-        setTimes(med.times ? JSON.parse(med.times) : ['08:00', '20:00']);
-        setStartDate(med.startDate || new Date().toISOString().split('T')[0]);
-        setEndDate(med.endDate || '');
+
+        // Parse times usually string "['08:00', '20:00']"
+        // Convert to Date objects for the picker
+        let parsedTimes: Date[] = [];
+        try {
+          const timeStrings = med.times ? JSON.parse(med.times) : ['08:00', '20:00'];
+          parsedTimes = timeStrings.map((ts: string) => {
+            const [h, m] = ts.split(':').map(Number);
+            const d = new Date();
+            d.setHours(h);
+            d.setMinutes(m);
+            return d;
+          });
+        } catch (e) {
+          parsedTimes = [new Date(new Date().setHours(8, 0)), new Date(new Date().setHours(20, 0))];
+        }
+        setTimes(parsedTimes);
+
+        setStartDate(med.startDate ? new Date(med.startDate) : new Date());
+        setEndDate(med.endDate ? new Date(med.endDate) : null);
         setNotes(med.notes || '');
         setReminderEnabled(!!med.reminderEnabled);
       }
@@ -79,18 +95,30 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
     const newErrors: { [key: string]: string } = {};
     if (!name.trim()) newErrors.name = t('common.required');
     if (!dosage.trim()) newErrors.dosage = t('common.required');
+    if (!startDate) newErrors.startDate = t('common.required');
+
+    // Validate End Date > Start Date
+    if (startDate && endDate && endDate < startDate) {
+      newErrors.endDate = t('common.invalidDateRange'); // Add key to i18n
+    }
+
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
     setLoading(true);
     try {
+      // Format times back to string array HH:MM
+      const timeStrings = times.map(t =>
+        t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+      );
+
       const medicationData = {
         name: name.trim(),
         dosage: dosage.trim(),
         frequency,
-        times: JSON.stringify(times),
-        startDate,
-        endDate: endDate || undefined,
+        times: JSON.stringify(timeStrings),
+        startDate: startDate!.toISOString().split('T')[0],
+        endDate: endDate ? endDate.toISOString().split('T')[0] : undefined,
         notes: notes.trim() || undefined,
         reminderEnabled,
       };
@@ -121,12 +149,14 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
     }
   };
 
-  const handleAddTime = () => setTimes([...times, '12:00']);
+  const handleAddTime = () => setTimes([...times, new Date(new Date().setHours(12, 0))]);
   const handleRemoveTime = (index: number) =>
     setTimes(times.filter((_, i) => i !== index));
-  const handleTimeChange = (index: number, value: string) => {
+
+  // Time change
+  const handleTimeChange = (index: number, newDate: Date) => {
     const newTimes = [...times];
-    newTimes[index] = value;
+    newTimes[index] = newDate;
     setTimes(newTimes);
   };
 
@@ -185,13 +215,15 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
         <Text style={styles.label}>{t('medications.reminderTimes')}</Text>
         {times.map((time, index) => (
           <View key={index} style={styles.timeRow}>
-            <TextInput
-              style={[styles.input, styles.timeInput]}
-              value={time}
-              onChangeText={value => handleTimeChange(index, value)}
-              placeholder="HH:MM"
-              placeholderTextColor={theme.colors.subText}
-            />
+            <View style={{ flex: 1 }}>
+              <DateTimePickerField
+                label=""
+                value={time}
+                onChange={(d) => handleTimeChange(index, d)}
+                mode="time"
+                placeholder="HH:MM"
+              />
+            </View>
             {times.length > 1 && (
               <TouchableOpacity
                 onPress={() => handleRemoveTime(index)}
@@ -208,22 +240,25 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
           </Text>
         </TouchableOpacity>
 
-        <Text style={styles.label}>{t('medications.startDate')}</Text>
-        <TextInput
-          style={styles.input}
+        {/* Start Date */}
+        <DateTimePickerField
+          label={t('medications.startDate')}
           value={startDate}
-          onChangeText={setStartDate}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor={theme.colors.subText}
+          onChange={setStartDate}
+          mode="date"
+          minimumDate={new Date()} // No past start dates?
+          required
+          error={errors.startDate}
         />
 
-        <Text style={styles.label}>{t('medications.endDate')}</Text>
-        <TextInput
-          style={styles.input}
+        {/* End Date */}
+        <DateTimePickerField
+          label={t('medications.endDate')}
           value={endDate}
-          onChangeText={setEndDate}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor={theme.colors.subText}
+          onChange={setEndDate}
+          mode="date"
+          minimumDate={startDate || new Date()} // End date >= start date
+          error={errors.endDate}
         />
 
         <Text style={styles.label}>{t('medications.notes')}</Text>
@@ -312,7 +347,6 @@ const createStyles = (theme: Theme) =>
       gap: theme.spacing.s,
       marginBottom: theme.spacing.s,
     },
-    timeInput: { flex: 1 },
     removeButton: {
       width: 32,
       height: 32,
@@ -320,6 +354,7 @@ const createStyles = (theme: Theme) =>
       backgroundColor: theme.colors.error,
       justifyContent: 'center',
       alignItems: 'center',
+      marginTop: 20 // align with input
     },
     removeButtonText: {
       color: theme.colors.surface,

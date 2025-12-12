@@ -16,6 +16,7 @@ import { prescriptionsDb } from '../../database/prescriptionsDb';
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
+import { DateTimePickerField } from '../../components/DateTimePickerField';
 
 export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const { theme } = useTheme();
@@ -28,10 +29,8 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
   const [medicationName, setMedicationName] = useState('');
   const [doctorName, setDoctorName] = useState(initialDoctorName);
-  const [issueDate, setIssueDate] = useState(
-    new Date().toISOString().split('T')[0],
-  );
-  const [expiryDate, setExpiryDate] = useState('');
+  const [issueDate, setIssueDate] = useState<Date | null>(new Date());
+  const [expiryDate, setExpiryDate] = useState<Date | null>(null);
   const [photoUri, setPhotoUri] = useState('');
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -54,7 +53,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? useContext(WebNavigationContext)
-    : { setActiveTab: () => { } }; // fallback pour mobile
+    : { setActiveTab: () => { } };
 
   const loadPrescription = async () => {
     if (!prescriptionId) return;
@@ -64,9 +63,9 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         setMedicationName(prescription.medicationName || '');
         setDoctorName(prescription.doctorName || '');
         setIssueDate(
-          prescription.issueDate || new Date().toISOString().split('T')[0],
+          prescription.issueDate ? new Date(prescription.issueDate) : new Date(),
         );
-        setExpiryDate(prescription.expiryDate || '');
+        setExpiryDate(prescription.expiryDate ? new Date(prescription.expiryDate) : null);
         setPhotoUri(prescription.photoUri || '');
         setNotes(prescription.notes || '');
       }
@@ -120,7 +119,13 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const handleSave = async () => {
     const newErrors: { [key: string]: string } = {};
     if (!medicationName.trim()) newErrors.medicationName = t('common.required');
-    if (!issueDate.trim()) newErrors.issueDate = t('common.required');
+    if (!issueDate) newErrors.issueDate = t('common.required');
+
+    // Validate Expiry Date > Issue Date
+    if (issueDate && expiryDate && expiryDate < issueDate) {
+      newErrors.expiryDate = t('common.invalidDateRange');
+    }
+
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
@@ -129,8 +134,8 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
       const prescriptionData = {
         medicationName: medicationName.trim(),
         doctorName: doctorName.trim() || undefined,
-        issueDate,
-        expiryDate: expiryDate || undefined,
+        issueDate: issueDate!.toISOString().split('T')[0],
+        expiryDate: expiryDate ? expiryDate.toISOString().split('T')[0] : undefined,
         photoUri: photoUri || undefined,
         notes: notes.trim() || undefined,
       };
@@ -144,11 +149,11 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
       }
 
       // Notifications
-      if (expiryDate) {
+      if (prescriptionData.expiryDate) {
         await notificationService.schedulePrescriptionExpiryReminder(
           id,
           prescriptionData.medicationName,
-          expiryDate,
+          prescriptionData.expiryDate,
         );
       } else if (isEdit) {
         await notificationService.cancelPrescriptionReminder(id);
@@ -215,28 +220,24 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
           placeholderTextColor={theme.colors.subText}
         />
 
-        <Text style={styles.label}>{t('prescriptions.issueDateLabel')} *</Text>
-        <TextInput
-          style={[styles.input, errors.issueDate && styles.inputError]}
+        {/* Issue Date */}
+        <DateTimePickerField
+          label={t('prescriptions.issueDateLabel')}
           value={issueDate}
-          onChangeText={text => {
-            setIssueDate(text);
-            if (errors.issueDate) setErrors({ ...errors, issueDate: '' });
-          }}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor={theme.colors.subText}
+          onChange={setIssueDate}
+          mode="date"
+          required
+          error={errors.issueDate}
         />
-        {errors.issueDate && (
-          <Text style={styles.errorText}>{errors.issueDate}</Text>
-        )}
 
-        <Text style={styles.label}>{t('prescriptions.expiryDateLabel')}</Text>
-        <TextInput
-          style={styles.input}
+        {/* Expiry Date */}
+        <DateTimePickerField
+          label={t('prescriptions.expiryDateLabel')}
           value={expiryDate}
-          onChangeText={setExpiryDate}
-          placeholder="YYYY-MM-DD"
-          placeholderTextColor={theme.colors.subText}
+          onChange={setExpiryDate}
+          mode="date"
+          minimumDate={issueDate || new Date()}
+          error={errors.expiryDate}
         />
 
         <Text style={styles.label}>{t('prescriptions.notesLabel')}</Text>
