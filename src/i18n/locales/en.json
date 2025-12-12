@@ -99,7 +99,8 @@
     "inactive": "Inactive",
     "noMedications": "No medications found",
     "addFirst": "Add your first medication to get started",
-    "urgent": "URGENT"
+    "urgent": "URGENT",
+    "isUrgent": "Urgent"
   },
   "appointments": {
     "title": "Appointments",
@@ -162,8 +163,6 @@
     "emptySubtitle": "Tap + to add a prescription",
     "issued": "Issued",
     "expires": "Expires",
-    "issued": "Issued",
-    "expires": "Expires",
     "doctor": "Dr.",
     "history": {
       "created": "Prescription Created",
@@ -204,7 +203,8 @@
     "deleteError": "Failed to delete doctor",
     "noAppointments": "No appointments scheduled",
     "addAppointment": "Add Appointment",
-    "addPrescription": "Add Prescription"
+    "addPrescription": "Add Prescription",
+    "notes": "Notes"
   },
   "analytics": {
     "title": "Analytics",

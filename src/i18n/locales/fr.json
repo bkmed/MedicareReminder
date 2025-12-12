@@ -98,7 +98,8 @@
         "inactive": "Inactif",
         "noMedications": "Aucun médicament trouvé",
         "addFirst": "Ajoutez votre premier médicament pour commencer",
-        "urgent": "URGENT"
+        "urgent": "URGENT",
+        "isUrgent": "Urgent"
     },
     "appointments": {
         "title": "Rendez-vous",
@@ -201,7 +202,8 @@
         "deleteError": "Échec de la suppression du médecin",
         "noAppointments": "Aucun rendez-vous planifié",
         "addAppointment": "Ajouter un rendez-vous",
-        "addPrescription": "Ajouter une ordonnance"
+        "addPrescription": "Ajouter une ordonnance",
+        "notes": "Notes"
     },
     "analytics": {
         "title": "Analytiques",

@@ -224,7 +224,7 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
             )}
             {doctor.notes && (
               <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>{t('medications.notes')}</Text>
+                <Text style={styles.detailLabel}>{t('doctors.notes')}</Text>
                 <Text style={styles.detailValue}>{doctor.notes}</Text>
               </View>
             )}

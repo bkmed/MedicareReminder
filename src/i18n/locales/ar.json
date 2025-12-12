@@ -98,7 +98,8 @@
         "inactive": "غير نشط",
         "noMedications": "لم يتم العثور على أدوية",
         "addFirst": "أضف دواءك الأول للبدء",
-        "urgent": "عاجل"
+        "urgent": "عاجل",
+        "isUrgent": "عاجل"
     },
     "appointments": {
         "title": "المواعيد",
@@ -201,7 +202,8 @@
         "deleteError": "فشل حذف الطبيب",
         "noAppointments": "لا توجد مواعيد مجدولة",
         "addAppointment": "إضافة موعد",
-        "addPrescription": "إضافة وصفة طبية"
+        "addPrescription": "إضافة وصفة طبية",
+        "notes": "ملاحظات"
     },
     "analytics": {
         "title": "التحليلات",
