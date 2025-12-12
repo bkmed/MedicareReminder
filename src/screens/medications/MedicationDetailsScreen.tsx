@@ -29,7 +29,7 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
       : null;
 
   const { setActiveTab } = WebNavigationContext
-    ? useContext(WebNavigationContext)
+    ? useContext(WebNavigationContext) as any
     : { setActiveTab: () => { } };
 
   const navigateBack = () => {
@@ -83,7 +83,11 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
   };
 
   const handleViewHistory = () => {
-    navigation.navigate('MedicationHistory', { medicationId });
+    if (Platform.OS === 'web') {
+      setActiveTab('Medications', 'MedicationHistory', { medicationId });
+    } else {
+      navigation.navigate('MedicationHistory', { medicationId });
+    }
   };
 
   if (loading || !medication) {

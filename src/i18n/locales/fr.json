@@ -26,7 +26,14 @@
         "addedToCalendar": "Événement ajouté au calendrier",
         "calendarPermissionRequired": "Permission de calendrier requise pour ajouter des événements",
         "calendarError": "Erreur lors de l'ajout au calendrier",
-        "downloadCalendarFile": "Fichier de calendrier téléchargé"
+        "downloadCalendarFile": "Fichier de calendrier téléchargé",
+        "errorTitle": "Erreur",
+        "loadFailed": "Échec du chargement des détails",
+        "deleteFailed": "Échec de la suppression de l'élément",
+        "deleteTitle": "Supprimer l'élément",
+        "deleteMessage": "Êtes-vous sûr de vouloir supprimer cet élément ?",
+        "viewHistory": "Voir l'historique",
+        "historyUnavailable": "Le suivi de l'historique n'est pas encore disponible"
     },
     "navigation": {
         "home": "Accueil",
@@ -149,7 +156,12 @@
         "emptySubtitle": "Appuyez sur + pour ajouter une ordonnance",
         "issued": "Émise",
         "expires": "Expire",
-        "doctor": "Dr."
+        "doctor": "Dr.",
+        "history": {
+            "created": "Ordonnance créée",
+            "updated": "Ordonnance mise à jour",
+            "refilled": "Ordonnance renouvelée"
+        }
     },
     "doctors": {
         "title": "Médecins",
@@ -348,6 +360,17 @@
     "offline": {
         "noConnection": "Pas de connexion Internet",
         "limitedFunctionality": "Certaines fonctionnalités peuvent être indisponibles"
+    },
+    "history": {
+        "title": "Historique",
+        "noHistory": "Aucun historique trouvé",
+        "unknownMedication": "Médicament inconnu",
+        "status": {
+            "taken": "PRIS",
+            "missed": "MANQUÉ",
+            "skipped": "SAUTÉ"
+        },
+        "medicationHistory": "Historique des médicaments"
     },
     "languages": {
         "en": "English",

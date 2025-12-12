@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -14,11 +14,16 @@ import {
   AnalyticsData,
 } from '../../services/analyticsService';
 import { googleAnalytics } from '../../services/googleAnalytics';
+import { useTheme } from '../../context/ThemeContext';
+import { Theme } from '../../theme';
 
 const screenWidth = Dimensions.get('window').width;
 
 export const AnalyticsScreen = () => {
   const { t } = useTranslation();
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [adherenceChart, setAdherenceChart] = useState<{
     labels: string[];
@@ -64,30 +69,30 @@ export const AnalyticsScreen = () => {
   if (loading || !analytics) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
 
   const chartConfig = {
-    backgroundColor: '#FFF',
-    backgroundGradientFrom: '#FFF',
-    backgroundGradientTo: '#FFF',
+    backgroundColor: theme.colors.surface,
+    backgroundGradientFrom: theme.colors.surface,
+    backgroundGradientTo: theme.colors.surface,
     decimalPlaces: 0,
-    color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
-    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`, // Keep brand blue for chart line
+    labelColor: (opacity = 1) => theme.colors.text, // Adapt text color
     style: {
       borderRadius: 16,
     },
     propsForDots: {
       r: '6',
       strokeWidth: '2',
-      stroke: '#007AFF',
+      stroke: theme.colors.primary,
     },
   };
 
   // Responsive width
-  const chartWidth = Math.min(screenWidth - 32, 800); // Max 800px on web,
+  const chartWidth = Math.min(screenWidth - 32, 800); // Max 800px on web
 
   return (
     <View style={styles.container}>
@@ -166,7 +171,7 @@ export const AnalyticsScreen = () => {
               yAxisSuffix=""
               chartConfig={{
                 ...chartConfig,
-                color: (opacity = 1) => `rgba(52, 199, 89, ${opacity})`,
+                color: (opacity = 1) => `rgba(52, 199, 89, ${opacity})`, // Keep green for success/appointments
               }}
               style={styles.chart}
               showValuesOnTopOfBars
@@ -219,115 +224,109 @@ export const AnalyticsScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F2F2F7',
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 32,
-    maxWidth: 1200, // Max width for web
-    alignSelf: 'center',
-    width: '100%',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F2F2F7',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 20,
-  },
-  cardsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
-  },
-  card: {
-    flex: 1,
-    padding: 20,
-    borderRadius: 16,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  cardBlue: {
-    backgroundColor: '#007AFF',
-  },
-  cardGreen: {
-    backgroundColor: '#34C759',
-  },
-  cardOrange: {
-    backgroundColor: '#FF9500',
-  },
-  cardPurple: {
-    backgroundColor: '#AF52DE',
-  },
-  cardNumber: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#FFF',
-    marginBottom: 4,
-  },
-  cardLabel: {
-    fontSize: 14,
-    color: '#FFF',
-    opacity: 0.9,
-  },
-  chartSection: {
-    marginTop: 24,
-    marginBottom: 16,
-  },
-  chartTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 12,
-  },
-  chart: {
-    borderRadius: 16,
-  },
-  insightsSection: {
-    marginTop: 24,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 16,
-  },
-  insightCard: {
-    flexDirection: 'row',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    alignItems: 'center',
-  },
-  insightGood: {
-    backgroundColor: '#D1F2EB',
-  },
-  insightWarning: {
-    backgroundColor: '#FCF3CF',
-  },
-  insightInfo: {
-    backgroundColor: '#D6EAF8',
-  },
-  insightEmoji: {
-    fontSize: 24,
-    marginRight: 12,
-  },
-  insightText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#000',
-    lineHeight: 20,
-  },
-});
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    content: {
+      padding: 16,
+      paddingBottom: 32,
+      maxWidth: 1200, // Max width for web
+      alignSelf: 'center',
+      width: '100%',
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: theme.colors.background,
+    },
+    title: {
+      ...theme.textVariants.header,
+      color: theme.colors.text,
+      marginBottom: 20,
+    },
+    cardsRow: {
+      flexDirection: 'row',
+      gap: 12,
+      marginBottom: 12,
+    },
+    card: {
+      flex: 1,
+      padding: 20,
+      borderRadius: 16,
+      alignItems: 'center',
+      ...theme.shadows.medium,
+    },
+    cardBlue: {
+      backgroundColor: '#007AFF', // Keep solid colors for stats cards
+    },
+    cardGreen: {
+      backgroundColor: '#34C759',
+    },
+    cardOrange: {
+      backgroundColor: '#FF9500',
+    },
+    cardPurple: {
+      backgroundColor: '#AF52DE',
+    },
+    cardNumber: {
+      fontSize: 32,
+      fontWeight: 'bold',
+      color: '#FFF',
+      marginBottom: 4,
+    },
+    cardLabel: {
+      fontSize: 14,
+      color: '#FFF',
+      opacity: 0.9,
+    },
+    chartSection: {
+      marginTop: 24,
+      marginBottom: 16,
+    },
+    chartTitle: {
+      ...theme.textVariants.subheader,
+      color: theme.colors.text,
+      marginBottom: 12,
+    },
+    chart: {
+      borderRadius: 16,
+    },
+    insightsSection: {
+      marginTop: 24,
+    },
+    sectionTitle: {
+      ...theme.textVariants.subheader,
+      color: theme.colors.text,
+      marginBottom: 16,
+    },
+    insightCard: {
+      flexDirection: 'row',
+      padding: 16,
+      borderRadius: 12,
+      marginBottom: 12,
+      alignItems: 'center',
+    },
+    insightGood: {
+      backgroundColor: theme.colors.successBackground,
+    },
+    insightWarning: {
+      backgroundColor: theme.colors.warningBackground,
+    },
+    insightInfo: {
+      backgroundColor: theme.colors.primaryBackground,
+    },
+    insightEmoji: {
+      fontSize: 24,
+      marginRight: 12,
+    },
+    insightText: {
+      flex: 1,
+      fontSize: 14,
+      color: theme.colors.text,
+      lineHeight: 20,
+    },
+  });

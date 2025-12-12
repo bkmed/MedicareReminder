@@ -46,6 +46,14 @@ export interface Prescription {
   updatedAt: string;
 }
 
+export interface PrescriptionHistory {
+  id: number;
+  prescriptionId: number;
+  action: 'created' | 'updated' | 'refilled';
+  date: string;
+  notes?: string;
+}
+
 export interface Doctor {
   id?: number;
   name: string;

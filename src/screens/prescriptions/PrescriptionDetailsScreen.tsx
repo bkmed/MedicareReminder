@@ -30,7 +30,7 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
       : null;
 
   const { setActiveTab } = WebNavigationContext
-    ? useContext(WebNavigationContext)
+    ? useContext(WebNavigationContext) as any
     : { setActiveTab: () => { } };
 
   const navigateBack = () => {
@@ -50,7 +50,7 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
       const presc = await prescriptionsDb.getById(prescriptionId);
       setPrescription(presc);
     } catch (error) {
-      Alert.alert('Error', 'Failed to load prescription');
+      Alert.alert(t('common.errorTitle'), t('common.loadFailed'));
     } finally {
       setLoading(false);
     }
@@ -58,19 +58,19 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
 
   const handleDelete = () => {
     Alert.alert(
-      'Delete Prescription',
-      'Are you sure you want to delete this prescription?',
+      t('common.deleteTitle'),
+      t('common.deleteMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await prescriptionsDb.delete(prescriptionId);
               navigateBack();
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete prescription');
+              Alert.alert(t('common.errorTitle'), t('common.deleteFailed'));
             }
           },
         },
@@ -80,6 +80,14 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
 
   const handleEdit = () => {
     navigation.navigate('AddPrescription', { prescriptionId });
+  };
+
+  const handleViewHistory = () => {
+    if (Platform.OS === 'web') {
+      setActiveTab('Prescriptions', 'PrescriptionHistory', { prescriptionId });
+    } else {
+      navigation.navigate('PrescriptionHistory', { prescriptionId });
+    }
   };
 
   if (loading || !prescription) {
@@ -137,9 +145,9 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => Alert.alert('View History', 'Prescription history tracking is not available yet.')}
+          onPress={handleViewHistory}
         >
-          <Text style={styles.buttonText}>View History</Text>
+          <Text style={styles.buttonText}>{t('common.viewHistory')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity

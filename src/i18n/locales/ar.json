@@ -26,7 +26,14 @@
         "addedToCalendar": "تمت إضافة الحدث إلى التقويم",
         "calendarPermissionRequired": "مطلوب إذن التقويم لإضافة الأحداث",
         "calendarError": "خطأ في الإضافة إلى التقويم",
-        "downloadCalendarFile": "تم تنزيل ملف التقويم"
+        "downloadCalendarFile": "تم تنزيل ملف التقويم",
+        "errorTitle": "خطأ",
+        "loadFailed": "فشل تحميل التفاصيل",
+        "deleteFailed": "فشل حذف العنصر",
+        "deleteTitle": "حذف العنصر",
+        "deleteMessage": "هل أنت متأكد من حذف هذا العنصر؟",
+        "viewHistory": "عرض السجل",
+        "historyUnavailable": "تتبع السجل غير متاح بعد"
     },
     "navigation": {
         "home": "الرئيسية",
@@ -149,7 +156,12 @@
         "emptySubtitle": "اضغط على + لإضافة وصفة طبية",
         "issued": "صدر بتاريخ",
         "expires": "ينتهي بتاريخ",
-        "doctor": "د."
+        "doctor": "د.",
+        "history": {
+            "created": "تم إنشاء الوصفة",
+            "updated": "تم تحديث الوصفة",
+            "refilled": "تم تجديد الوصفة"
+        }
     },
     "doctors": {
         "title": "الأطباء",
@@ -348,6 +360,17 @@
     "offline": {
         "noConnection": "لا يوجد اتصال بالإنترنت",
         "limitedFunctionality": "قد تكون بعض الميزات غير متاحة"
+    },
+    "history": {
+        "title": "السجل",
+        "noHistory": "لا توجد سجلات",
+        "unknownMedication": "دواء غير معروف",
+        "status": {
+            "taken": "مأخوذ",
+            "missed": "فائت",
+            "skipped": "تم تخطيه"
+        },
+        "medicationHistory": "سجل الدواء"
     },
     "languages": {
         "en": "English",

@@ -26,7 +26,14 @@
         "addedToCalendar": "Termin zum Kalender hinzugefügt",
         "calendarPermissionRequired": "Kalender-Berechtigung erforderlich, um Ereignisse hinzuzufügen",
         "calendarError": "Fehler beim Hinzufügen zum Kalender",
-        "downloadCalendarFile": "Kalenderdatei heruntergeladen"
+        "downloadCalendarFile": "Kalenderdatei heruntergeladen",
+        "errorTitle": "Fehler",
+        "loadFailed": "Fehler beim Laden der Details",
+        "deleteFailed": "Fehler beim Löschen des Elements",
+        "deleteTitle": "Element löschen",
+        "deleteMessage": "Sind Sie sicher, dass Sie dieses Element löschen möchten?",
+        "viewHistory": "Verlauf anzeigen",
+        "historyUnavailable": "Verlaufsverfolgung noch nicht verfügbar"
     },
     "navigation": {
         "home": "Startseite",
@@ -149,7 +156,14 @@
         "emptySubtitle": "Tippen Sie auf +, um ein Rezept hinzuzufügen",
         "issued": "Ausgestellt",
         "expires": "Läuft ab",
-        "doctor": "Dr."
+        "issued": "Ausgestellt",
+        "expires": "Läuft ab",
+        "doctor": "Dr.",
+        "history": {
+            "created": "Rezept erstellt",
+            "updated": "Rezept aktualisiert",
+            "refilled": "Rezept nachgefüllt"
+        }
     },
     "doctors": {
         "title": "Ärzte",
@@ -348,6 +362,17 @@
     "offline": {
         "noConnection": "Keine Internetverbindung",
         "limitedFunctionality": "Einige Funktionen sind möglicherweise nicht verfügbar"
+    },
+    "history": {
+        "title": "Verlauf",
+        "noHistory": "Keine Verlaufsdatensätze gefunden",
+        "unknownMedication": "Unbekanntes Medikament",
+        "status": {
+            "taken": "EINGENOMMEN",
+            "missed": "VERPASST",
+            "skipped": "ÜBERSPRUNGEN"
+        },
+        "medicationHistory": "Medikamentenverlauf"
     },
     "languages": {
         "en": "English",

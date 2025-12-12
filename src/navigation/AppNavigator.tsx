@@ -25,10 +25,12 @@ import { AppointmentDetailsScreen } from '../screens/appointments/AppointmentDet
 import { PrescriptionListScreen } from '../screens/prescriptions/PrescriptionListScreen';
 import { AddPrescriptionScreen } from '../screens/prescriptions/AddPrescriptionScreen';
 import { PrescriptionDetailsScreen } from '../screens/prescriptions/PrescriptionDetailsScreen';
+import { PrescriptionHistoryScreen } from '../screens/prescriptions/PrescriptionHistoryScreen';
 import { DoctorListScreen } from '../screens/doctors/DoctorListScreen';
 import { AddDoctorScreen } from '../screens/doctors/AddDoctorScreen';
 import { DoctorDetailsScreen } from '../screens/doctors/DoctorDetailsScreen';
 import { AnalyticsScreen } from '../screens/analytics/AnalyticsScreen';
+import { GlobalHistoryScreen } from '../screens/history/GlobalHistoryScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 
 enableScreens();
@@ -66,7 +68,7 @@ const MedicationsStack = () => {
       <Stack.Screen
         name="MedicationHistory"
         component={MedicationHistoryScreen}
-        options={{ title: 'Medication History' }}
+        options={{ title: t('history.medicationHistory') }}
       />
     </Stack.Navigator>
   );
@@ -114,9 +116,15 @@ const PrescriptionsStack = () => {
         component={PrescriptionDetailsScreen}
         options={{ title: t('prescriptions.details') }}
       />
+      <Stack.Screen
+        name="PrescriptionHistory"
+        component={PrescriptionHistoryScreen}
+        options={{ title: t('common.viewHistory') }}
+      />
     </Stack.Navigator>
   );
 };
+
 
 const DoctorsStack = () => {
   const { t } = useTranslation();
@@ -136,6 +144,21 @@ const DoctorsStack = () => {
         name="DoctorDetails"
         component={DoctorDetailsScreen}
         options={{ title: t('doctors.details') }}
+      />
+    </Stack.Navigator>
+  );
+};
+
+
+
+const HistoryStack = () => {
+  const { t } = useTranslation();
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="GlobalHistory"
+        component={GlobalHistoryScreen}
+        options={{ title: t('navigation.history') }}
       />
     </Stack.Navigator>
   );
@@ -173,6 +196,7 @@ const DrawerNavigator = () => (
     <Drawer.Screen name="Analytics" component={AnalyticsScreen} />
     <Drawer.Screen name="Prescriptions" component={PrescriptionsStack} />
     <Drawer.Screen name="Doctors" component={DoctorsStack} />
+    <Drawer.Screen name="History" component={HistoryStack} />
     <Drawer.Screen name="Profile" component={ProfileStack} />
   </Drawer.Navigator>
 );
@@ -211,6 +235,8 @@ const WebNavigator = () => {
           return <AddMedicationScreen route={mockRoute} />;
         if (subScreen === 'MedicationDetails')
           return <MedicationDetailsScreen route={mockRoute} />;
+        if (subScreen === 'MedicationHistory')
+          return <MedicationHistoryScreen route={mockRoute} />;
         return <MedicationsStack />;
       case 'Appointments':
         if (subScreen === 'AddAppointment')
@@ -225,6 +251,8 @@ const WebNavigator = () => {
           return <AddPrescriptionScreen route={mockRoute} />;
         if (subScreen === 'PrescriptionDetails')
           return <PrescriptionDetailsScreen route={mockRoute} />;
+        if (subScreen === 'PrescriptionHistory')
+          return <PrescriptionHistoryScreen />;
         return <PrescriptionsStack />;
       case 'Doctors':
         if (subScreen === 'AddDoctor')
@@ -232,6 +260,8 @@ const WebNavigator = () => {
         if (subScreen === 'DoctorDetails')
           return <DoctorDetailsScreen route={mockRoute} />;
         return <DoctorsStack />;
+      case 'History':
+        return <HistoryStack />;
       case 'Profile':
         return <ProfileStack />;
       default:
@@ -266,6 +296,17 @@ const WebNavigator = () => {
               {t('home.appName')}
             </Text>
           </TouchableOpacity>
+
+          {/* Web Back Button */}
+          {subScreen ? (
+            <TouchableOpacity
+              style={webStyles.backButton}
+              onPress={() => setSubScreen('')} // Clear subScreen to go back
+            >
+              <Text style={webStyles.backButtonText}>← {t('common.back')}</Text>
+            </TouchableOpacity>
+          ) : null}
+
           <View style={webStyles.navButtons}>
             {[
               ['Home', t('navigation.home')],
@@ -274,6 +315,7 @@ const WebNavigator = () => {
               ['Analytics', t('navigation.analytics')],
               ['Prescriptions', t('navigation.prescriptions')],
               ['Doctors', t('navigation.doctors')],
+              ['History', t('navigation.history') || 'History'],
               ['Profile', t('navigation.profile')],
             ].map(([key, label]) => (
               <TouchableOpacity
@@ -345,4 +387,14 @@ const webStyles = StyleSheet.create({
   navButton: { paddingVertical: 8, paddingHorizontal: 16 },
   navButtonText: { fontSize: 16 },
   activeNavButton: { fontWeight: '600' },
+  backButton: {
+    marginLeft: 20,
+    padding: 8,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+  },
+  backButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });

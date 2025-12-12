@@ -1,7 +1,8 @@
 import { storageService } from '../services/storage';
-import { Prescription } from './schema';
+import { Prescription, PrescriptionHistory } from './schema';
 
 const PRESCRIPTIONS_KEY = 'prescriptions';
+const PRESCRIPTIONS_HISTORY_KEY = 'prescriptions_history';
 
 // Helper functions
 const getAllPrescriptions = (): Prescription[] => {
@@ -11,6 +12,32 @@ const getAllPrescriptions = (): Prescription[] => {
 
 const saveAllPrescriptions = (prescriptions: Prescription[]): void => {
   storageService.setString(PRESCRIPTIONS_KEY, JSON.stringify(prescriptions));
+};
+
+const getAllHistory = (): PrescriptionHistory[] => {
+  const json = storageService.getString(PRESCRIPTIONS_HISTORY_KEY);
+  return json ? JSON.parse(json) : [];
+};
+
+const saveAllHistory = (history: PrescriptionHistory[]): void => {
+  storageService.setString(PRESCRIPTIONS_HISTORY_KEY, JSON.stringify(history));
+};
+
+const recordHistory = (
+  prescriptionId: number,
+  action: PrescriptionHistory['action'],
+  notes?: string,
+) => {
+  const history = getAllHistory();
+  const newRecord: PrescriptionHistory = {
+    id: Date.now(),
+    prescriptionId,
+    action,
+    date: new Date().toISOString(),
+    notes,
+  };
+  history.push(newRecord);
+  saveAllHistory(history);
 };
 
 export const prescriptionsDb = {
@@ -64,6 +91,7 @@ export const prescriptionsDb = {
 
     prescriptions.push(newPrescription);
     saveAllPrescriptions(prescriptions);
+    recordHistory(id, 'created', 'Initial prescription created');
 
     return id;
   },
@@ -80,6 +108,7 @@ export const prescriptionsDb = {
         updatedAt: new Date().toISOString(),
       };
       saveAllPrescriptions(prescriptions);
+      recordHistory(id, 'updated', 'Prescription details updated');
     }
   },
 
@@ -88,5 +117,18 @@ export const prescriptionsDb = {
     const prescriptions = getAllPrescriptions();
     const filtered = prescriptions.filter(p => p.id !== id);
     saveAllPrescriptions(filtered);
+
+    // Also delete associated history
+    const history = getAllHistory();
+    const filteredHistory = history.filter(h => h.prescriptionId !== id);
+    saveAllHistory(filteredHistory);
+  },
+
+  // Get history
+  getHistory: async (id: number): Promise<PrescriptionHistory[]> => {
+    const history = getAllHistory();
+    return history
+      .filter(h => h.prescriptionId === id)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   },
 };
