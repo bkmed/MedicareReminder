@@ -2,6 +2,7 @@
   "name": "medicarereminder",
   "version": "0.0.1",
   "private": true,
+  "homepage": ".",
   "scripts": {
     "build-web-dev": "npm-run-all --parallel webpack-web-dev dev:build-web-server",
     "build-web-prod": "npm-run-all --parallel webpack-web-prod prod:build-web-server",

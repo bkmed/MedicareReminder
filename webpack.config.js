@@ -9,7 +9,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, './build'),
     filename: 'index_bundle.js',
-    publicPath: '/',
+    publicPath: 'auto',
     clean: true,
   },
   devServer: {
