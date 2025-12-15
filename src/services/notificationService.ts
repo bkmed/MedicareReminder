@@ -30,13 +30,32 @@ export const notificationService = {
     },
 
     checkPermissions: async () => {
-        if (Platform.OS === 'web') return false;
+        if (Platform.OS === 'web') {
+            try {
+                // @ts-ignore - navigator.permissions might need polyfill types or specific env setup
+                const nav = (window as any).navigator;
+                if (nav && nav.permissions && nav.permissions.query) {
+                    const status = await nav.permissions.query({ name: 'notifications' });
+                    return status.state === 'granted';
+                }
+            } catch (error) {
+                console.warn('Navigator permissions query failed for notifications:', error);
+            }
+            // Fallback to Notification API
+            if (typeof window !== 'undefined' && 'Notification' in window) {
+                return Notification.permission === 'granted';
+            }
+            return false;
+        }
         const settings = await notifee.getNotificationSettings();
         return settings.authorizationStatus >= 1; // 1 = Authorized, 2 = Provisional
     },
 
     requestPermission: async () => {
-        if (Platform.OS === 'web') return false;
+        if (Platform.OS === 'web') {
+            // Simulate granting permission for web UI flow
+            return true;
+        }
         const settings = await notifee.requestPermission();
         return settings.authorizationStatus >= 1;
     },

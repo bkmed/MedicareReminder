@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // Always clear local user state to redirect to Login
             setUser(null);
             if (Platform.OS === 'web') {
-                window.location.reload();
+                (window as any).location.reload();
             }
         }
     };

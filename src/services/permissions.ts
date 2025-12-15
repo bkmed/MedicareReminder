@@ -108,7 +108,17 @@ class PermissionsService {
      */
     async checkNotificationPermission(): Promise<PermissionStatus> {
         if (Platform.OS === 'web') {
-            // Web: Use Notification API
+            // Web: Use Permissions API with fallback to Notification API
+            try {
+                // @ts-ignore
+                if (navigator.permissions && navigator.permissions.query) {
+                    const result = await navigator.permissions.query({ name: 'notifications' });
+                    return this.mapWebPermissionState(result.state);
+                }
+            } catch (error) {
+                // Ignore and fall back
+            }
+
             if (typeof window !== 'undefined' && 'Notification' in window) {
                 const permission = Notification.permission;
                 if (permission === 'granted') return 'granted';
