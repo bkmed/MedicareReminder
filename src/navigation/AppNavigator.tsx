@@ -219,7 +219,7 @@ const WebNavigator = () => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { width, height } = useWindowDimensions();
-  const isMobile = width < 768;
+  const isMobile = width < 1024;
 
   const [activeTab, setActiveTab] = useState('Home');
   const [subScreen, setSubScreen] = useState('');
