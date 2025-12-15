@@ -11,22 +11,25 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
+import { isValidEmail } from '../../utils/validation';
 
 export const ForgotPasswordScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleReset = async () => {
     if (!email) {
-      Alert.alert(
-        t('forgotPassword.errorTitle'),
-        t('forgotPassword.errorEmptyEmail'),
-      );
+      setEmailError(t('forgotPassword.errorEmptyEmail'));
+      return;
+    } else if (!isValidEmail(email)) {
+      setEmailError(t('forgotPassword.errorInvalidEmail'));
       return;
     }
+    setEmailError('');
 
     setLoading(true);
     // Simulate API call
@@ -57,6 +60,9 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
             autoCapitalize="none"
             keyboardType="email-address"
           />
+          {emailError ? (
+            <Text style={styles.errorText}>{emailError}</Text>
+          ) : null}
         </View>
 
         <TouchableOpacity
@@ -89,7 +95,6 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
-      flex: 1,
       backgroundColor: theme.colors.background,
       justifyContent: 'center',
       padding: theme.spacing.m,
@@ -150,5 +155,10 @@ const createStyles = (theme: Theme) =>
     backButtonText: {
       ...theme.textVariants.body,
       color: theme.colors.subText,
+    },
+    errorText: {
+      ...theme.textVariants.caption,
+      color: theme.colors.error,
+      marginTop: 4,
     },
   });

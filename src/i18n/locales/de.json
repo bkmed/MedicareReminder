@@ -279,7 +279,12 @@
         "signUp": "Registrieren",
         "errorTitle": "Fehler",
         "errorEmptyFields": "Bitte geben Sie E-Mail und Passwort ein",
-        "errorLoginFailed": "Anmeldung fehlgeschlagen"
+        "errorEmptyEmail": "E-Mail ist erforderlich",
+        "errorInvalidEmail": "Ungültiges E-Mail-Format",
+        "errorEmptyPassword": "Passwort ist erforderlich",
+        "errorLoginFailed": "Anmeldung fehlgeschlagen",
+        "tipTitle": "Demo-Konto",
+        "tipMessage": "Verwenden Sie 'test@test.com' / 'test' zum Anmelden."
     },
     "signUp": {
         "title": "Konto erstellen",
@@ -295,6 +300,11 @@
         "signIn": "Anmelden",
         "errorTitle": "Fehler",
         "errorEmptyFields": "Bitte füllen Sie alle Felder aus",
+        "errorEmptyName": "Name ist erforderlich",
+        "errorEmptyEmail": "E-Mail ist erforderlich",
+        "errorInvalidEmail": "Ungültiges E-Mail-Format",
+        "errorEmptyPassword": "Passwort ist erforderlich",
+        "errorWeakPassword": "Passwort muss mindestens 6 Zeichen lang sein",
         "errorRegistrationFailed": "Registrierung fehlgeschlagen"
     },
     "forgotPassword": {
@@ -306,6 +316,7 @@
         "backToLogin": "Zurück zur Anmeldung",
         "errorTitle": "Fehler",
         "errorEmptyEmail": "Bitte geben Sie Ihre E-Mail ein",
+        "errorInvalidEmail": "Ungültiges E-Mail-Format",
         "successTitle": "Erfolg",
         "successMessage": "Wenn ein Konto mit dieser E-Mail existiert, erhalten Sie Anweisungen zum Zurücksetzen des Passworts."
     },

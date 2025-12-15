@@ -16,8 +16,8 @@ export const authService = {
         await new Promise(resolve => setTimeout(() => resolve(undefined), 1000));
 
         // Add test user if not exists (for demo purposes)
-        if (email === 'test' && password === 'test') {
-            const testUser = { id: 'test-user', name: 'Test User', email: 'test' };
+        if (email === 'test@test.com' && password === 'test') {
+            const testUser = { id: 'test-user', name: 'Test User', email: 'test@test.com' };
             storageService.setString(AUTH_KEY, JSON.stringify(testUser));
             return testUser;
         }
@@ -66,6 +66,8 @@ export const authService = {
     // Logout
     logout: async (): Promise<void> => {
         storageService.delete(AUTH_KEY);
+        // Ensure web storage is cleared instantly if async issues exist (though this is sync)
+        return Promise.resolve();
     },
 
     // Get current user

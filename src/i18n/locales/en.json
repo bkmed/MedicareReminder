@@ -280,7 +280,12 @@
     "signUp": "Sign Up",
     "errorTitle": "Error",
     "errorEmptyFields": "Please enter email and password",
-    "errorLoginFailed": "Login failed"
+    "errorEmptyEmail": "Email is required",
+    "errorInvalidEmail": "Invalid email format",
+    "errorEmptyPassword": "Password is required",
+    "errorLoginFailed": "Login failed",
+    "tipTitle": "Demo Account",
+    "tipMessage": "Use 'test@test.com' / 'test' to log in."
   },
   "signUp": {
     "title": "Create Account",
@@ -296,6 +301,11 @@
     "signIn": "Sign In",
     "errorTitle": "Error",
     "errorEmptyFields": "Please fill in all fields",
+    "errorEmptyName": "Name is required",
+    "errorEmptyEmail": "Email is required",
+    "errorInvalidEmail": "Invalid email format",
+    "errorEmptyPassword": "Password is required",
+    "errorWeakPassword": "Password must be at least 6 characters",
     "errorRegistrationFailed": "Registration failed"
   },
   "forgotPassword": {
@@ -307,6 +317,7 @@
     "backToLogin": "Back to Login",
     "errorTitle": "Error",
     "errorEmptyEmail": "Please enter your email",
+    "errorInvalidEmail": "Invalid email format",
     "successTitle": "Success",
     "successMessage": "If an account exists with this email, you will receive password reset instructions."
   },

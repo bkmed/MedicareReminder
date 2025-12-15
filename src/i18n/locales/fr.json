@@ -279,7 +279,12 @@
         "signUp": "S'inscrire",
         "errorTitle": "Erreur",
         "errorEmptyFields": "Veuillez saisir l'email et le mot de passe",
-        "errorLoginFailed": "Échec de la connexion"
+        "errorEmptyEmail": "L'email est requis",
+        "errorInvalidEmail": "Format d'email invalide",
+        "errorEmptyPassword": "Le mot de passe est requis",
+        "errorLoginFailed": "Échec de la connexion",
+        "tipTitle": "Compte de démo",
+        "tipMessage": "Utilisez 'test@test.com' / 'test' pour vous connecter."
     },
     "signUp": {
         "title": "Créer un compte",
@@ -295,6 +300,11 @@
         "signIn": "Se connecter",
         "errorTitle": "Erreur",
         "errorEmptyFields": "Veuillez remplir tous les champs",
+        "errorEmptyName": "Le nom est requis",
+        "errorEmptyEmail": "L'email est requis",
+        "errorInvalidEmail": "Format d'email invalide",
+        "errorEmptyPassword": "Le mot de passe est requis",
+        "errorWeakPassword": "Le mot de passe doit contenir au moins 6 caractères",
         "errorRegistrationFailed": "Échec de l'inscription"
     },
     "forgotPassword": {
@@ -306,6 +316,7 @@
         "backToLogin": "Retour à la connexion",
         "errorTitle": "Erreur",
         "errorEmptyEmail": "Veuillez saisir votre email",
+        "errorInvalidEmail": "Format d'email invalide",
         "successTitle": "Succès",
         "successMessage": "Si un compte existe avec cet email, vous recevrez des instructions de réinitialisation du mot de passe."
     },

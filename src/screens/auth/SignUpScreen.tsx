@@ -14,26 +14,57 @@ import {
 import { useTranslation } from 'react-i18next';
 import { authService } from '../../services/authService';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Theme } from '../../theme';
+import { isValidEmail, isValidPassword } from '../../utils/validation';
 
 export const SignUpScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const { signUp } = useAuth();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
 
-  const handleSignUp = async () => {
-    if (!name || !email || !password) {
-      Alert.alert(t('signUp.errorTitle'), t('signUp.errorEmptyFields'));
-      return;
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { name: '', email: '', password: '' };
+
+    if (!name) {
+      newErrors.name = t('signUp.errorEmptyName');
+      isValid = false;
     }
+
+    if (!email) {
+      newErrors.email = t('signUp.errorEmptyEmail');
+      isValid = false;
+    } else if (!isValidEmail(email)) {
+      newErrors.email = t('signUp.errorInvalidEmail');
+      isValid = false;
+    }
+
+    if (!password) {
+      newErrors.password = t('signUp.errorEmptyPassword');
+      isValid = false;
+    } else if (!isValidPassword(password)) {
+      newErrors.password = t('signUp.errorWeakPassword'); // Ensure translation key exists or use generic
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleSignUp = async () => {
+    if (!validateForm()) return;
 
     setLoading(true);
     try {
-      await authService.register(name, email, password);
+      const user = await authService.register(name, email, password);
+      await signUp(user);
     } catch (error: any) {
       Alert.alert(
         t('signUp.errorTitle'),
@@ -66,6 +97,9 @@ export const SignUpScreen = ({ navigation }: any) => {
               placeholder={t('signUp.namePlaceholder')}
               placeholderTextColor={theme.colors.subText}
             />
+            {errors.name ? (
+              <Text style={styles.errorText}>{errors.name}</Text>
+            ) : null}
           </View>
 
           <View style={styles.inputContainer}>
@@ -79,6 +113,9 @@ export const SignUpScreen = ({ navigation }: any) => {
               autoCapitalize="none"
               keyboardType="email-address"
             />
+            {errors.email ? (
+              <Text style={styles.errorText}>{errors.email}</Text>
+            ) : null}
           </View>
 
           <View style={styles.inputContainer}>
@@ -91,6 +128,9 @@ export const SignUpScreen = ({ navigation }: any) => {
               placeholderTextColor={theme.colors.subText}
               secureTextEntry
             />
+            {errors.password ? (
+              <Text style={styles.errorText}>{errors.password}</Text>
+            ) : null}
           </View>
 
           <TouchableOpacity
@@ -120,7 +160,6 @@ export const SignUpScreen = ({ navigation }: any) => {
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
-      flex: 1,
       backgroundColor: theme.colors.background,
     },
     scrollContent: {
@@ -132,6 +171,9 @@ const createStyles = (theme: Theme) =>
       backgroundColor: theme.colors.surface,
       borderRadius: theme.spacing.l,
       padding: theme.spacing.l,
+      width: '100%',
+      maxWidth: 400,
+      alignSelf: 'center',
       ...theme.shadows.medium,
     },
     title: {
@@ -191,5 +233,10 @@ const createStyles = (theme: Theme) =>
       ...theme.textVariants.body,
       color: theme.colors.primary,
       fontWeight: '600',
+    },
+    errorText: {
+      ...theme.textVariants.caption,
+      color: theme.colors.error,
+      marginTop: 4,
     },
   });

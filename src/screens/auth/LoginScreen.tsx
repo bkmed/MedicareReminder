@@ -14,25 +14,48 @@ import {
 import { useTranslation } from 'react-i18next';
 import { authService } from '../../services/authService';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
 import { Theme } from '../../theme';
+import { isValidEmail } from '../../utils/validation';
 
 export const LoginScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const { signIn } = useAuth();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errors, setErrors] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert(t('login.errorTitle'), t('login.errorEmptyFields'));
-      return;
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = { email: '', password: '' };
+
+    if (!email) {
+      newErrors.email = t('login.errorEmptyEmail');
+      isValid = false;
+    } else if (!isValidEmail(email)) {
+      newErrors.email = t('login.errorInvalidEmail');
+      isValid = false;
     }
+
+    if (!password) {
+      newErrors.password = t('login.errorEmptyPassword');
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleLogin = async () => {
+    if (!validateForm()) return;
 
     setLoading(true);
     try {
-      await authService.login(email, password);
+      const user = await authService.login(email, password);
+      await signIn(user);
     } catch (error: any) {
       Alert.alert(
         t('login.errorTitle'),
@@ -67,6 +90,9 @@ export const LoginScreen = ({ navigation }: any) => {
               autoCapitalize="none"
               keyboardType="email-address"
             />
+            {errors.email ? (
+              <Text style={styles.errorText}>{errors.email}</Text>
+            ) : null}
           </View>
 
           <View style={styles.inputContainer}>
@@ -79,6 +105,9 @@ export const LoginScreen = ({ navigation }: any) => {
               placeholderTextColor={theme.colors.subText}
               secureTextEntry
             />
+            {errors.password ? (
+              <Text style={styles.errorText}>{errors.password}</Text>
+            ) : null}
           </View>
 
           <TouchableOpacity
@@ -102,6 +131,11 @@ export const LoginScreen = ({ navigation }: any) => {
             )}
           </TouchableOpacity>
 
+          <View style={styles.tipContainer}>
+            <Text style={styles.tipTitle}>{t('login.tipTitle')}</Text>
+            <Text style={styles.tipText}>{t('login.tipMessage')}</Text>
+          </View>
+
           <View style={styles.footer}>
             <Text style={styles.footerText}>{t('login.noAccount')} </Text>
             <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
@@ -117,7 +151,6 @@ export const LoginScreen = ({ navigation }: any) => {
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
     container: {
-      flex: 1,
       backgroundColor: theme.colors.background,
     },
     scrollContent: {
@@ -129,6 +162,9 @@ const createStyles = (theme: Theme) =>
       backgroundColor: theme.colors.surface,
       borderRadius: theme.spacing.l,
       padding: theme.spacing.l,
+      width: '100%',
+      maxWidth: 400,
+      alignSelf: 'center',
       ...theme.shadows.medium,
     },
     title: {
@@ -196,5 +232,29 @@ const createStyles = (theme: Theme) =>
       ...theme.textVariants.body,
       color: theme.colors.primary,
       fontWeight: '600',
+    },
+    errorText: {
+      ...theme.textVariants.caption,
+      color: theme.colors.error,
+      marginTop: 4,
+    },
+    tipContainer: {
+      backgroundColor: theme.colors.background,
+      padding: theme.spacing.m,
+      borderRadius: theme.spacing.s,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: theme.spacing.l,
+      alignItems: 'center',
+    },
+    tipTitle: {
+      ...theme.textVariants.caption,
+      fontWeight: 'bold',
+      color: theme.colors.primary,
+      marginBottom: 4,
+    },
+    tipText: {
+      ...theme.textVariants.caption,
+      color: theme.colors.text,
     },
   });

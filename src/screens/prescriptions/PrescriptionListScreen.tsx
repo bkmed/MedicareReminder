@@ -153,6 +153,9 @@ const createStyles = (theme: Theme) =>
       padding: theme.spacing.m,
       flexGrow: 1,
       paddingBottom: 80,
+      width: '100%',
+      maxWidth: 800,
+      alignSelf: 'center',
     },
     searchContainer: {
       padding: theme.spacing.m,

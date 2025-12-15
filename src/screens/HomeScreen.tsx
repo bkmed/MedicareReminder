@@ -1,6 +1,5 @@
 import React, {
   useState,
-  useEffect,
   useMemo,
   useContext,
   useCallback,
@@ -35,7 +34,8 @@ export const HomeScreen = () => {
     expiringPrescriptions: 0,
   });
   const [loading, setLoading] = useState(true);
-  const [hasNotificationPermission, setHasNotificationPermission] = useState(true);
+  const [hasNotificationPermission, setHasNotificationPermission] =
+    useState(true);
 
   useFocusEffect(
     useCallback(() => {
@@ -45,7 +45,7 @@ export const HomeScreen = () => {
   );
 
   const checkPermission = async () => {
-    if (Platform.OS === 'web') return;
+    // Remove web check to allow tip to show (service returns false on web)
     const hasPermission = await notificationService.checkPermissions();
     setHasNotificationPermission(hasPermission);
   };
@@ -78,7 +78,7 @@ export const HomeScreen = () => {
   // Safe access à WebNavigationContext
   const webContext =
     Platform.OS === 'web'
-      ? useContext(require('../navigation/AppNavigator').WebNavigationContext)
+      ? useContext((require('../navigation/AppNavigator').WebNavigationContext) as React.Context<any>)
       : null;
 
   const setActiveTab = webContext?.setActiveTab || (() => { });
@@ -238,6 +238,9 @@ const createStyles = (theme: Theme) =>
     content: {
       padding: theme.spacing.m,
       paddingBottom: 40,
+      width: '100%',
+      maxWidth: 800,
+      alignSelf: 'center',
     },
     loadingContainer: {
       flex: 1,

@@ -279,7 +279,12 @@
         "signUp": "إنشاء حساب",
         "errorTitle": "خطأ",
         "errorEmptyFields": "يرجى إدخال البريد الإلكتروني وكلمة المرور",
-        "errorLoginFailed": "فشل تسجيل الدخول"
+        "errorEmptyEmail": "البريد الإلكتروني مطلوب",
+        "errorInvalidEmail": "تنسيق البريد الإلكتروني غير صالح",
+        "errorEmptyPassword": "كلمة المرور مطلوبة",
+        "errorLoginFailed": "فشل تسجيل الدخول",
+        "tipTitle": "حساب تجريبي",
+        "tipMessage": "استخدم 'test@test.com' / 'test' لتسجيل الدخول."
     },
     "signUp": {
         "title": "إنشاء حساب",
@@ -295,6 +300,11 @@
         "signIn": "تسجيل الدخول",
         "errorTitle": "خطأ",
         "errorEmptyFields": "يرجى ملء جميع الحقول",
+        "errorEmptyName": "الاسم مطلوب",
+        "errorEmptyEmail": "البريد الإلكتروني مطلوب",
+        "errorInvalidEmail": "تنسيق البريد الإلكتروني غير صالح",
+        "errorEmptyPassword": "كلمة المرور مطلوبة",
+        "errorWeakPassword": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
         "errorRegistrationFailed": "فشل التسجيل"
     },
     "forgotPassword": {
@@ -306,6 +316,7 @@
         "backToLogin": "العودة لتسجيل الدخول",
         "errorTitle": "خطأ",
         "errorEmptyEmail": "يرجى إدخال بريدك الإلكتروني",
+        "errorInvalidEmail": "تنسيق البريد الإلكتروني غير صالح",
         "successTitle": "نجاح",
         "successMessage": "إذا كان هناك حساب مسجل بهذا البريد الإلكتروني، ستتلقى تعليمات إعادة تعيين كلمة المرور."
     },

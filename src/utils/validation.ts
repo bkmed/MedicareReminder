@@ -8,3 +8,7 @@ export const isValidPhone = (phone: string): boolean => {
   const phoneRegex = /^[+]?[\d\s-]{8,}$/;
   return phoneRegex.test(phone);
 };
+
+export const isValidPassword = (password: string): boolean => {
+  return password.length >= 6;
+};

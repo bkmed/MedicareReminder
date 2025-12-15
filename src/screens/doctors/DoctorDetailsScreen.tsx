@@ -378,6 +378,8 @@ const createStyles = (theme: Theme) =>
       justifyContent: 'space-between',
       alignItems: 'center',
       marginBottom: theme.spacing.m,
+      flexWrap: 'wrap', // Allow wrapping
+      gap: theme.spacing.s,
     },
     sectionTitle: {
       ...theme.textVariants.subheader,
@@ -439,6 +441,8 @@ const createStyles = (theme: Theme) =>
     headerActions: {
       flexDirection: 'row',
       gap: theme.spacing.s,
+      flexWrap: 'wrap', // Allow buttons to wrap
+      justifyContent: 'flex-end', // Keep them to the right implies standard desktop look, but wrapping handles mobile
     },
     secondaryButton: {
       backgroundColor: 'transparent',

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
+  useWindowDimensions,
 } from 'react-native';
 import { enableScreens } from 'react-native-screens';
 import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
@@ -32,6 +33,10 @@ import { DoctorDetailsScreen } from '../screens/doctors/DoctorDetailsScreen';
 import { AnalyticsScreen } from '../screens/analytics/AnalyticsScreen';
 import { GlobalHistoryScreen } from '../screens/history/GlobalHistoryScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
+import { LoginScreen } from '../screens/auth/LoginScreen';
+import { SignUpScreen } from '../screens/auth/SignUpScreen';
+import { ForgotPasswordScreen } from '../screens/auth/ForgotPasswordScreen';
+import { AuthProvider, useAuth } from '../context/AuthContext';
 
 enableScreens();
 
@@ -45,6 +50,17 @@ export const WebNavigationContext = createContext({
 
 // ======= Stacks =======
 const Stack = createNativeStackNavigator();
+
+const AuthStack = () => {
+  const { t } = useTranslation();
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+    </Stack.Navigator>
+  );
+};
 
 const MedicationsStack = () => {
   const { t } = useTranslation();
@@ -125,7 +141,6 @@ const PrescriptionsStack = () => {
   );
 };
 
-
 const DoctorsStack = () => {
   const { t } = useTranslation();
   return (
@@ -148,8 +163,6 @@ const DoctorsStack = () => {
     </Stack.Navigator>
   );
 };
-
-
 
 const HistoryStack = () => {
   const { t } = useTranslation();
@@ -205,9 +218,13 @@ const DrawerNavigator = () => (
 const WebNavigator = () => {
   const { t } = useTranslation();
   const { theme } = useTheme();
+  const { width, height } = useWindowDimensions();
+  const isMobile = width < 768;
+
   const [activeTab, setActiveTab] = useState('Home');
   const [subScreen, setSubScreen] = useState('');
   const [screenParams, setScreenParams] = useState<any>({});
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const contextValue = useMemo(
     () => ({
@@ -218,6 +235,7 @@ const WebNavigator = () => {
         setActiveTab(tab);
         setSubScreen(screen || '');
         setScreenParams(params || {});
+        setIsMenuOpen(false); // Close menu on navigation
       },
     }),
     [activeTab, subScreen, screenParams],
@@ -269,6 +287,17 @@ const WebNavigator = () => {
     }
   };
 
+  const navItems = [
+    ['Home', t('navigation.home')],
+    ['Medications', t('navigation.medications')],
+    ['Appointments', t('navigation.appointments')],
+    ['Analytics', t('navigation.analytics')],
+    ['Prescriptions', t('navigation.prescriptions')],
+    ['Doctors', t('navigation.doctors')],
+    ['History', t('navigation.history') || 'History'],
+    ['Profile', t('navigation.profile')],
+  ];
+
   return (
     <WebNavigationContext.Provider value={contextValue}>
       <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -283,64 +312,141 @@ const WebNavigator = () => {
             },
           ]}
         >
-          <TouchableOpacity
-            style={webStyles.brandContainer}
-            onPress={() => setActiveTab('Home')}
-          >
-            <Image
-              source={require('../../public/logo.png')}
-              style={webStyles.logo}
-              resizeMode="contain"
-            />
-            <Text style={[webStyles.title, { color: theme.colors.text }]}>
-              {t('home.appName')}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Web Back Button */}
-          {subScreen ? (
+          <View style={webStyles.leftContainer}>
+            {/* Brand */}
             <TouchableOpacity
-              style={webStyles.backButton}
-              onPress={() => setSubScreen('')} // Clear subScreen to go back
+              style={webStyles.brandContainer}
+              onPress={() => setActiveTab('Home')}
             >
-              <Text style={webStyles.backButtonText}>← {t('common.back')}</Text>
+              <Image
+                source={require('../../public/logo.png')}
+                style={webStyles.logo}
+                resizeMode="contain"
+              />
+              <Text style={[webStyles.title, { color: theme.colors.text }]}>
+                {t('home.appName')}
+              </Text>
             </TouchableOpacity>
-          ) : null}
 
-          <View style={webStyles.navButtons}>
-            {[
-              ['Home', t('navigation.home')],
-              ['Medications', t('navigation.medications')],
-              ['Appointments', t('navigation.appointments')],
-              ['Analytics', t('navigation.analytics')],
-              ['Prescriptions', t('navigation.prescriptions')],
-              ['Doctors', t('navigation.doctors')],
-              ['History', t('navigation.history') || 'History'],
-              ['Profile', t('navigation.profile')],
-            ].map(([key, label]) => (
+            {/* Back Button (Desktop: visible, Mobile: only if subScreen) */}
+            {subScreen && (
               <TouchableOpacity
-                key={key as string}
-                onPress={() => setActiveTab(key as string)}
-                style={webStyles.navButton}
+                style={webStyles.backButton}
+                onPress={() => setSubScreen('')}
+              >
+                <Text style={webStyles.backButtonText}>
+                  ← {t('common.back')}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Desktop Navigation */}
+          {!isMobile && (
+            <View style={webStyles.navButtons}>
+              {navItems.map(([key, label]) => (
+                <TouchableOpacity
+                  key={key as string}
+                  onPress={() => setActiveTab(key as string)}
+                  style={webStyles.navButton}
+                >
+                  <Text
+                    style={[
+                      webStyles.navButtonText,
+                      {
+                        color:
+                          activeTab === key
+                            ? theme.colors.primary
+                            : theme.colors.subText,
+                      },
+                      activeTab === key && webStyles.activeNavButton,
+                    ]}
+                  >
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {/* Mobile Menu Button */}
+          {isMobile && (
+            <TouchableOpacity
+              style={webStyles.hamburgerButton}
+              onPress={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              <Text
+                style={[webStyles.hamburgerText, { color: theme.colors.text }]}
+              >
+                ☰
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Mobile Menu Overlay */}
+        {isMobile && isMenuOpen && (
+          <View
+            style={[
+              webStyles.mobileMenuOverlay,
+              { backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000 },
+            ]}
+          >
+            <View
+              style={[
+                webStyles.mobileMenu,
+                {
+                  backgroundColor: theme.colors.surface, // Solid color from theme
+                  borderRightWidth: 1,
+                  borderRightColor: theme.colors.border,
+                  height: height,
+                },
+              ]}
+            >
+              <TouchableOpacity
+                style={webStyles.closeButton}
+                onPress={() => setIsMenuOpen(false)}
               >
                 <Text
                   style={[
-                    webStyles.navButtonText,
-                    {
-                      color:
-                        activeTab === key
-                          ? theme.colors.primary
-                          : theme.colors.subText,
-                    },
-                    activeTab === key && webStyles.activeNavButton,
+                    webStyles.closeButtonText,
+                    { color: theme.colors.text },
                   ]}
                 >
-                  {label}
+                  ✕
                 </Text>
               </TouchableOpacity>
-            ))}
+              {navItems.map(([key, label]) => (
+                <TouchableOpacity
+                  key={key as string}
+                  onPress={() => {
+                    setActiveTab(key as string);
+                    setIsMenuOpen(false);
+                  }}
+                  style={webStyles.mobileMenuItem}
+                >
+                  <Text
+                    style={[
+                      webStyles.mobileMenuItemText,
+                      {
+                        color:
+                          activeTab === key
+                            ? theme.colors.primary
+                            : theme.colors.text,
+                      },
+                    ]}
+                  >
+                    {label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TouchableOpacity
+              style={{ flex: 1 }}
+              onPress={() => setIsMenuOpen(false)}
+            />
           </View>
-        </View>
+        )}
 
         {/* Content */}
         <View style={{ flex: 1 }}>{getActiveComponent()}</View>
@@ -352,14 +458,44 @@ const WebNavigator = () => {
 // ======= Root Export =======
 export const AppNavigator = () => {
   const linking: LinkingOptions<any> = {
-    prefixes: ['http://localhost:8080', 'medicarereminder://', 'https://bkmed.github.io/MedicareReminder/'],
+    prefixes: [
+      'http://localhost:8080',
+      'medicarereminder://',
+      'https://bkmed.github.io/MedicareReminder/',
+    ],
     config: { screens: {} },
   };
 
   return (
-    <NavigationContainer linking={linking}>
-      {Platform.OS === 'web' ? <WebNavigator /> : <DrawerNavigator />}
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer linking={linking}>
+        <AppContent />
+      </NavigationContainer>
+    </AuthProvider>
+  );
+};
+
+const AppContent = () => {
+  const { user, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <>
+      {!user ? (
+        <AuthStack />
+      ) : Platform.OS === 'web' ? (
+        <WebNavigator />
+      ) : (
+        <DrawerNavigator />
+      )}
+    </>
   );
 };
 
@@ -372,6 +508,11 @@ const webStyles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 20,
     elevation: 3,
+    zIndex: 10,
+  },
+  leftContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   brandContainer: {
     flexDirection: 'row',
@@ -396,5 +537,52 @@ const webStyles = StyleSheet.create({
   backButtonText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  hamburgerButton: {
+    padding: 8,
+  },
+  hamburgerText: {
+    fontSize: 24,
+  },
+  mobileMenuOverlay: {
+    position: 'absolute',
+    top: 60,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 20,
+    flexDirection: 'row',
+  },
+  mobileMenu: {
+    width: 250,
+    height: '100%',
+    backgroundColor: '#FFFFFF', // Default light, overridden by theme
+    padding: 20,
+    zIndex: 1001, // Ensure it sits above everything
+    ...Platform.select({
+      web: {
+        boxShadow: '2px 0 5px rgba(0,0,0,0.2)',
+      },
+      default: {
+        elevation: 5,
+      },
+    }),
+  },
+  closeButton: {
+    alignSelf: 'flex-end',
+    padding: 10,
+    marginBottom: 10,
+  },
+  closeButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  mobileMenuItem: {
+    paddingVertical: 15,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#ccc',
+  },
+  mobileMenuItemText: {
+    fontSize: 18,
   },
 });

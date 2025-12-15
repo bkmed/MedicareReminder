@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { storageService } from '../../services/storage';
 import { useTheme } from '../../context/ThemeContext';
 import { authService } from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 import {
   permissionsService,
   PermissionStatus,
@@ -31,6 +32,7 @@ const LANGUAGES = [
 export const ProfileScreen = ({ navigation }: any) => {
   const { theme, isDark, toggleTheme } = useTheme();
   const { t, i18n } = useTranslation();
+  const { signOut } = useAuth();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [currentLanguage, setCurrentLanguage] = useState(i18n.language);
   const [cameraPermission, setCameraPermission] =
@@ -151,7 +153,7 @@ export const ProfileScreen = ({ navigation }: any) => {
 
   const handleLogout = async () => {
     try {
-      await authService.logout();
+      await signOut();
     } catch (error) {
       Alert.alert(t('common.error'), t('profile.logoutError'));
     }
