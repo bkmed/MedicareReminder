@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
-  View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -12,6 +10,8 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 import { isValidEmail } from '../../utils/validation';
+import { AuthLayout } from '../../components/auth/AuthLayout';
+import { AuthInput } from '../../components/auth/AuthInput';
 
 export const ForgotPasswordScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
@@ -44,103 +44,56 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <Text style={styles.title}>{t('forgotPassword.title')}</Text>
-        <Text style={styles.subtitle}>{t('forgotPassword.subtitle')}</Text>
+    <AuthLayout
+      title={t('forgotPassword.title')}
+      subtitle={t('forgotPassword.subtitle')}
+    >
+      <AuthInput
+        label={t('forgotPassword.emailLabel')}
+        value={email}
+        onChangeText={setEmail}
+        placeholder={t('forgotPassword.emailPlaceholder')}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        error={emailError}
+      />
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>{t('forgotPassword.emailLabel')}</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder={t('forgotPassword.emailPlaceholder')}
-            placeholderTextColor={theme.colors.subText}
-            autoCapitalize="none"
-            keyboardType="email-address"
-          />
-          {emailError ? (
-            <Text style={styles.errorText}>{emailError}</Text>
-          ) : null}
-        </View>
-
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleReset}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#FFF" />
-          ) : (
-            <Text style={styles.buttonText}>
-              {t('forgotPassword.sendInstructionsButton')}
-            </Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <Text style={styles.backButtonText}>
-            {t('forgotPassword.backToLogin')}
+      <TouchableOpacity
+        style={[styles.button, loading && styles.buttonDisabled]}
+        onPress={handleReset}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#FFF" />
+        ) : (
+          <Text style={styles.buttonText}>
+            {t('forgotPassword.sendInstructionsButton')}
           </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+        )}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={styles.backButton}
+      >
+        <Text style={styles.backButtonText}>
+          {t('forgotPassword.backToLogin')}
+        </Text>
+      </TouchableOpacity>
+    </AuthLayout>
   );
 };
 
 const createStyles = (theme: Theme) =>
   StyleSheet.create({
-    container: {
-      backgroundColor: theme.colors.background,
-      justifyContent: 'center',
-      padding: theme.spacing.m,
-    },
-    card: {
-      backgroundColor: theme.colors.surface,
-      borderRadius: theme.spacing.l,
-      padding: theme.spacing.l,
-      ...theme.shadows.medium,
-    },
-    title: {
-      ...theme.textVariants.header,
-      color: theme.colors.text,
-      textAlign: 'center',
-      marginBottom: theme.spacing.xs,
-    },
-    subtitle: {
-      ...theme.textVariants.body,
-      color: theme.colors.subText,
-      textAlign: 'center',
-      marginBottom: theme.spacing.xl,
-    },
-    inputContainer: {
-      marginBottom: theme.spacing.m,
-    },
-    label: {
-      ...theme.textVariants.caption,
-      fontWeight: '600',
-      marginBottom: theme.spacing.xs,
-      color: theme.colors.text,
-    },
-    input: {
-      backgroundColor: theme.colors.background,
-      borderRadius: theme.spacing.s,
-      padding: theme.spacing.m,
-      fontSize: 16,
-      color: theme.colors.text,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
     button: {
       backgroundColor: theme.colors.primary,
       padding: theme.spacing.m,
-      borderRadius: theme.spacing.s,
+      borderRadius: theme.spacing.m, // Consistent with AuthInput
       alignItems: 'center',
+      marginTop: theme.spacing.m,
       marginBottom: theme.spacing.l,
+      ...theme.shadows.small,
     },
     buttonDisabled: {
       opacity: 0.7,
@@ -155,10 +108,5 @@ const createStyles = (theme: Theme) =>
     backButtonText: {
       ...theme.textVariants.body,
       color: theme.colors.subText,
-    },
-    errorText: {
-      ...theme.textVariants.caption,
-      color: theme.colors.error,
-      marginTop: 4,
     },
   });

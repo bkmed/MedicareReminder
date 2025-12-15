@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { medicationsDb } from '../database/medicationsDb';
 import { appointmentsDb } from '../database/appointmentsDb';
 import { prescriptionsDb } from '../database/prescriptionsDb';
-import { notificationService } from '../services/notificationService';
+import { permissionsService } from '../services/permissions';
 import { useTheme } from '../context/ThemeContext';
 import { Theme } from '../theme';
 
@@ -45,14 +45,14 @@ export const HomeScreen = () => {
   );
 
   const checkPermission = async () => {
-    // Remove web check to allow tip to show (service returns false on web)
-    const hasPermission = await notificationService.checkPermissions();
-    setHasNotificationPermission(hasPermission);
+    // Check permission using unified service (works for web & native)
+    const status = await permissionsService.checkNotificationPermission();
+    setHasNotificationPermission(status === 'granted');
   };
 
   const handleEnableNotifications = async () => {
-    const granted = await notificationService.requestPermission();
-    setHasNotificationPermission(granted);
+    const status = await permissionsService.requestNotificationPermission();
+    setHasNotificationPermission(status === 'granted');
   };
 
   const loadSummary = async () => {

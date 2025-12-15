@@ -1,5 +1,6 @@
 import { Platform, Linking, Alert } from 'react-native';
 import { PERMISSIONS, request, check, RESULTS, openSettings } from 'react-native-permissions';
+import notifee, { AuthorizationStatus } from '@notifee/react-native';
 
 // Declare web-only globals
 declare global {
@@ -128,8 +129,10 @@ class PermissionsService {
             return 'unavailable';
         }
 
-        // Mobile: Notifications are handled by notificationService
-        // Return unavailable to indicate it's managed elsewhere
+        // Mobile: Notifications are handled by notifee
+        const settings = await notifee.getNotificationSettings();
+        if (settings.authorizationStatus >= AuthorizationStatus.AUTHORIZED) return 'granted';
+        if (settings.authorizationStatus === AuthorizationStatus.DENIED) return 'denied';
         return 'unavailable';
     }
 
@@ -151,7 +154,10 @@ class PermissionsService {
             return 'unavailable';
         }
 
-        // Mobile: handled by notificationService
+        // Mobile: handled by notifee
+        const settings = await notifee.requestPermission();
+        if (settings.authorizationStatus >= AuthorizationStatus.AUTHORIZED) return 'granted';
+        if (settings.authorizationStatus === AuthorizationStatus.DENIED) return 'denied';
         return 'unavailable';
     }
 

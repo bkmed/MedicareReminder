@@ -7,7 +7,7 @@ interface AuthContextType {
     isLoading: boolean;
     signIn: (user: User) => Promise<void>;
     signUp: (user: User) => Promise<void>;
-    signOut: () => Promise<void>;
+    signOut: (navigation: any) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(registeredUser);
     };
 
-    const signOut = async () => {
+    const signOut = async (navigation: any) => {
         try {
             await authService.logout();
         } catch (error) {
@@ -47,9 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } finally {
             // Always clear local user state to redirect to Login
             setUser(null);
-            if (Platform.OS === 'web') {
-                (window as any).location.reload();
-            }
+            navigation.navigate('Login')
         }
     };
 

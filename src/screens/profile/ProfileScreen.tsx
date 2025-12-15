@@ -153,7 +153,7 @@ export const ProfileScreen = ({ navigation }: any) => {
 
   const handleLogout = async () => {
     try {
-      await signOut();
+      await signOut(navigation);
     } catch (error) {
       Alert.alert(t('common.error'), t('profile.logoutError'));
     }
