@@ -72,8 +72,7 @@ npm run start-web-dev
 
 Access the live version of the application here:
 
-> [**🔗 Medicare Reminder Public Link**](https://bk-medicarereminder.example.com) 
-> *(Please update this link with your actual deployment URL)*
+> [**🔗 Medicare Reminder Public Link**](https://bkmed.github.io/MedicareReminder/) 
 
 ## 🤝 Contributing
 
