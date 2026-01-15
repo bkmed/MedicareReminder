@@ -6,10 +6,10 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Image,
   Platform,
 } from 'react-native';
+import { useNotification } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { prescriptionsDb } from '../../database/prescriptionsDb';
@@ -22,6 +22,7 @@ import { DateTimePickerField } from '../../components/DateTimePickerField';
 
 export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -104,7 +105,11 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         }
       }
     } catch (error) {
-      Alert.alert(t('common.error'), t('prescriptions.loadError'));
+      showNotification({
+        title: t('common.error'),
+        message: t('prescriptions.loadError'),
+        type: 'error',
+      });
     }
   };
 
@@ -125,29 +130,46 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
       return;
     }
 
-    Alert.alert(t('prescriptions.addPhoto'), t('prescriptions.chooseOption'), [
-      {
-        text: t('prescriptions.takePhoto'),
-        onPress: () => {
-          launchCamera({ mediaType: 'photo', quality: 0.8 }, response => {
-            if (response.assets && response.assets[0]?.uri) {
-              setPhotoUri(response.assets[0].uri);
-            }
-          });
+    showNotification({
+      title: t('prescriptions.addPhoto'),
+      message: t('prescriptions.chooseOption'),
+      buttons: [
+        {
+          text: t('prescriptions.takePhoto'),
+          onPress: () => {
+            launchCamera({ mediaType: 'photo', quality: 0.8 }, response => {
+              if (response.didCancel) {
+                console.log('User cancelled image picker');
+              } else if (response.errorCode) {
+                console.error('ImagePicker Error: ', response.errorMessage);
+                showNotification({
+                  title: t('common.error'),
+                  message: t('prescriptions.imagePickerError'),
+                  type: 'error',
+                });
+              } else if (response.assets && response.assets[0]?.uri) {
+                setPhotoUri(response.assets[0].uri);
+              }
+            });
+          },
         },
-      },
-      {
-        text: t('prescriptions.chooseFromLibrary'),
-        onPress: () => {
-          launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, response => {
-            if (response.assets && response.assets[0]?.uri) {
-              setPhotoUri(response.assets[0].uri);
-            }
-          });
+        {
+          text: t('prescriptions.chooseFromLibrary'),
+          onPress: () => {
+            launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, response => {
+              if (response.assets && response.assets[0]?.uri) {
+                setPhotoUri(response.assets[0].uri);
+              }
+            });
+          },
         },
-      },
-      { text: t('common.cancel'), style: 'cancel' },
-    ]);
+        {
+          text: t('common.cancel'),
+          style: 'cancel',
+          onPress: () => { },
+        },
+      ],
+    });
   };
 
   const toggleMedicationSelection = (id: number) => {
@@ -218,31 +240,24 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         await notificationService.cancelPrescriptionReminder(id);
       }
 
+      showNotification({
+        title: t('common.success'),
+        message: isEdit ? t('prescriptions.editSuccess') : t('prescriptions.addSuccess'),
+        type: 'success',
+      });
+
       if (Platform.OS === 'web') {
-        (window as any).alert(
-          isEdit
-            ? t('prescriptions.editSuccess')
-            : t('prescriptions.addSuccess'),
-        );
-        // If came from DoctorDetails (has initialDoctorName), return to Doctors
-        // Otherwise return to Prescriptions
-        if (initialDoctorName) {
-          setActiveTab('Doctors');
-        } else {
-          setActiveTab('Prescriptions');
-        }
+        setActiveTab('Prescriptions');
       } else {
-        Alert.alert(
-          t('common.success'),
-          isEdit
-            ? t('prescriptions.editSuccess')
-            : t('prescriptions.addSuccess'),
-          [{ text: t('common.ok'), onPress: () => navigation.goBack() }],
-        );
+        navigation.goBack();
       }
     } catch (error) {
       console.error('Error saving prescription:', error);
-      Alert.alert(t('common.error'), t('prescriptions.saveError'));
+      showNotification({
+        title: t('common.error'),
+        message: t('prescriptions.saveError'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }

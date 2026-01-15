@@ -3,9 +3,9 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
+import { useNotification } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
@@ -15,6 +15,7 @@ import { AuthInput } from '../../components/auth/AuthInput';
 
 export const ForgotPasswordScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [email, setEmail] = useState('');
@@ -35,11 +36,12 @@ export const ForgotPasswordScreen = ({ navigation }: any) => {
     // Simulate API call
     setTimeout(() => {
       setLoading(false);
-      Alert.alert(
-        t('forgotPassword.successTitle'),
-        t('forgotPassword.successMessage'),
-        [{ text: 'OK', onPress: () => navigation.goBack() }],
-      );
+      showNotification({
+        title: t('forgotPassword.successTitle'),
+        message: t('forgotPassword.successMessage'),
+        type: 'success',
+        onConfirm: () => navigation.goBack(),
+      });
     }, 1500);
   };
 

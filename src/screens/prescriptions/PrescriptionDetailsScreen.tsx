@@ -9,6 +9,7 @@ import {
   Image,
   Platform,
 } from 'react-native';
+import { useNotification } from '../../context/NotificationContext';
 import { prescriptionsDb } from '../../database/prescriptionsDb';
 import { Prescription } from '../../database/schema';
 import { useTranslation } from 'react-i18next';
@@ -20,6 +21,7 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
   const prescriptionId = Number(route.params.prescriptionId);
   const { t } = useTranslation();
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [prescription, setPrescription] = useState<Prescription | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,40 +59,29 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
   };
 
   const handleDelete = () => {
-    if (Platform.OS === 'web') {
-      const confirmed = (window as any).confirm(t('common.deleteMessage'));
-      if (confirmed) {
-        performDelete();
-      }
-    } else {
-      Alert.alert(t('common.deleteTitle'), t('common.deleteMessage'), [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: performDelete,
-        },
-      ]);
-    }
+    showNotification({
+      title: t('common.deleteTitle'),
+      message: t('common.deleteMessage'),
+      type: 'confirm',
+      onConfirm: performDelete,
+    });
   };
 
   const performDelete = async () => {
     try {
       await prescriptionsDb.delete(prescriptionId);
-      if (Platform.OS === 'web') {
-        (window as any).alert(t('prescriptions.deleteSuccess'));
-        navigateBack();
-      } else {
-        Alert.alert(t('common.success'), t('prescriptions.deleteSuccess'), [
-          { text: t('common.ok'), onPress: () => navigateBack() },
-        ]);
-      }
+      showNotification({
+        title: t('common.success'),
+        message: t('prescriptions.deleteSuccess'),
+        type: 'success',
+      });
+      navigateBack();
     } catch (error) {
-      if (Platform.OS === 'web') {
-        (window as any).alert(t('common.deleteFailed'));
-      } else {
-        Alert.alert(t('common.errorTitle'), t('common.deleteFailed'));
-      }
+      showNotification({
+        title: t('common.errorTitle'),
+        message: t('common.deleteFailed'),
+        type: 'error',
+      });
     }
   };
 

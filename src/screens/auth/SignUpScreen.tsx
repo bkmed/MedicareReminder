@@ -3,10 +3,10 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   View,
 } from 'react-native';
+import { useNotification } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { authService } from '../../services/authService';
 import { useTheme } from '../../context/ThemeContext';
@@ -18,6 +18,7 @@ import { AuthInput } from '../../components/auth/AuthInput';
 
 export const SignUpScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const { t } = useTranslation();
   const { signUp } = useAuth();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -64,10 +65,11 @@ export const SignUpScreen = ({ navigation }: any) => {
       const user = await authService.register(name, email, password);
       await signUp(user);
     } catch (error: any) {
-      Alert.alert(
-        t('signUp.errorTitle'),
-        error.message || t('signUp.errorRegistrationFailed'),
-      );
+      showNotification({
+        title: t('signUp.errorTitle'),
+        message: error.message || t('signUp.errorRegistrationFailed'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }

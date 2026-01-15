@@ -5,9 +5,9 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
   Platform,
 } from 'react-native';
+import { useNotification } from '../../context/NotificationContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { doctorsDb } from '../../database/doctorsDb';
@@ -18,6 +18,7 @@ import { SearchInput } from '../../components/SearchInput';
 
 export const DoctorListScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -39,7 +40,11 @@ export const DoctorListScreen = ({ navigation }: any) => {
       setDoctors(data);
     } catch (error) {
       console.error('Error loading doctors:', error);
-      Alert.alert(t('common.error'), t('doctors.loadError'));
+      showNotification({
+        title: t('common.error'),
+        message: t('doctors.loadError'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }

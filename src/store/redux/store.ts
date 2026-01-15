@@ -15,6 +15,10 @@ import {
 } from 'redux-persist';
 import { storageService } from '../../services/storage';
 import appReducer from './slices/appSlice';
+import medicationReducer from './slices/medicationSlice';
+import appointmentReducer from './slices/appointmentSlice';
+import doctorReducer from './slices/doctorSlice';
+import prescriptionReducer from './slices/prescriptionSlice';
 
 // Create Redux Persist storage adapter using MMKV
 const reduxPersistMMKVStorage = {
@@ -36,11 +40,15 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage: reduxPersistMMKVStorage,
-  whitelist: ['app'], // Only persist specific reducers
+  whitelist: ['app', 'medications', 'appointments', 'doctors', 'prescriptions'],
 };
 
 const rootReducer = combineReducers({
   app: appReducer,
+  medications: medicationReducer,
+  appointments: appointmentReducer,
+  doctors: doctorReducer,
+  prescriptions: prescriptionReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

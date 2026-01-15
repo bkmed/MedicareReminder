@@ -1,4 +1,4 @@
-import React, { useState, useMemo, createContext } from 'react';
+import React, { useState, useMemo, createContext, useEffect } from 'react';
 import {
   Platform,
   View,
@@ -37,6 +37,8 @@ import { LoginScreen } from '../screens/auth/LoginScreen';
 import { SignUpScreen } from '../screens/auth/SignUpScreen';
 import { ForgotPasswordScreen } from '../screens/auth/ForgotPasswordScreen';
 import { AuthProvider, useAuth } from '../context/AuthContext';
+import { NotificationProvider } from '../context/NotificationContext';
+import { useNetworkStatus } from '../services/offlineService';
 
 enableScreens();
 
@@ -468,15 +470,27 @@ export const AppNavigator = () => {
 
   return (
     <AuthProvider>
-      <NavigationContainer linking={linking}>
-        <AppContent />
-      </NavigationContainer>
+      <NotificationProvider>
+        <NavigationContainer linking={linking}>
+          <AppContent />
+        </NavigationContainer>
+      </NotificationProvider>
     </AuthProvider>
   );
 };
 
 const AppContent = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, signOut } = useAuth();
+  const { isConnected } = useNetworkStatus();
+  const { navigationRef }: any = useMemo(() => ({ navigationRef: React.createRef() }), []);
+
+  useEffect(() => {
+    // Secure session: log out if disconnected
+    if (user && isConnected === false) {
+      console.log('Device disconnected, signing out for security...');
+      signOut({ navigate: (screen: string) => { /** handle redirect if needed */ } });
+    }
+  }, [isConnected, user, signOut]);
 
   if (isLoading) {
     return (

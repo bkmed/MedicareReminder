@@ -5,9 +5,9 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
   Platform,
 } from 'react-native';
+import { useNotification } from '../../context/NotificationContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { appointmentsDb } from '../../database/appointmentsDb';
@@ -19,6 +19,7 @@ import { SearchInput } from '../../components/SearchInput';
 export const AppointmentListScreen = ({ navigation }: any) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,11 +36,15 @@ export const AppointmentListScreen = ({ navigation }: any) => {
 
   const loadAppointments = async () => {
     try {
-      const data = await appointmentsDb.getUpcoming();
+      const data = await appointmentsDb.getAll();
       setAppointments(data);
     } catch (error) {
       console.error('Error loading appointments:', error);
-      Alert.alert(t('common.error'), t('appointments.loadError'));
+      showNotification({
+        title: t('common.error'),
+        message: t('appointments.loadError'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }

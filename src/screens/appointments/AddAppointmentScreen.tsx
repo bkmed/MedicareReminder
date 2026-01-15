@@ -10,6 +10,7 @@ import {
   Switch,
   Platform,
 } from 'react-native';
+import { useNotification } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { appointmentsDb } from '../../database/appointmentsDb';
 import { notificationService } from '../../services/notificationService';
@@ -21,6 +22,7 @@ import { DateTimePickerField } from '../../components/DateTimePickerField';
 export const AddAppointmentScreen = ({ navigation, route }: any) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
   // Web Navigation context
@@ -124,22 +126,25 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
         );
       }
 
-      // Go back: Mobile stack or Web tab
+      // Show Success and Navigate
+      showNotification({
+        title: t('common.success'),
+        message: isEdit ? t('appointments.editSuccess') : t('appointments.addSuccess'),
+        type: 'success',
+      });
+
       if (Platform.OS === 'web') {
-        (window as any).alert(
-          isEdit ? t('appointments.editSuccess') : t('appointments.addSuccess'),
-        );
-        setActiveTab('Appointments'); // retourne à la liste
+        setActiveTab('Appointments');
       } else {
-        Alert.alert(
-          t('common.success'),
-          isEdit ? t('appointments.editSuccess') : t('appointments.addSuccess'),
-          [{ text: t('common.ok'), onPress: () => navigation.goBack() }],
-        );
+        navigation.goBack();
       }
     } catch (error) {
       console.error('Error saving appointment:', error);
-      Alert.alert(t('common.error'), t('appointments.saveError'));
+      showNotification({
+        title: t('common.error'),
+        message: t('appointments.saveError'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }

@@ -38,7 +38,7 @@ export const googleAnalytics: AnalyticsService = {
         if (webAnalytics && firebaseWeb) {
           firebaseWeb.logEvent(webAnalytics, name, params);
         }
-      } else if (nativeAnalytics) {
+      } else if (typeof nativeAnalytics === 'function') {
         await nativeAnalytics().logEvent(name, params);
       }
       console.log(`[${Platform.OS} Analytics] Event logged:`, name, params);
@@ -59,7 +59,7 @@ export const googleAnalytics: AnalyticsService = {
             firebase_screen_class: screenClass,
           });
         }
-      } else if (nativeAnalytics) {
+      } else if (typeof nativeAnalytics === 'function') {
         await nativeAnalytics().logScreenView({
           screen_name: screenName,
           screen_class: screenClass,
@@ -77,7 +77,7 @@ export const googleAnalytics: AnalyticsService = {
         if (webAnalytics && firebaseWeb) {
           firebaseWeb.setUserProperties(webAnalytics, { [name]: value });
         }
-      } else if (nativeAnalytics) {
+      } else if (typeof nativeAnalytics === 'function') {
         await nativeAnalytics().setUserProperty(name, value);
       }
     } catch (error) {
@@ -91,7 +91,7 @@ export const googleAnalytics: AnalyticsService = {
         if (webAnalytics && firebaseWeb) {
           firebaseWeb.setUserId(webAnalytics, userId);
         }
-      } else if (nativeAnalytics) {
+      } else if (typeof nativeAnalytics === 'function') {
         await nativeAnalytics().setUserId(userId);
       }
     } catch (error) {

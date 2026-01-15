@@ -10,6 +10,7 @@ import {
   Switch,
   Platform,
 } from 'react-native';
+import { useNotification } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { medicationsDb } from '../../database/medicationsDb';
 import { notificationService } from '../../services/notificationService';
@@ -19,6 +20,7 @@ import { DateTimePickerField } from '../../components/DateTimePickerField';
 
 export const AddMedicationScreen = ({ navigation, route }: any) => {
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -151,22 +153,25 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
         const med = await medicationsDb.getById(id);
         if (med) await notificationService.scheduleMedicationReminders(med);
       }
+      // Show Success and Navigate
+      showNotification({
+        title: t('common.success'),
+        message: isEdit ? t('medications.editSuccess') : t('medications.addSuccess'),
+        type: 'success',
+      });
 
       if (Platform.OS === 'web') {
-        (window as any).alert(
-          isEdit ? t('medications.editSuccess') : t('medications.addSuccess'),
-        );
         setActiveTab('Medications');
       } else {
-        Alert.alert(
-          t('common.success'),
-          isEdit ? t('medications.editSuccess') : t('medications.addSuccess'),
-          [{ text: t('common.ok'), onPress: () => navigation.goBack() }],
-        );
+        navigation.goBack();
       }
     } catch (error) {
       console.error('Error saving medication:', error);
-      Alert.alert(t('common.error'), t('medications.saveError'));
+      showNotification({
+        title: t('common.error'),
+        message: t('medications.saveError'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }

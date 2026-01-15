@@ -9,6 +9,7 @@ import {
   Platform,
   Image,
 } from 'react-native';
+import { useNotification } from '../../context/NotificationContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { doctorsDb } from '../../database/doctorsDb';
 import { appointmentsDb } from '../../database/appointmentsDb';
@@ -22,6 +23,7 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
   const doctorId = Number(route.params.doctorId);
   const { t } = useTranslation();
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -114,45 +116,30 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
   };
 
   const handleDelete = () => {
-    if (Platform.OS === 'web') {
-      const confirmed = (window as any).confirm(t('doctors.deleteConfirmMessage'));
-      if (confirmed) {
-        performDelete();
-      }
-    } else {
-      Alert.alert(
-        t('doctors.deleteConfirmTitle'),
-        t('doctors.deleteConfirmMessage'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          {
-            text: t('common.delete'),
-            style: 'destructive',
-            onPress: performDelete,
-          },
-        ],
-      );
-    }
+    showNotification({
+      title: t('doctors.deleteConfirmTitle'),
+      message: t('doctors.deleteConfirmMessage'),
+      type: 'confirm',
+      onConfirm: performDelete,
+    });
   };
 
   const performDelete = async () => {
     try {
       await doctorsDb.delete(doctorId);
-      if (Platform.OS === 'web') {
-        (window as any).alert(t('doctors.deleteSuccess'));
-        navigationBack();
-      } else {
-        Alert.alert(t('common.success'), t('doctors.deleteSuccess'), [
-          { text: t('common.ok'), onPress: () => navigationBack() },
-        ]);
-      }
+      showNotification({
+        title: t('common.success'),
+        message: t('doctors.deleteSuccess'),
+        type: 'success',
+      });
+      navigationBack();
     } catch (error) {
       console.error('Error deleting doctor:', error);
-      if (Platform.OS === 'web') {
-        (window as any).alert(t('doctors.deleteError'));
-      } else {
-        Alert.alert(t('common.error'), t('doctors.deleteError'));
-      }
+      showNotification({
+        title: t('common.error'),
+        message: t('doctors.deleteError'),
+        type: 'error',
+      });
     }
   };
 

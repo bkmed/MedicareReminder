@@ -13,11 +13,13 @@ import { notificationService } from '../../services/notificationService';
 import { Appointment } from '../../database/schema';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
+import { useNotification } from '../../context/NotificationContext';
 import { Theme } from '../../theme';
 
 export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
   const appointmentId = Number(route.params.appointmentId);
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [appointment, setAppointment] = useState<Appointment | null>(null);
@@ -56,47 +58,30 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
   };
 
   const handleDelete = () => {
-    if (Platform.OS === 'web') {
-      const confirmed = (window as any).confirm(
-        t('appointmentDetails.deleteConfirmMessage'),
-      );
-      if (confirmed) {
-        performDelete();
-      }
-    } else {
-      Alert.alert(
-        t('appointmentDetails.deleteConfirmTitle'),
-        t('appointmentDetails.deleteConfirmMessage'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          {
-            text: t('common.delete'),
-            style: 'destructive',
-            onPress: performDelete,
-          },
-        ],
-      );
-    }
+    showNotification({
+      title: t('appointmentDetails.deleteConfirmTitle'),
+      message: t('appointmentDetails.deleteConfirmMessage'),
+      type: 'confirm',
+      onConfirm: performDelete,
+    });
   };
 
   const performDelete = async () => {
     try {
       await appointmentsDb.delete(appointmentId);
       await notificationService.cancelAppointmentReminder(appointmentId);
-      if (Platform.OS === 'web') {
-        (window as any).alert(t('appointments.deleteSuccess'));
-        navigateBack();
-      } else {
-        Alert.alert(t('common.success'), t('appointments.deleteSuccess'), [
-          { text: t('common.ok'), onPress: () => navigateBack() },
-        ]);
-      }
+      showNotification({
+        title: t('common.success'),
+        message: t('appointments.deleteSuccess'),
+        type: 'success',
+      });
+      navigateBack();
     } catch (error) {
-      if (Platform.OS === 'web') {
-        (window as any).alert(t('appointmentDetails.errorDeleteFailed'));
-      } else {
-        Alert.alert(t('appointmentDetails.errorDeleteFailed'));
-      }
+      showNotification({
+        title: t('common.error'),
+        message: t('appointmentDetails.errorDeleteFailed'),
+        type: 'error',
+      });
     }
   };
 

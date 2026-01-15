@@ -5,9 +5,9 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
   Platform,
 } from 'react-native';
+import { useNotification } from '../../context/NotificationContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { medicationsDb } from '../../database/medicationsDb';
@@ -19,6 +19,7 @@ import { SearchInput } from '../../components/SearchInput';
 
 export const MedicationListScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [medications, setMedications] = useState<Medication[]>([]);
@@ -39,7 +40,11 @@ export const MedicationListScreen = ({ navigation }: any) => {
       setMedications(data);
     } catch (error) {
       console.error('Error loading medications:', error);
-      Alert.alert(t('common.error'), t('medications.loadError'));
+      showNotification({
+        title: t('common.error'),
+        message: t('medications.loadError'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }

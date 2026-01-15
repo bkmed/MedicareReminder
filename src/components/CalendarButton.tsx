@@ -1,7 +1,8 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, Alert, View, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { TouchableOpacity, Text, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
+import { useNotification } from '../context/NotificationContext';
 import { Theme } from '../theme';
 
 // Lazy load web component to avoid issues on native
@@ -43,6 +44,8 @@ export const CalendarButton: React.FC<CalendarButtonProps> = ({
 }) => {
   const { t, i18n } = useTranslation();
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
+  const [loading, setLoading] = useState(false);
   const styles = createStyles(theme);
 
   if (Platform.OS === 'web' && AddToCalendarButton) {
@@ -57,7 +60,17 @@ export const CalendarButton: React.FC<CalendarButtonProps> = ({
       .padStart(2, '0')}:${endDateObj.getMinutes().toString().padStart(2, '0')}`;
 
     return (
-      <View style={styles.webContainer}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          // For web, the button itself handles the action, so we just render it.
+          // The actual add-to-calendar-button-react component is responsible for its UI and interaction.
+          // We can't easily wrap it in our TouchableOpacity and still have it function correctly.
+          // So, for web, we return the AddToCalendarButton directly within a View.
+        }}
+        activeOpacity={1} // Disable activeOpacity as it's not a native button
+        disabled={true} // Disable the TouchableOpacity itself
+      >
         <AddToCalendarButton
           name={title}
           options={['Apple', 'Google', 'Outlook.com', 'Yahoo', 'iCal']}
@@ -83,20 +96,21 @@ export const CalendarButton: React.FC<CalendarButtonProps> = ({
                   `}
           label={t('appointments.addToCalendar')}
         />
-      </View>
+      </TouchableOpacity>
     );
   }
 
   const handlePress = async () => {
+    setLoading(true);
     try {
       const permission = await permissionsService.checkCalendarPermission();
 
       if (permission !== 'granted') {
-        Alert.alert(
-          t('common.error'),
-          t('appointments.calendarPermissionRequired'),
-          [{ text: t('common.ok') }],
-        );
+        showNotification({
+          title: t('common.permissionDenied'),
+          message: t('calendar.permissionDeniedMessage'),
+          type: 'error',
+        });
         return;
       }
 
@@ -110,16 +124,30 @@ export const CalendarButton: React.FC<CalendarButtonProps> = ({
       });
 
       if (success) {
-        Alert.alert(t('common.success'), t('appointments.addedToCalendar'));
+        showNotification({
+          title: t('common.success'),
+          message: t('calendar.eventAdded'),
+          type: 'success',
+        });
         onSuccess?.();
       } else {
-        Alert.alert(t('common.error'), t('appointments.calendarError'));
+        showNotification({
+          title: t('common.error'),
+          message: t('calendar.eventError'),
+          type: 'error',
+        });
         onError?.();
       }
     } catch (error) {
       console.error('Error adding to calendar:', error);
-      Alert.alert(t('common.error'), t('appointments.calendarError'));
+      showNotification({
+        title: t('common.error'),
+        message: t('calendar.eventError'),
+        type: 'error',
+      });
       onError?.();
+    } finally {
+      setLoading(false);
     }
   };
 

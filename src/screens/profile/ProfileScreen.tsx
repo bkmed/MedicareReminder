@@ -5,11 +5,11 @@ import {
   StyleSheet,
   Switch,
   TouchableOpacity,
-  Alert,
   ScrollView,
   Platform,
   I18nManager,
 } from 'react-native';
+import { useNotification } from '../../context/NotificationContext';
 import { Picker } from '@react-native-picker/picker';
 import { useTranslation } from 'react-i18next';
 import { storageService } from '../../services/storage';
@@ -33,7 +33,8 @@ const LANGUAGES = [
 ];
 
 export const ProfileScreen = ({ navigation }: any) => {
-  const { theme, isDark, toggleTheme } = useTheme();
+  const { theme, toggleTheme, isDark } = useTheme();
+  const { showNotification } = useNotification();
   const { t, i18n } = useTranslation();
   const { signOut } = useAuth();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -65,19 +66,22 @@ export const ProfileScreen = ({ navigation }: any) => {
       setCurrentLanguage(langCode);
 
       if (Platform.OS !== 'web') {
-        // Set RTL for Arabic on native platforms
         const shouldBeRTL = langCode === 'ar';
         if (I18nManager.isRTL !== shouldBeRTL) {
           I18nManager.forceRTL(shouldBeRTL);
-          Alert.alert(
-            t('profile.restartRequired'),
-            t('profile.restartRequiredMessage'),
-            [{ text: t('common.ok') }],
-          );
+          showNotification({
+            title: t('profile.restartRequired'),
+            message: t('profile.restartRequiredMessage'),
+            type: 'info',
+          });
         }
       }
     } catch (error) {
-      Alert.alert(t('common.error'), t('profile.languageChangeError'));
+      showNotification({
+        title: t('common.error'),
+        message: t('profile.languageChangeError'),
+        type: 'error',
+      });
     }
   };
 
@@ -91,17 +95,17 @@ export const ProfileScreen = ({ navigation }: any) => {
     setCameraPermission(status);
 
     if (status === 'blocked') {
-      Alert.alert(
-        t('profile.permissionBlocked'),
-        t('profile.permissionBlockedMessage'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
+      showNotification({
+        title: t('profile.permissionBlocked'),
+        message: t('profile.permissionBlockedMessage'),
+        buttons: [
+          { text: t('common.cancel'), style: 'cancel', onPress: () => { } },
           {
             text: t('profile.openSettings'),
             onPress: () => permissionsService.openAppSettings(),
           },
         ],
-      );
+      });
     }
   };
 
@@ -115,17 +119,17 @@ export const ProfileScreen = ({ navigation }: any) => {
     setNotificationPermission(status);
 
     if (status === 'blocked') {
-      Alert.alert(
-        t('profile.permissionBlocked'),
-        t('profile.permissionBlockedMessage'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
+      showNotification({
+        title: t('profile.permissionBlocked'),
+        message: t('profile.permissionBlockedMessage'),
+        buttons: [
+          { text: t('common.cancel'), style: 'cancel', onPress: () => { } },
           {
             text: t('profile.openSettings'),
             onPress: () => permissionsService.openAppSettings(),
           },
         ],
-      );
+      });
     }
   };
 
@@ -139,26 +143,37 @@ export const ProfileScreen = ({ navigation }: any) => {
     setCalendarPermission(status);
 
     if (status === 'blocked') {
-      Alert.alert(
-        t('profile.permissionBlocked'),
-        t('profile.permissionBlockedMessage'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
+      showNotification({
+        title: t('profile.permissionBlocked'),
+        message: t('profile.permissionBlockedMessage'),
+        buttons: [
+          { text: t('common.cancel'), style: 'cancel', onPress: () => { } },
           {
             text: t('profile.openSettings'),
             onPress: () => permissionsService.openAppSettings(),
           },
         ],
-      );
+      });
     }
   };
 
   const handleLogout = async () => {
-    try {
-      await signOut(navigation);
-    } catch (error) {
-      Alert.alert(t('common.error'), t('profile.logoutError'));
-    }
+    showNotification({
+      title: t('profile.signOut'),
+      message: t('profile.signOutConfirm'),
+      type: 'confirm',
+      onConfirm: async () => {
+        try {
+          await signOut(navigation);
+        } catch (error) {
+          showNotification({
+            title: t('common.error'),
+            message: t('profile.logoutError'),
+            type: 'error',
+          });
+        }
+      }
+    });
   };
 
   const getPermissionStatusText = (status: PermissionStatus) => {

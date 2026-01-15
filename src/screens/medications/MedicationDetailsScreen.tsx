@@ -13,11 +13,13 @@ import { notificationService } from '../../services/notificationService';
 import { Medication } from '../../database/schema';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../context/ThemeContext';
+import { useNotification } from '../../context/NotificationContext';
 import { Theme } from '../../theme';
 
 export const MedicationDetailsScreen = ({ navigation, route }: any) => {
   const medicationId = Number(route.params.medicationId);
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const [medication, setMedication] = useState<Medication | null>(null);
@@ -56,47 +58,30 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
   };
 
   const handleDelete = () => {
-    if (Platform.OS === 'web') {
-      const confirmed = (window as any).confirm(
-        t('medicationDetails.deleteConfirmMessage'),
-      );
-      if (confirmed) {
-        performDelete();
-      }
-    } else {
-      Alert.alert(
-        t('medicationDetails.deleteConfirmTitle'),
-        t('medicationDetails.deleteConfirmMessage'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          {
-            text: t('common.delete'),
-            style: 'destructive',
-            onPress: performDelete,
-          },
-        ],
-      );
-    }
+    showNotification({
+      title: t('medicationDetails.deleteConfirmTitle'),
+      message: t('medicationDetails.deleteConfirmMessage'),
+      type: 'confirm',
+      onConfirm: performDelete,
+    });
   };
 
   const performDelete = async () => {
     try {
       await medicationsDb.delete(medicationId);
       await notificationService.cancelMedicationReminders(medicationId);
-      if (Platform.OS === 'web') {
-        (window as any).alert(t('medications.deleteSuccess'));
-        navigateBack();
-      } else {
-        Alert.alert(t('common.success'), t('medications.deleteSuccess'), [
-          { text: t('common.ok'), onPress: () => navigateBack() },
-        ]);
-      }
+      showNotification({
+        title: t('common.success'),
+        message: t('medications.deleteSuccess'),
+        type: 'success',
+      });
+      navigateBack();
     } catch (error) {
-      if (Platform.OS === 'web') {
-        (window as any).alert(t('medicationDetails.errorDeleteFailed'));
-      } else {
-        Alert.alert(t('medicationDetails.errorDeleteFailed'));
-      }
+      showNotification({
+        title: t('common.error'),
+        message: t('medicationDetails.errorDeleteFailed'),
+        type: 'error',
+      });
     }
   };
 

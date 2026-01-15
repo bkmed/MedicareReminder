@@ -88,6 +88,8 @@ module.exports = {
   resolve: {
     alias: {
       'react-native$': 'react-native-web',
+      '@react-native-firebase/analytics': false,
+      '@react-native-firebase/app': false,
     },
     extensions: [
       '.web.ts',

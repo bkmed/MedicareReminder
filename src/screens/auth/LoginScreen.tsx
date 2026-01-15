@@ -3,10 +3,10 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   View,
 } from 'react-native';
+import { useNotification } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { authService } from '../../services/authService';
 import { useTheme } from '../../context/ThemeContext';
@@ -18,6 +18,7 @@ import { AuthInput } from '../../components/auth/AuthInput';
 
 export const LoginScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const { t } = useTranslation();
   const { signIn } = useAuth();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -55,10 +56,11 @@ export const LoginScreen = ({ navigation }: any) => {
       const user = await authService.login(email, password);
       await signIn(user);
     } catch (error: any) {
-      Alert.alert(
-        t('login.errorTitle'),
-        error.message || t('login.errorLoginFailed'),
-      );
+      showNotification({
+        title: t('login.errorTitle'),
+        message: error.message || t('login.errorLoginFailed'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }

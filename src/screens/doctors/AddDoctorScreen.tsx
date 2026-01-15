@@ -10,6 +10,7 @@ import {
   Image,
   Platform,
 } from 'react-native';
+import { useNotification } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { doctorsDb } from '../../database/doctorsDb';
@@ -21,6 +22,7 @@ import { isValidEmail, isValidPhone } from '../../utils/validation';
 
 export const AddDoctorScreen = ({ navigation, route }: any) => {
   const { theme } = useTheme();
+  const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
@@ -87,7 +89,12 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
         setNotes(doctor.notes || '');
       }
     } catch (error) {
-      Alert.alert(t('common.error'), t('doctors.loadError'));
+      console.error('Error loading doctor:', error);
+      showNotification({
+        title: t('common.error'),
+        message: t('doctors.loadError'),
+        type: 'error',
+      });
     }
   };
 
@@ -162,67 +169,61 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
         await doctorsDb.add(doctorData);
       }
 
+      // Show Success and Navigate
+      showNotification({
+        title: t('common.success'),
+        message: isEdit ? t('doctors.editSuccess') : t('doctors.addSuccess'),
+        type: 'success',
+      });
+
       if (Platform.OS === 'web') {
-        (window as any).alert(
-          isEdit ? t('doctors.editSuccess') : t('doctors.addSuccess'),
-        );
-        navigateBack();
+        setActiveTab('Doctors');
       } else {
-        Alert.alert(
-          t('common.success'),
-          isEdit ? t('doctors.editSuccess') : t('doctors.addSuccess'),
-          [{ text: t('common.ok'), onPress: () => navigateBack() }],
-        );
+        navigation.goBack();
       }
     } catch (error) {
       console.error('Error saving doctor:', error);
-      Alert.alert(t('common.error'), t('doctors.saveError'));
+      showNotification({
+        title: t('common.error'),
+        message: t('doctors.saveError'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = () => {
-    if (!doctorId) return;
-    if (Platform.OS === 'web') {
-      const confirmed = (window as any).confirm(t('doctors.deleteConfirmMessage'));
-      if (confirmed) {
-        performDelete();
-      }
-    } else {
-      Alert.alert(
-        t('doctors.deleteConfirmTitle'),
-        t('doctors.deleteConfirmMessage'),
-        [
-          { text: t('common.cancel'), style: 'cancel' },
-          {
-            text: t('common.delete'),
-            style: 'destructive',
-            onPress: performDelete,
-          },
-        ],
-      );
-    }
+    showNotification({
+      title: t('doctors.deleteConfirmTitle'),
+      message: t('doctors.deleteConfirmMessage'),
+      type: 'confirm',
+      onConfirm: performDelete,
+    });
   };
 
   const performDelete = async () => {
     try {
-      if (!doctorId) return;
-      await doctorsDb.delete(doctorId);
-      if (Platform.OS === 'web') {
-        (window as any).alert(t('doctors.deleteSuccess'));
-        navigateBack();
-      } else {
-        Alert.alert(t('common.success'), t('doctors.deleteSuccess'), [
-          { text: t('common.ok'), onPress: () => navigateBack() },
-        ]);
+      if (doctorId) {
+        await doctorsDb.delete(doctorId);
+        showNotification({
+          title: t('common.success'),
+          message: t('doctors.deleteSuccess'),
+          type: 'success',
+        });
+        if (Platform.OS === 'web') {
+          setActiveTab('Doctors');
+        } else {
+          navigation.goBack();
+        }
       }
     } catch (error) {
-      if (Platform.OS === 'web') {
-        (window as any).alert(t('doctors.deleteError'));
-      } else {
-        Alert.alert(t('common.error'), t('doctors.deleteError'));
-      }
+      console.error('Error deleting doctor:', error);
+      showNotification({
+        title: t('common.error'),
+        message: t('doctors.deleteError'),
+        type: 'error',
+      });
     }
   };
 
