@@ -9,6 +9,9 @@ import { WebThemeHandler } from './src/components/WebThemeHandler';
 import './src/i18n'; // Initialize i18n
 
 import { LoadingScreen } from './src/components/LoadingScreen';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from './src/store/redux/store';
 
 const App = () => {
   const [loading, setLoading] = React.useState(true);
@@ -44,13 +47,17 @@ const App = () => {
   }
 
   return (
-    <ThemeProvider>
-      <SafeAreaProvider>
-        <WebThemeHandler />
-        <OfflineIndicator />
-        <AppNavigator />
-      </SafeAreaProvider>
-    </ThemeProvider>
+    <Provider store={store}>
+      <PersistGate loading={<LoadingScreen />} persistor={persistor}>
+        <ThemeProvider>
+          <SafeAreaProvider>
+            <WebThemeHandler />
+            <OfflineIndicator />
+            <AppNavigator />
+          </SafeAreaProvider>
+        </ThemeProvider>
+      </PersistGate>
+    </Provider>
   );
 };
 

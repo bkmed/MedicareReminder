@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Platform,
 } from 'react-native';
 import { medicationsDb } from '../../database/medicationsDb';
@@ -51,7 +50,11 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
       const med = await medicationsDb.getById(medicationId);
       setMedication(med);
     } catch (error) {
-      Alert.alert(t('medicationDetails.errorLoadFailed'));
+      showNotification({
+        title: t('common.error'),
+        message: t('medicationDetails.errorLoadFailed'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }

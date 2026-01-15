@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Image,
   Platform,
 } from 'react-native';
@@ -52,7 +51,11 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
       const presc = await prescriptionsDb.getById(prescriptionId);
       setPrescription(presc);
     } catch (error) {
-      Alert.alert(t('common.errorTitle'), t('common.loadFailed'));
+      showNotification({
+        title: t('common.errorTitle'),
+        message: t('common.loadFailed'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }

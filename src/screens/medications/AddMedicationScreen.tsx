@@ -18,6 +18,7 @@ import { addMedication, updateMedication } from '../../store/redux/slices/medica
 import { medicationsDb } from '../../database/medicationsDb';
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
+import { Medication } from '../../database/schema';
 import { Theme } from '../../theme';
 import { DateTimePickerField } from '../../components/DateTimePickerField';
 

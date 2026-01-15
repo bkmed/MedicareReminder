@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Platform,
   Image,
 } from 'react-native';
@@ -88,14 +87,22 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
       if (doctorData) {
         setDoctor(doctorData);
       } else {
-        Alert.alert(t('common.error'), t('doctors.notFound'));
+        showNotification({
+          title: t('common.error'),
+          message: t('doctors.notFound'),
+          type: 'error',
+        });
         navigationBack();
       }
 
       setAppointments(appointmentsData);
     } catch (error) {
       console.error('Error loading doctor details:', error);
-      Alert.alert(t('common.error'), t('doctors.loadError'));
+      showNotification({
+        title: t('common.error'),
+        message: t('doctors.loadError'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }

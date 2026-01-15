@@ -1,4 +1,4 @@
-import { Platform, Linking, Alert } from 'react-native';
+import { Platform, Linking } from 'react-native';
 // Lazy load native modules
 let RNPermissions: any;
 let notifee: any;
@@ -293,11 +293,7 @@ class PermissionsService {
 
   async openAppSettings(): Promise<void> {
     if (Platform.OS === 'web') {
-      Alert.alert(
-        'Permissions',
-        'Please check your browser settings to manage permissions.',
-        [{ text: 'OK' }],
-      );
+      window.alert('Please check your browser settings to manage permissions.');
       return;
     }
 

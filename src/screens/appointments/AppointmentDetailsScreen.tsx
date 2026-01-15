@@ -5,7 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Platform,
 } from 'react-native';
 import { appointmentsDb } from '../../database/appointmentsDb';
@@ -51,7 +50,11 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
       const appt = await appointmentsDb.getById(appointmentId);
       setAppointment(appt);
     } catch (error) {
-      Alert.alert(t('appointmentDetails.errorLoadFailed'));
+      showNotification({
+        title: t('common.error'),
+        message: t('appointmentDetails.errorLoadFailed'),
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }

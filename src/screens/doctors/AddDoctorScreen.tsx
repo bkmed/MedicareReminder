@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/redux/store';
-import { addDoctor, updateDoctor } from '../../store/redux/slices/doctorSlice';
+import { addDoctor, updateDoctor, removeDoctor } from '../../store/redux/slices/doctorSlice';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 import { Dropdown } from '../../components/Dropdown';
@@ -134,6 +134,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
         {
           text: t('common.cancel'),
           style: 'cancel',
+          onPress: () => { },
         },
       ],
     });
@@ -202,133 +203,136 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
   const performDelete = async () => {
     try {
       if (doctorId) {
-        await doctorsDb.delete(doctorId);
+        dispatch(removeDoctor(doctorId));
         showNotification({
           title: t('common.success'),
           message: t('doctors.deleteSuccess'),
           type: 'success',
         });
-        if (Platform.OS === 'web') {
-          setActiveTab('Doctors');
-        } else {
-          navigation.goBack();
-        }
+        navigateBack();
       }
     } catch (error) {
-      console.error('Error deleting doctor:', error);
-      showNotification({
-        title: t('common.error'),
-        message: t('doctors.deleteError'),
-        type: 'error',
-      });
+      if (Platform.OS === 'web') {
+        setActiveTab('Doctors');
+      } else {
+        navigation.goBack();
+      }
     }
-  };
+  } catch (error) {
+    console.error('Error deleting doctor:', error);
+    showNotification({
+      title: t('common.error'),
+      message: t('doctors.deleteError'),
+      type: 'error',
+    });
+  }
+};
 
-  return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <TouchableOpacity style={styles.photoButton} onPress={handleTakePhoto}>
-          {photoUri ? (
-            <Image source={{ uri: photoUri }} style={styles.photo} />
-          ) : (
-            <View style={styles.photoPlaceholder}>
-              <Text style={styles.photoPlaceholderText}>
-                {t('prescriptions.photoButton')}
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
+return (
+  <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.content}>
+      <TouchableOpacity style={styles.photoButton} onPress={handleTakePhoto}>
+        {photoUri ? (
+          <Image source={{ uri: photoUri }} style={styles.photo} />
+        ) : (
+          <View style={styles.photoPlaceholder}>
+            <Text style={styles.photoPlaceholderText}>
+              {t('prescriptions.photoButton')}
+            </Text>
+          </View>
+        )}
+      </TouchableOpacity>
 
-        <Text style={styles.label}>{t('doctors.name')} *</Text>
-        <TextInput
-          style={[styles.input, errors.name && styles.inputError]}
-          value={name}
-          onChangeText={text => {
-            setName(text);
-            if (errors.name) setErrors({ ...errors, name: '' });
-          }}
-          placeholder={t('doctors.namePlaceholder')}
-          placeholderTextColor={theme.colors.subText}
-        />
-        {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+      <Text style={styles.label}>{t('doctors.name')} *</Text>
+      <TextInput
+        style={[styles.input, errors.name && styles.inputError]}
+        value={name}
+        onChangeText={text => {
+          setName(text);
+          if (errors.name) setErrors({ ...errors, name: '' });
+        }}
+        placeholder={t('doctors.namePlaceholder')}
+        placeholderTextColor={theme.colors.subText}
+      />
+      {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
-        <Dropdown
-          label={t('doctors.specialty')}
-          data={specialtyOptions}
-          value={specialty}
-          onSelect={setSpecialty}
-          placeholder={t('doctors.specialtyPlaceholder')}
-        />
+      <Dropdown
+        label={t('doctors.specialty')}
+        data={specialtyOptions}
+        value={specialty}
+        onSelect={setSpecialty}
+        placeholder={t('doctors.specialtyPlaceholder')}
+      />
 
-        <Text style={styles.label}>{t('doctors.phone')}</Text>
-        <TextInput
-          style={[styles.input, errors.phone && styles.inputError]}
-          value={phone}
-          onChangeText={text => {
-            setPhone(text);
-            if (errors.phone) setErrors({ ...errors, phone: '' });
-          }}
-          placeholder={t('doctors.phonePlaceholder')}
-          placeholderTextColor={theme.colors.subText}
-          keyboardType="phone-pad"
-        />
-        {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
+      <Text style={styles.label}>{t('doctors.phone')}</Text>
+      <TextInput
+        style={[styles.input, errors.phone && styles.inputError]}
+        value={phone}
+        onChangeText={text => {
+          setPhone(text);
+          if (errors.phone) setErrors({ ...errors, phone: '' });
+        }}
+        placeholder={t('doctors.phonePlaceholder')}
+        placeholderTextColor={theme.colors.subText}
+        keyboardType="phone-pad"
+      />
+      {errors.phone && <Text style={styles.errorText}>{errors.phone}</Text>}
 
-        <Text style={styles.label}>{t('doctors.email')}</Text>
-        <TextInput
-          style={[styles.input, errors.email && styles.inputError]}
-          value={email}
-          onChangeText={text => {
-            setEmail(text);
-            if (errors.email) setErrors({ ...errors, email: '' });
-          }}
-          placeholder={t('doctors.emailPlaceholder')}
-          placeholderTextColor={theme.colors.subText}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
+      <Text style={styles.label}>{t('doctors.email')}</Text>
+      <TextInput
+        style={[styles.input, errors.email && styles.inputError]}
+        value={email}
+        onChangeText={text => {
+          setEmail(text);
+          if (errors.email) setErrors({ ...errors, email: '' });
+        }}
+        placeholder={t('doctors.emailPlaceholder')}
+        placeholderTextColor={theme.colors.subText}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
 
-        <Text style={styles.label}>{t('doctors.address')}</Text>
-        <TextInput
-          style={styles.input}
-          value={address}
-          onChangeText={setAddress}
-          placeholder={t('doctors.addressPlaceholder')}
-          placeholderTextColor={theme.colors.subText}
-        />
+      <Text style={styles.label}>{t('doctors.address')}</Text>
+      <TextInput
+        style={styles.input}
+        value={address}
+        onChangeText={setAddress}
+        placeholder={t('doctors.addressPlaceholder')}
+        placeholderTextColor={theme.colors.subText}
+      />
 
-        <Text style={styles.label}>{t('doctors.notes')}</Text>
-        <TextInput
-          style={[styles.input, styles.notesInput]}
-          value={notes}
-          onChangeText={setNotes}
-          placeholder={t('doctors.notesPlaceholder')}
-          placeholderTextColor={theme.colors.subText}
-          multiline
-          numberOfLines={4}
-        />
+      <Text style={styles.label}>{t('doctors.notes')}</Text>
+      <TextInput
+        style={[styles.input, styles.notesInput]}
+        value={notes}
+        onChangeText={setNotes}
+        placeholder={t('doctors.notesPlaceholder')}
+        placeholderTextColor={theme.colors.subText}
+        multiline
+        numberOfLines={4}
+      />
 
-        <TouchableOpacity
-          style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-          onPress={handleSave}
-          disabled={loading}
-        >
-          <Text style={styles.saveButtonText}>
-            {isEdit ? t('doctors.updateButton') : t('doctors.saveButton')}
+      <TouchableOpacity
+        style={[styles.saveButton, loading && styles.saveButtonDisabled]}
+        onPress={handleSave}
+        disabled={loading}
+      >
+        <Text style={styles.saveButtonText}>
+          {isEdit ? t('doctors.updateButton') : t('doctors.saveButton')}
+        </Text>
+      </TouchableOpacity>
+
+      {isEdit && (
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+          <Text style={styles.deleteButtonText}>
+            {t('doctors.deleteButton')}
           </Text>
         </TouchableOpacity>
-
-        {isEdit && (
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-            <Text style={styles.deleteButtonText}>
-              {t('doctors.deleteButton')}
-            </Text>
-          </TouchableOpacity>
-        )}
-      </ScrollView>
-    </View>
-  );
+      )}
+    </ScrollView>
+  </View>
+);
 };
 
 const createStyles = (theme: Theme) =>
