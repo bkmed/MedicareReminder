@@ -20,6 +20,8 @@ import appointmentReducer from './slices/appointmentSlice';
 import doctorReducer from './slices/doctorSlice';
 import prescriptionReducer from './slices/prescriptionSlice';
 
+import analyticsReducer from './slices/analyticsSlice';
+
 // Create Redux Persist storage adapter using MMKV
 const reduxPersistMMKVStorage = {
   setItem: (key: string, value: string) => {
@@ -40,7 +42,14 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage: reduxPersistMMKVStorage,
-  whitelist: ['app', 'medications', 'appointments', 'doctors', 'prescriptions'],
+  whitelist: [
+    'app',
+    'medications',
+    'appointments',
+    'doctors',
+    'prescriptions',
+    'analytics',
+  ],
 };
 
 const rootReducer = combineReducers({
@@ -49,6 +58,7 @@ const rootReducer = combineReducers({
   appointments: appointmentReducer,
   doctors: doctorReducer,
   prescriptions: prescriptionReducer,
+  analytics: analyticsReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

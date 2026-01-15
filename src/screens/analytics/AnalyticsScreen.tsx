@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,12 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { LineChart, BarChart } from 'react-native-chart-kit';
-import {
-  analyticsService,
-  AnalyticsData,
-} from '../../services/analyticsService';
 import { googleAnalytics } from '../../services/googleAnalytics';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../store/redux/store';
+import { fetchAnalytics } from '../../store/redux/slices/analyticsSlice';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -23,48 +22,20 @@ export const AnalyticsScreen = () => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const dispatch = useDispatch<AppDispatch>();
 
-  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-  const [adherenceChart, setAdherenceChart] = useState<{
-    labels: string[];
-    data: number[];
-  } | null>(null);
-  const [appointmentsChart, setAppointmentsChart] = useState<{
-    labels: string[];
-    data: number[];
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: analytics,
+    adherenceChart,
+    appointmentsChart,
+    loading,
+  } = useSelector((state: RootState) => state.analytics);
 
   useEffect(() => {
     // Log screen view for analytics
     googleAnalytics.logScreenView('AnalyticsScreen', 'analytics');
-    loadAnalytics();
-  }, []);
-
-  const loadAnalytics = async () => {
-    try {
-      const [data, adherence, appointments] = await Promise.all([
-        analyticsService.getAnalytics(),
-        analyticsService.getMedicationAdherence(),
-        analyticsService.getUpcomingAppointmentsChart(),
-      ]);
-
-      setAnalytics(data);
-      setAdherenceChart(adherence);
-      setAppointmentsChart(appointments);
-
-      // Log analytics view event
-      googleAnalytics.logEvent('view_analytics_dashboard', {
-        total_medications: data.totalMedications,
-        upcoming_appointments: data.upcomingAppointments,
-        adherence_rate: data.medicationAdherence,
-      });
-    } catch (error) {
-      console.error('Error loading analytics:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    dispatch(fetchAnalytics());
+  }, [dispatch]);
 
   if (loading || !analytics) {
     return (
@@ -155,7 +126,7 @@ export const AnalyticsScreen = () => {
         )}
 
         {/* Upcoming Appointments Chart */}
-        {appointmentsChart && appointmentsChart.data.some(val => val > 0) && (
+        {appointmentsChart && appointmentsChart.data.some((val: number) => val > 0) && (
           <View style={styles.chartSection}>
             <Text style={styles.chartTitle}>
               {t('analytics.upcomingAppointmentsChart')}

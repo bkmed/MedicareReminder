@@ -10,33 +10,33 @@ import {
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { medicationsDb } from '../database/medicationsDb';
-import { appointmentsDb } from '../database/appointmentsDb';
-import { prescriptionsDb } from '../database/prescriptionsDb';
+
 import { permissionsService } from '../services/permissions';
 import { useTheme } from '../context/ThemeContext';
 import { Theme } from '../theme';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../store/redux/store';
+import { fetchAnalytics } from '../store/redux/slices/analyticsSlice';
 
 export const HomeScreen = () => {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const dispatch = useDispatch<AppDispatch>();
 
-  const [summary, setSummary] = useState({
-    medications: 0,
-    upcomingAppointments: 0,
-    expiringPrescriptions: 0,
-  });
-  const [loading, setLoading] = useState(true);
+  const { data: summary, loading } = useSelector(
+    (state: RootState) => state.analytics,
+  );
+
   const [hasNotificationPermission, setHasNotificationPermission] =
     useState(true);
 
   useFocusEffect(
     useCallback(() => {
-      loadSummary();
+      dispatch(fetchAnalytics());
       checkPermission();
-    }, []),
+    }, [dispatch]),
   );
 
   const checkPermission = async () => {
@@ -50,36 +50,16 @@ export const HomeScreen = () => {
     setHasNotificationPermission(status === 'granted');
   };
 
-  const loadSummary = async () => {
-    try {
-      const [meds, appts, prescriptions] = await Promise.all([
-        medicationsDb.getAll(),
-        appointmentsDb.getUpcoming(),
-        prescriptionsDb.getExpiringSoon(),
-      ]);
-
-      setSummary({
-        medications: meds.length,
-        upcomingAppointments: appts.length,
-        expiringPrescriptions: prescriptions.length,
-      });
-    } catch (error) {
-      console.error('Error loading summary:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // Safe access à WebNavigationContext
   const webContext =
     Platform.OS === 'web'
       ? useContext(
-          require('../navigation/AppNavigator')
-            .WebNavigationContext as React.Context<any>,
-        )
+        require('../navigation/AppNavigator')
+          .WebNavigationContext as React.Context<any>,
+      )
       : null;
 
-  const setActiveTab = webContext?.setActiveTab || (() => {});
+  const setActiveTab = webContext?.setActiveTab || (() => { });
 
   const navigateToTab = (tab: string, screen?: string) => {
     if (Platform.OS === 'web') {
@@ -91,10 +71,10 @@ export const HomeScreen = () => {
         tab === 'medications' || tab === 'Medications'
           ? 'MedicationsTab'
           : tab === 'appointments' || tab === 'Appointments'
-          ? 'AppointmentsTab'
-          : tab === 'analytics'
-          ? 'Analytics'
-          : undefined;
+            ? 'AppointmentsTab'
+            : tab === 'analytics'
+              ? 'Analytics'
+              : undefined;
 
       if (stackScreen) {
         navigation.navigate(
@@ -142,7 +122,7 @@ export const HomeScreen = () => {
             style={[styles.statCard, styles.statCardBlue]}
             onPress={() => navigateToTab('Medications')}
           >
-            <Text style={styles.statNumber}>{summary.medications}</Text>
+            <Text style={styles.statNumber}>{summary.totalMedications}</Text>
             <Text style={styles.statLabel}>{t('home.activeMedications')}</Text>
           </TouchableOpacity>
 
