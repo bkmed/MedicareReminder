@@ -1,15 +1,47 @@
-/**
- * Native Google Analytics Service using React Native Firebase Analytics
- * Platform-specific implementation for iOS and Android
- */
+import { Platform } from 'react-native';
 
-import analytics from '@react-native-firebase/analytics';
+// Typing for analytics objects
+interface AnalyticsService {
+  logEvent: (name: string, params?: { [key: string]: any }) => Promise<void>;
+  logScreenView: (screenName: string, screenClass?: string) => Promise<void>;
+  setUserProperty: (name: string, value: string) => Promise<void>;
+  setUserId: (userId: string | null) => Promise<void>;
+}
 
-export const googleAnalytics = {
+let nativeAnalytics: any;
+let webAnalytics: any;
+let firebaseWeb: any;
+
+if (Platform.OS !== 'web') {
+  try {
+    nativeAnalytics = require('@react-native-firebase/analytics').default;
+  } catch (error) {
+    console.warn('Native Analytics not available:', error);
+  }
+} else {
+  try {
+    const { getAnalytics, logEvent, setUserProperties, setUserId } = require('firebase/analytics');
+    const { app } = require('../config/firebase');
+    if (app) {
+      webAnalytics = getAnalytics(app);
+      firebaseWeb = { logEvent, setUserProperties, setUserId };
+    }
+  } catch (error) {
+    console.warn('Web Analytics not available:', error);
+  }
+}
+
+export const googleAnalytics: AnalyticsService = {
   logEvent: async (name: string, params?: { [key: string]: any }) => {
     try {
-      await analytics().logEvent(name, params);
-      console.log('[Native Analytics] Event logged:', name, params);
+      if (Platform.OS === 'web') {
+        if (webAnalytics && firebaseWeb) {
+          firebaseWeb.logEvent(webAnalytics, name, params);
+        }
+      } else if (nativeAnalytics) {
+        await nativeAnalytics().logEvent(name, params);
+      }
+      console.log(`[${Platform.OS} Analytics] Event logged:`, name, params);
     } catch (error) {
       console.warn('Error logging event:', error);
     }
@@ -20,11 +52,20 @@ export const googleAnalytics = {
     screenClass: string = screenName,
   ) => {
     try {
-      await analytics().logScreenView({
-        screen_name: screenName,
-        screen_class: screenClass,
-      });
-      console.log('[Native Analytics] Screen view logged:', screenName);
+      if (Platform.OS === 'web') {
+        if (webAnalytics && firebaseWeb) {
+          firebaseWeb.logEvent(webAnalytics, 'screen_view', {
+            firebase_screen: screenName,
+            firebase_screen_class: screenClass,
+          });
+        }
+      } else if (nativeAnalytics) {
+        await nativeAnalytics().logScreenView({
+          screen_name: screenName,
+          screen_class: screenClass,
+        });
+      }
+      console.log(`[${Platform.OS} Analytics] Screen view logged:`, screenName);
     } catch (error) {
       console.warn('Error logging screen view:', error);
     }
@@ -32,7 +73,13 @@ export const googleAnalytics = {
 
   setUserProperty: async (name: string, value: string) => {
     try {
-      await analytics().setUserProperty(name, value);
+      if (Platform.OS === 'web') {
+        if (webAnalytics && firebaseWeb) {
+          firebaseWeb.setUserProperties(webAnalytics, { [name]: value });
+        }
+      } else if (nativeAnalytics) {
+        await nativeAnalytics().setUserProperty(name, value);
+      }
     } catch (error) {
       console.warn('Error setting user property:', error);
     }
@@ -40,7 +87,13 @@ export const googleAnalytics = {
 
   setUserId: async (userId: string | null) => {
     try {
-      await analytics().setUserId(userId);
+      if (Platform.OS === 'web') {
+        if (webAnalytics && firebaseWeb) {
+          firebaseWeb.setUserId(webAnalytics, userId);
+        }
+      } else if (nativeAnalytics) {
+        await nativeAnalytics().setUserId(userId);
+      }
     } catch (error) {
       console.warn('Error setting user ID:', error);
     }

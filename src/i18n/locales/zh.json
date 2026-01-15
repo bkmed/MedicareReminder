@@ -19,6 +19,7 @@
         "selectTime": "选择时间",
         "yes": "是",
         "no": "否",
+        "or": "或",
         "ok": "确定",
         "required": "此字段为必填项",
         "invalidEmail": "无效的电子邮件地址",

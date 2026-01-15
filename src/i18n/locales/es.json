@@ -19,6 +19,7 @@
         "selectTime": "Seleccionar Hora",
         "yes": "Sí",
         "no": "No",
+        "or": "o",
         "ok": "Aceptar",
         "required": "Este campo es obligatorio",
         "invalidEmail": "Correo electrónico inválido",

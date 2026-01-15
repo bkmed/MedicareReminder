@@ -1,10 +1,26 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, Alert } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, Alert, View, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { calendarService } from '../services/calendarService';
-import { permissionsService } from '../services/permissions';
 import { useTheme } from '../context/ThemeContext';
 import { Theme } from '../theme';
+
+// Lazy load web component to avoid issues on native
+let AddToCalendarButton: any;
+if (Platform.OS === 'web') {
+  try {
+    AddToCalendarButton = require('add-to-calendar-button-react').AddToCalendarButton;
+  } catch (error) {
+    console.warn('add-to-calendar-button-react not available:', error);
+  }
+}
+
+// Native services
+let calendarService: any;
+let permissionsService: any;
+if (Platform.OS !== 'web') {
+  calendarService = require('../services/calendarService').calendarService;
+  permissionsService = require('../services/permissions').permissionsService;
+}
 
 interface CalendarButtonProps {
   title: string;
@@ -25,9 +41,51 @@ export const CalendarButton: React.FC<CalendarButtonProps> = ({
   onSuccess,
   onError,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { theme } = useTheme();
   const styles = createStyles(theme);
+
+  if (Platform.OS === 'web' && AddToCalendarButton) {
+    // Calculate end time (default 1 hour)
+    const [hours, minutes] = time.split(':').map(Number);
+    const endDateObj = new Date();
+    endDateObj.setHours(hours + 1);
+    endDateObj.setMinutes(minutes);
+    const endTime = `${endDateObj
+      .getHours()
+      .toString()
+      .padStart(2, '0')}:${endDateObj.getMinutes().toString().padStart(2, '0')}`;
+
+    return (
+      <View style={styles.webContainer}>
+        <AddToCalendarButton
+          name={title}
+          options={['Apple', 'Google', 'Outlook.com', 'Yahoo', 'iCal']}
+          location={location}
+          startDate={date}
+          endDate={date}
+          startTime={time}
+          endTime={endTime}
+          timeZone="currentBrowser"
+          description={notes}
+          language={i18n.language.split('-')[0] as any}
+          buttonStyle="custom"
+          customCss={`
+                      --btn-background: ${theme.colors.secondary};
+                      --btn-text: #FFFFFF;
+                      --font: 'System', sans-serif;
+                      --btn-shadow: none;
+                      --btn-border: none;
+                      --btn-radius: 8px;
+                      --btn-padding: 12px 20px;
+                      --btn-font-weight: 600;
+                      --btn-font-size: 16px;
+                  `}
+          label={t('appointments.addToCalendar')}
+        />
+      </View>
+    );
+  }
 
   const handlePress = async () => {
     try {
@@ -91,5 +149,10 @@ const createStyles = (theme: Theme) =>
       color: '#FFFFFF',
       fontSize: 16,
       fontWeight: '600',
+    },
+    webContainer: {
+      marginTop: 10,
+      alignItems: 'center',
+      width: '100%',
     },
   });

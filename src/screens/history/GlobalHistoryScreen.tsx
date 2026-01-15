@@ -125,7 +125,6 @@ const createStyles = (theme: Theme) =>
       backgroundColor: theme.colors.background,
       padding: theme.spacing.s,
       borderRadius: theme.spacing.s,
-      color: theme.colors.text,
       ...theme.textVariants.body,
     },
     listContent: {

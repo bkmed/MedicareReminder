@@ -27,6 +27,9 @@ const LANGUAGES = [
   { code: 'fr', name: 'Français', flag: '🇫🇷' },
   { code: 'ar', name: 'العربية', flag: '🇹🇳' },
   { code: 'de', name: 'Deutsch', flag: '🇩🇪' },
+  { code: 'es', name: 'Español', flag: '🇪🇸' },
+  { code: 'zh', name: '中文', flag: '🇨🇳' },
+  { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
 ];
 
 export const ProfileScreen = ({ navigation }: any) => {
@@ -61,15 +64,17 @@ export const ProfileScreen = ({ navigation }: any) => {
       storageService.setString('user-language', langCode);
       setCurrentLanguage(langCode);
 
-      // Set RTL for Arabic on native platforms
-      const shouldBeRTL = langCode === 'ar';
-      if (I18nManager.isRTL !== shouldBeRTL) {
-        I18nManager.forceRTL(shouldBeRTL);
-        Alert.alert(
-          t('profile.restartRequired'),
-          t('profile.restartRequiredMessage'),
-          [{ text: t('common.ok') }],
-        );
+      if (Platform.OS !== 'web') {
+        // Set RTL for Arabic on native platforms
+        const shouldBeRTL = langCode === 'ar';
+        if (I18nManager.isRTL !== shouldBeRTL) {
+          I18nManager.forceRTL(shouldBeRTL);
+          Alert.alert(
+            t('profile.restartRequired'),
+            t('profile.restartRequiredMessage'),
+            [{ text: t('common.ok') }],
+          );
+        }
       }
     } catch (error) {
       Alert.alert(t('common.error'), t('profile.languageChangeError'));
@@ -78,7 +83,6 @@ export const ProfileScreen = ({ navigation }: any) => {
 
   const handleCameraPermission = async (value: boolean) => {
     if (!value) {
-      // User is trying to disable - just update UI
       setCameraPermission('denied');
       return;
     }
@@ -103,7 +107,6 @@ export const ProfileScreen = ({ navigation }: any) => {
 
   const handleNotificationPermission = async (value: boolean) => {
     if (!value) {
-      // User is trying to disable - just update UI
       setNotificationPermission('denied');
       return;
     }
@@ -128,7 +131,6 @@ export const ProfileScreen = ({ navigation }: any) => {
 
   const handleCalendarPermission = async (value: boolean) => {
     if (!value) {
-      // User is trying to disable - just update UI
       setCalendarPermission('denied');
       return;
     }
@@ -193,23 +195,24 @@ export const ProfileScreen = ({ navigation }: any) => {
         {/* Language Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('profile.language')}</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={currentLanguage}
-              onValueChange={itemValue => handleLanguageChange(itemValue)}
-              style={styles.picker}
-              dropdownIconColor={theme.colors.text}
+          {LANGUAGES.map(lang => (
+            <TouchableOpacity
+              key={lang.code}
+              style={[
+                styles.languageRow,
+                currentLanguage === lang.code && styles.languageRowActive,
+              ]}
+              onPress={() => handleLanguageChange(lang.code)}
             >
-              {LANGUAGES.map(lang => (
-                <Picker.Item
-                  key={lang.code}
-                  label={`${lang.flag} ${lang.name}`}
-                  value={lang.code}
-                  color={Platform.OS === 'ios' ? theme.colors.text : undefined}
-                />
-              ))}
-            </Picker>
-          </View>
+              <View style={styles.languageInfo}>
+                <Text style={styles.languageFlag}>{lang.flag}</Text>
+                <Text style={styles.languageName}>{lang.name}</Text>
+              </View>
+              {currentLanguage === lang.code && (
+                <Text style={styles.checkmark}>✓</Text>
+              )}
+            </TouchableOpacity>
+          ))}
         </View>
 
         {/* Permissions Section */}
@@ -354,16 +357,36 @@ const createStyles = (theme: Theme) =>
       ...theme.textVariants.body,
       color: theme.colors.text,
     },
-    pickerContainer: {
-      backgroundColor: theme.colors.background,
+    languageRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: theme.spacing.m,
+      paddingHorizontal: theme.spacing.s,
       borderRadius: theme.spacing.s,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-      overflow: 'hidden',
+      marginBottom: theme.spacing.xs,
     },
-    picker: {
+    languageRowActive: {
+      backgroundColor: theme.colors.primaryBackground || (theme.dark ? '#1A2E35' : '#E6F2F5'),
+    },
+    languageInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    languageFlag: {
+      fontSize: 24,
+      marginRight: theme.spacing.m,
+    },
+    languageName: {
+      ...theme.textVariants.body,
       color: theme.colors.text,
-      backgroundColor: theme.colors.background,
+      fontSize: 16,
+    },
+    checkmark: {
+      ...theme.textVariants.body,
+      color: theme.colors.primary,
+      fontSize: 20,
+      fontWeight: 'bold',
     },
     permissionRow: {
       flexDirection: 'row',
@@ -384,17 +407,6 @@ const createStyles = (theme: Theme) =>
     permissionStatus: {
       ...theme.textVariants.caption,
       fontSize: 12,
-    },
-    permissionButton: {
-      backgroundColor: theme.colors.primary,
-      paddingHorizontal: theme.spacing.m,
-      paddingVertical: theme.spacing.s,
-      borderRadius: theme.spacing.s,
-    },
-    permissionButtonText: {
-      ...theme.textVariants.button,
-      color: '#FFFFFF',
-      fontSize: 14,
     },
     logoutButton: {
       backgroundColor: theme.colors.surface,
