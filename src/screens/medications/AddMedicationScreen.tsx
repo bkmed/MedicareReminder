@@ -28,7 +28,10 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   const [name, setName] = useState('');
   const [dosage, setDosage] = useState('');
   const [frequency, setFrequency] = useState('Daily');
-  const [times, setTimes] = useState<Date[]>([new Date(new Date().setHours(8, 0, 0, 0)), new Date(new Date().setHours(20, 0, 0, 0))]);
+  const [times, setTimes] = useState<Date[]>([
+    new Date(new Date().setHours(8, 0, 0, 0)),
+    new Date(new Date().setHours(20, 0, 0, 0)),
+  ]);
   const [startDate, setStartDate] = useState<Date | null>(new Date());
   const [endDate, setEndDate] = useState<Date | null>(null);
   const [notes, setNotes] = useState('');
@@ -53,8 +56,8 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
       : null;
 
   const { setActiveTab } = WebNavigationContext
-    ? useContext(WebNavigationContext)
-    : { setActiveTab: () => { } };
+    ? (useContext(WebNavigationContext) as any)
+    : { setActiveTab: () => {} };
 
   const loadMedication = async () => {
     if (!medicationId) return;
@@ -69,7 +72,9 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
         // Convert to Date objects for the picker
         let parsedTimes: Date[] = [];
         try {
-          const timeStrings = med.times ? JSON.parse(med.times) : ['08:00', '20:00'];
+          const timeStrings = med.times
+            ? JSON.parse(med.times)
+            : ['08:00', '20:00'];
           parsedTimes = timeStrings.map((ts: string) => {
             const [h, m] = ts.split(':').map(Number);
             const d = new Date();
@@ -78,7 +83,10 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
             return d;
           });
         } catch (e) {
-          parsedTimes = [new Date(new Date().setHours(8, 0)), new Date(new Date().setHours(20, 0))];
+          parsedTimes = [
+            new Date(new Date().setHours(8, 0)),
+            new Date(new Date().setHours(20, 0)),
+          ];
         }
         setTimes(parsedTimes);
 
@@ -111,7 +119,11 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
     try {
       // Format times back to string array HH:MM
       const timeStrings = times.map(t =>
-        t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })
+        t.toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        }),
       );
 
       const medicationData = {
@@ -140,9 +152,17 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
       }
 
       if (Platform.OS === 'web') {
+        Alert.alert(
+          t('common.success'),
+          isEdit ? t('medications.editSuccess') : t('medications.addSuccess'),
+        );
         setActiveTab('Medications');
       } else {
-        navigation.goBack();
+        Alert.alert(
+          t('common.success'),
+          isEdit ? t('medications.editSuccess') : t('medications.addSuccess'),
+          [{ text: t('common.ok'), onPress: () => navigation.goBack() }],
+        );
       }
     } catch (error) {
       console.error('Error saving medication:', error);
@@ -152,7 +172,8 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
     }
   };
 
-  const handleAddTime = () => setTimes([...times, new Date(new Date().setHours(12, 0))]);
+  const handleAddTime = () =>
+    setTimes([...times, new Date(new Date().setHours(12, 0))]);
   const handleRemoveTime = (index: number) =>
     setTimes(times.filter((_, i) => i !== index));
 
@@ -222,7 +243,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
               <DateTimePickerField
                 label=""
                 value={time}
-                onChange={(d) => handleTimeChange(index, d)}
+                onChange={d => handleTimeChange(index, d)}
                 mode="time"
                 placeholder="HH:MM"
               />
@@ -370,7 +391,7 @@ const createStyles = (theme: Theme) =>
       backgroundColor: theme.colors.error,
       justifyContent: 'center',
       alignItems: 'center',
-      marginTop: 20 // align with input
+      marginTop: 20, // align with input
     },
     removeButtonText: {
       color: theme.colors.surface,

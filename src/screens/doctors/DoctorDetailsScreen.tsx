@@ -33,8 +33,8 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
       : null;
 
   const { setActiveTab } = WebNavigationContext
-    ? useContext(WebNavigationContext)
-    : { setActiveTab: () => { } }; // fallback pour mobile
+    ? (useContext(WebNavigationContext) as any)
+    : { setActiveTab: () => {} }; // fallback pour mobile
 
   const navigateToAddAppointment = () => {
     if (Platform.OS === 'web') {
@@ -117,7 +117,12 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
           onPress: async () => {
             try {
               await doctorsDb.delete(doctorId);
-              navigationBack();
+              Alert.alert(t('common.success'), t('doctors.deleteSuccess'), [
+                { text: t('common.ok'), onPress: () => navigationBack() },
+              ]);
+              if (Platform.OS === 'web') {
+                navigationBack();
+              }
             } catch (error) {
               console.error('Error deleting doctor:', error);
               Alert.alert(t('common.error'), t('doctors.deleteError'));
@@ -162,9 +167,14 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
           <View style={styles.header}>
             <View style={styles.doctorInfoContainer}>
               {doctor.photoUri ? (
-                <Image source={{ uri: doctor.photoUri }} style={styles.doctorPhoto} />
+                <Image
+                  source={{ uri: doctor.photoUri }}
+                  style={styles.doctorPhoto}
+                />
               ) : (
-                <View style={[styles.doctorPhoto, styles.doctorPhotoPlaceholder]}>
+                <View
+                  style={[styles.doctorPhoto, styles.doctorPhotoPlaceholder]}
+                >
                   <Text style={styles.doctorPhotoPlaceholderText}>
                     {doctor.name.charAt(0)}
                   </Text>

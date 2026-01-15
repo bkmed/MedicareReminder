@@ -74,10 +74,7 @@ export const SignUpScreen = ({ navigation }: any) => {
   };
 
   return (
-    <AuthLayout
-      title={t('signUp.title')}
-      subtitle={t('signUp.subtitle')}
-    >
+    <AuthLayout title={t('signUp.title')} subtitle={t('signUp.subtitle')}>
       <AuthInput
         label={t('signUp.nameLabel')}
         value={name}

@@ -43,8 +43,8 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
       : null;
 
   const { setActiveTab } = WebNavigationContext
-    ? useContext(WebNavigationContext)
-    : { setActiveTab: () => { } }; // fallback pour mobile
+    ? (useContext(WebNavigationContext) as any)
+    : { setActiveTab: () => {} }; // fallback pour mobile
 
   const specialtyOptions = useMemo(() => {
     return MEDICAL_SPECIALTIES.map(key => ({
@@ -93,7 +93,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
 
   const handleTakePhoto = async () => {
     if (Platform.OS === 'web') {
-      const input = document.createElement('input');
+      const input = (document as any).createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
       input.onchange = (e: any) => {

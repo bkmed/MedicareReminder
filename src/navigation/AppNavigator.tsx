@@ -45,7 +45,7 @@ export const WebNavigationContext = createContext({
   activeTab: 'Home',
   subScreen: '',
   screenParams: {} as any,
-  setActiveTab: (tab: string, subScreen?: string, params?: any) => { },
+  setActiveTab: (tab: string, subScreen?: string, params?: any) => {},
 });
 
 // ======= Stacks =======

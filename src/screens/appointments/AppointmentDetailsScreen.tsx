@@ -29,8 +29,8 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
       : null;
 
   const { setActiveTab } = WebNavigationContext
-    ? useContext(WebNavigationContext)
-    : { setActiveTab: () => { } };
+    ? (useContext(WebNavigationContext) as any)
+    : { setActiveTab: () => {} };
 
   const navigateBack = () => {
     if (Platform.OS === 'web') {
@@ -70,7 +70,14 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
               await notificationService.cancelAppointmentReminder(
                 appointmentId,
               );
-              navigateBack();
+              Alert.alert(
+                t('common.success'),
+                t('appointments.deleteSuccess'),
+                [{ text: t('common.ok'), onPress: () => navigateBack() }],
+              );
+              if (Platform.OS === 'web') {
+                navigateBack();
+              }
             } catch (error) {
               Alert.alert(t('appointmentDetails.errorDeleteFailed'));
             }
@@ -87,7 +94,9 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
   if (loading || !appointment) {
     return (
       <View style={styles.container}>
-        <Text style={{ color: theme.colors.text }}>{t('appointmentDetails.loading')}</Text>
+        <Text style={{ color: theme.colors.text }}>
+          {t('appointmentDetails.loading')}
+        </Text>
       </View>
     );
   }
@@ -117,35 +126,50 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
 
         {appointment.doctorName && (
           <View style={styles.section}>
-            <Text style={styles.label}>{t('appointmentDetails.doctorLabel')}</Text>
+            <Text style={styles.label}>
+              {t('appointmentDetails.doctorLabel')}
+            </Text>
             <Text style={styles.value}>Dr. {appointment.doctorName}</Text>
           </View>
         )}
 
         {appointment.location && (
           <View style={styles.section}>
-            <Text style={styles.label}>{t('appointmentDetails.locationLabel')}</Text>
+            <Text style={styles.label}>
+              {t('appointmentDetails.locationLabel')}
+            </Text>
             <Text style={styles.value}>{appointment.location}</Text>
           </View>
         )}
 
         {appointment.notes && (
           <View style={styles.section}>
-            <Text style={styles.label}>{t('appointmentDetails.notesLabel')}</Text>
+            <Text style={styles.label}>
+              {t('appointmentDetails.notesLabel')}
+            </Text>
             <Text style={styles.value}>{appointment.notes}</Text>
           </View>
         )}
 
         <View style={styles.section}>
-          <Text style={styles.label}>{t('appointmentDetails.reminderLabel')}</Text>
+          <Text style={styles.label}>
+            {t('appointmentDetails.reminderLabel')}
+          </Text>
           <Text style={styles.value}>
-            {appointment.reminderEnabled ? t('appointmentDetails.reminderTimeText') : t('appointmentDetails.reminderDisabled')}
+            {appointment.reminderEnabled
+              ? t('appointmentDetails.reminderTimeText')
+              : t('appointmentDetails.reminderDisabled')}
           </Text>
         </View>
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => Alert.alert('View History', 'Appointment history tracking is not available yet.')}
+          onPress={() =>
+            Alert.alert(
+              'View History',
+              'Appointment history tracking is not available yet.',
+            )
+          }
         >
           <Text style={styles.buttonText}>View History</Text>
         </TouchableOpacity>
@@ -154,14 +178,18 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
           style={[styles.button, styles.editButton]}
           onPress={handleEdit}
         >
-          <Text style={styles.buttonText}>{t('appointmentDetails.editButton')}</Text>
+          <Text style={styles.buttonText}>
+            {t('appointmentDetails.editButton')}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.button, styles.deleteButton]}
           onPress={handleDelete}
         >
-          <Text style={styles.buttonText}>{t('appointmentDetails.deleteButton')}</Text>
+          <Text style={styles.buttonText}>
+            {t('appointmentDetails.deleteButton')}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

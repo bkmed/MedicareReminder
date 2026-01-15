@@ -45,17 +45,19 @@ export const MedicationListScreen = ({ navigation }: any) => {
   const filteredMedications = useMemo(() => {
     if (!searchQuery) return medications;
     const lowerQuery = searchQuery.toLowerCase();
-    return medications.filter(
-      med =>
-        med.name.toLowerCase().includes(lowerQuery) ||
-        med.dosage.toLowerCase().includes(lowerQuery),
-    ).sort((a, b) => {
-      // Sort by urgency first
-      if (a.isUrgent && !b.isUrgent) return -1;
-      if (!a.isUrgent && b.isUrgent) return 1;
-      // Then by name
-      return a.name.localeCompare(b.name);
-    });
+    return medications
+      .filter(
+        med =>
+          med.name.toLowerCase().includes(lowerQuery) ||
+          med.dosage.toLowerCase().includes(lowerQuery),
+      )
+      .sort((a, b) => {
+        // Sort by urgency first
+        if (a.isUrgent && !b.isUrgent) return -1;
+        if (!a.isUrgent && b.isUrgent) return 1;
+        // Then by name
+        return a.name.localeCompare(b.name);
+      });
   }, [medications, searchQuery]);
 
   const handleMedicationPress = (medication: Medication) => {

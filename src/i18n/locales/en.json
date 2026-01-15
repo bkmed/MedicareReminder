@@ -23,6 +23,7 @@
     "required": "This field is required",
     "invalidEmail": "Invalid email address",
     "invalidPhone": "Invalid phone number",
+    "invalidDateRange": "End date must be after start date",
     "searchPlaceholder": "Search...",
     "week": "Week",
     "month": "Month",
@@ -100,7 +101,10 @@
     "noMedications": "No medications found",
     "addFirst": "Add your first medication to get started",
     "urgent": "URGENT",
-    "isUrgent": "Urgent"
+    "isUrgent": "Urgent",
+    "addSuccess": "Medication added successfully",
+    "editSuccess": "Medication updated successfully",
+    "deleteSuccess": "Medication deleted successfully"
   },
   "appointments": {
     "title": "Appointments",
@@ -127,7 +131,10 @@
     "enableReminder": "Enable Reminder (1 hour before)",
     "loadError": "Failed to load appointment",
     "saveError": "Failed to save appointment",
-    "fillRequired": "Please enter a title"
+    "fillRequired": "Please enter a title",
+    "addSuccess": "Appointment scheduled successfully",
+    "editSuccess": "Appointment updated successfully",
+    "deleteSuccess": "Appointment deleted successfully"
   },
   "prescriptions": {
     "title": "Prescriptions",
@@ -168,7 +175,10 @@
       "created": "Prescription Created",
       "updated": "Prescription Updated",
       "refilled": "Prescription Refilled"
-    }
+    },
+    "addSuccess": "Prescription added successfully",
+    "editSuccess": "Prescription updated successfully",
+    "deleteSuccess": "Prescription deleted successfully"
   },
   "doctors": {
     "title": "Doctors",
@@ -204,7 +214,10 @@
     "noAppointments": "No appointments scheduled",
     "addAppointment": "Add Appointment",
     "addPrescription": "Add Prescription",
-    "notes": "Notes"
+    "notes": "Notes",
+    "addSuccess": "Doctor added successfully",
+    "editSuccess": "Doctor updated successfully",
+    "deleteSuccess": "Doctor deleted successfully"
   },
   "analytics": {
     "title": "Analytics",

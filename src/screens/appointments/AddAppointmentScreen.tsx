@@ -30,8 +30,8 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
       : null;
 
   const { setActiveTab } = WebNavigationContext
-    ? useContext(WebNavigationContext)
-    : { setActiveTab: () => { } }; // fallback pour mobile
+    ? (useContext(WebNavigationContext) as any)
+    : { setActiveTab: () => {} }; // fallback pour mobile
 
   // Get appointmentId only if route exists (mobile)
   const appointmentId = route?.params?.appointmentId;
@@ -121,9 +121,17 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
 
       // Go back: Mobile stack or Web tab
       if (Platform.OS === 'web') {
+        Alert.alert(
+          t('common.success'),
+          isEdit ? t('appointments.editSuccess') : t('appointments.addSuccess'),
+        );
         setActiveTab('Appointments'); // retourne à la liste
       } else {
-        navigation.goBack();
+        Alert.alert(
+          t('common.success'),
+          isEdit ? t('appointments.editSuccess') : t('appointments.addSuccess'),
+          [{ text: t('common.ok'), onPress: () => navigation.goBack() }],
+        );
       }
     } catch (error) {
       console.error('Error saving appointment:', error);

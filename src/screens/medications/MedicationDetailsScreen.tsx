@@ -29,8 +29,8 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
       : null;
 
   const { setActiveTab } = WebNavigationContext
-    ? useContext(WebNavigationContext) as any
-    : { setActiveTab: () => { } };
+    ? (useContext(WebNavigationContext) as any)
+    : { setActiveTab: () => {} };
 
   const navigateBack = () => {
     if (Platform.OS === 'web') {
@@ -68,7 +68,12 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
             try {
               await medicationsDb.delete(medicationId);
               await notificationService.cancelMedicationReminders(medicationId);
-              navigateBack();
+              Alert.alert(t('common.success'), t('medications.deleteSuccess'), [
+                { text: t('common.ok'), onPress: () => navigateBack() },
+              ]);
+              if (Platform.OS === 'web') {
+                navigateBack();
+              }
             } catch (error) {
               Alert.alert(t('medicationDetails.errorDeleteFailed'));
             }

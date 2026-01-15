@@ -30,8 +30,8 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
       : null;
 
   const { setActiveTab } = WebNavigationContext
-    ? useContext(WebNavigationContext) as any
-    : { setActiveTab: () => { } };
+    ? (useContext(WebNavigationContext) as any)
+    : { setActiveTab: () => {} };
 
   const navigateBack = () => {
     if (Platform.OS === 'web') {
@@ -57,25 +57,26 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      t('common.deleteTitle'),
-      t('common.deleteMessage'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await prescriptionsDb.delete(prescriptionId);
+    Alert.alert(t('common.deleteTitle'), t('common.deleteMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await prescriptionsDb.delete(prescriptionId);
+            Alert.alert(t('common.success'), t('prescriptions.deleteSuccess'), [
+              { text: t('common.ok'), onPress: () => navigateBack() },
+            ]);
+            if (Platform.OS === 'web') {
               navigateBack();
-            } catch (error) {
-              Alert.alert(t('common.errorTitle'), t('common.deleteFailed'));
             }
-          },
+          } catch (error) {
+            Alert.alert(t('common.errorTitle'), t('common.deleteFailed'));
+          }
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const handleEdit = () => {
@@ -143,10 +144,7 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
           </View>
         )}
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleViewHistory}
-        >
+        <TouchableOpacity style={styles.button} onPress={handleViewHistory}>
           <Text style={styles.buttonText}>{t('common.viewHistory')}</Text>
         </TouchableOpacity>
 

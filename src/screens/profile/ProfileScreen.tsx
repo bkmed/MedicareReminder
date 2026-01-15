@@ -196,7 +196,7 @@ export const ProfileScreen = ({ navigation }: any) => {
           <View style={styles.pickerContainer}>
             <Picker
               selectedValue={currentLanguage}
-              onValueChange={(itemValue) => handleLanguageChange(itemValue)}
+              onValueChange={itemValue => handleLanguageChange(itemValue)}
               style={styles.picker}
               dropdownIconColor={theme.colors.text}
             >

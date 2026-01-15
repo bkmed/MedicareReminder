@@ -21,7 +21,9 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "postinstall": "patch-package"
+    "postinstall": "patch-package",
+    "format": "bash scripts/format.sh",
+    "verify-translations": "node scripts/verify_translations.js"
   },
   "dependencies": {
     "@notifee/react-native": "9.1.8",

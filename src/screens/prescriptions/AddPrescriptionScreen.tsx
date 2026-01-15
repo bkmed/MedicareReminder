@@ -30,7 +30,9 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const initialDoctorName = route?.params?.doctorName || '';
 
   const [allMedications, setAllMedications] = useState<Medication[]>([]);
-  const [selectedMedicationIds, setSelectedMedicationIds] = useState<number[]>([]);
+  const [selectedMedicationIds, setSelectedMedicationIds] = useState<number[]>(
+    [],
+  );
   const [medicationName, setMedicationName] = useState(''); // Fallback or computed
   const [doctorName, setDoctorName] = useState(initialDoctorName);
   const [issueDate, setIssueDate] = useState<Date | null>(new Date());
@@ -60,8 +62,8 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
       : null;
 
   const { setActiveTab } = WebNavigationContext
-    ? useContext(WebNavigationContext)
-    : { setActiveTab: () => { } };
+    ? (useContext(WebNavigationContext) as any)
+    : { setActiveTab: () => {} };
 
   const loadMedications = async () => {
     try {
@@ -80,9 +82,13 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         setMedicationName(prescription.medicationName || '');
         setDoctorName(prescription.doctorName || '');
         setIssueDate(
-          prescription.issueDate ? new Date(prescription.issueDate) : new Date(),
+          prescription.issueDate
+            ? new Date(prescription.issueDate)
+            : new Date(),
         );
-        setExpiryDate(prescription.expiryDate ? new Date(prescription.expiryDate) : null);
+        setExpiryDate(
+          prescription.expiryDate ? new Date(prescription.expiryDate) : null,
+        );
         setPhotoUri(prescription.photoUri || '');
         setNotes(prescription.notes || '');
 
@@ -101,7 +107,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
   const handleTakePhoto = async () => {
     if (Platform.OS === 'web') {
-      const input = document.createElement('input');
+      const input = (document as any).createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
       input.onchange = (e: any) => {
@@ -180,7 +186,9 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         medicationIds: JSON.stringify(selectedMedicationIds),
         doctorName: doctorName.trim() || undefined,
         issueDate: issueDate!.toISOString().split('T')[0],
-        expiryDate: expiryDate ? expiryDate.toISOString().split('T')[0] : undefined,
+        expiryDate: expiryDate
+          ? expiryDate.toISOString().split('T')[0]
+          : undefined,
         photoUri: photoUri || undefined,
         notes: notes.trim() || undefined,
       };
@@ -205,6 +213,12 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
       }
 
       if (Platform.OS === 'web') {
+        Alert.alert(
+          t('common.success'),
+          isEdit
+            ? t('prescriptions.editSuccess')
+            : t('prescriptions.addSuccess'),
+        );
         // If came from DoctorDetails (has initialDoctorName), return to Doctors
         // Otherwise return to Prescriptions
         if (initialDoctorName) {
@@ -213,7 +227,13 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
           setActiveTab('Prescriptions');
         }
       } else {
-        navigation.goBack();
+        Alert.alert(
+          t('common.success'),
+          isEdit
+            ? t('prescriptions.editSuccess')
+            : t('prescriptions.addSuccess'),
+          [{ text: t('common.ok'), onPress: () => navigation.goBack() }],
+        );
       }
     } catch (error) {
       console.error('Error saving prescription:', error);
@@ -245,7 +265,9 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         {/* Medication Selection List */}
         <View style={styles.medicationListContainer}>
           {allMedications.map(med => {
-            const isSelected = med.id ? selectedMedicationIds.includes(med.id) : false;
+            const isSelected = med.id
+              ? selectedMedicationIds.includes(med.id)
+              : false;
             return (
               <TouchableOpacity
                 key={med.id}
@@ -268,7 +290,9 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
             );
           })}
           {allMedications.length === 0 && (
-            <Text style={styles.noMedicationsText}>{t('medications.empty')}</Text>
+            <Text style={styles.noMedicationsText}>
+              {t('medications.empty')}
+            </Text>
           )}
         </View>
 
