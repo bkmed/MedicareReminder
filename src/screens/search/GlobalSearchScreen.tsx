@@ -126,7 +126,6 @@ export const GlobalSearchScreen = ({ navigation }: any) => {
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     placeholder={t('search.placeholder')}
-                    autoFocus
                 />
             </View>
 
@@ -159,7 +158,7 @@ const createStyles = (theme: Theme) =>
             backgroundColor: theme.colors.background,
         },
         searchContainer: {
-            padding: theme.spacing.md,
+            padding: theme.spacing.m,
             backgroundColor: theme.colors.surface,
             borderBottomWidth: 1,
             borderBottomColor: theme.colors.border,
@@ -168,20 +167,20 @@ const createStyles = (theme: Theme) =>
             flex: 1,
         },
         section: {
-            marginBottom: theme.spacing.lg,
+            marginBottom: theme.spacing.l,
         },
         sectionTitle: {
             fontSize: 14,
             fontWeight: '600',
             color: theme.colors.primary,
             backgroundColor: theme.colors.surface,
-            paddingHorizontal: theme.spacing.md,
-            paddingVertical: theme.spacing.xs,
+            paddingHorizontal: theme.spacing.m,
+            paddingVertical: theme.spacing.s,
             textTransform: 'uppercase',
         },
         resultItem: {
             backgroundColor: theme.colors.surface,
-            padding: theme.spacing.md,
+            padding: theme.spacing.m,
             borderBottomWidth: 1,
             borderBottomColor: theme.colors.border,
             flexDirection: 'row',
@@ -195,8 +194,8 @@ const createStyles = (theme: Theme) =>
         },
         resultType: {
             fontSize: 12,
-            color: theme.colors.textSecondary,
-            marginLeft: theme.spacing.sm,
+            color: theme.colors.subText,
+            marginLeft: theme.spacing.s,
         },
         emptyContainer: {
             flex: 1,
@@ -206,7 +205,7 @@ const createStyles = (theme: Theme) =>
         },
         emptyText: {
             fontSize: 16,
-            color: theme.colors.textSecondary,
+            color: theme.colors.subText,
             textAlign: 'center',
         },
     });

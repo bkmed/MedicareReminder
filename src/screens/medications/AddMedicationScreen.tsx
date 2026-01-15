@@ -145,7 +145,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
       }
 
       if (reminderEnabled) {
-        const med = await medicationsDb.getById(id);
+        const med = await medicationsDb.getById(medicationData.id!);
         if (med) await notificationService.scheduleMedicationReminders(med);
       }
       // Show Success and Navigate

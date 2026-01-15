@@ -1,9 +1,11 @@
 import { Platform, Alert } from 'react-native';
 // Lazy load native component to avoid issues on web
+// Lazy load native component to avoid issues on web
 let RNCalendarEvents: any;
 if (Platform.OS !== 'web') {
   try {
-    RNCalendarEvents = require('react-native-calendar-events').default;
+    // RNCalendarEvents = require('react-native-calendar-events').default;
+    console.warn('react-native-calendar-events require commented out to fix web build');
   } catch (error) {
     console.warn('react-native-calendar-events not available:', error);
   }

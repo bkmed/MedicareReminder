@@ -173,7 +173,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         updatedAt: now,
       };
 
-      const id = prescriptionData.id;
+      const id = prescriptionData.id as number;
 
       if (isEdit) {
         dispatch(updatePrescription(prescriptionData));

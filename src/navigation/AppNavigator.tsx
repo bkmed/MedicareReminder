@@ -31,7 +31,7 @@ import { DoctorListScreen } from '../screens/doctors/DoctorListScreen';
 import { AddDoctorScreen } from '../screens/doctors/AddDoctorScreen';
 import { DoctorDetailsScreen } from '../screens/doctors/DoctorDetailsScreen';
 import { AnalyticsScreen } from '../screens/analytics/AnalyticsScreen';
-import { GlobalHistoryScreen } from '../screens/history/GlobalHistoryScreen';
+import { GlobalSearchScreen } from '../screens/search/GlobalSearchScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { LoginScreen } from '../screens/auth/LoginScreen';
 import { SignUpScreen } from '../screens/auth/SignUpScreen';
@@ -166,19 +166,6 @@ const DoctorsStack = () => {
   );
 };
 
-const HistoryStack = () => {
-  const { t } = useTranslation();
-  return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="GlobalHistory"
-        component={GlobalHistoryScreen}
-        options={{ title: t('navigation.history') }}
-      />
-    </Stack.Navigator>
-  );
-};
-
 const ProfileStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="Profile" component={ProfileScreen} />
@@ -205,16 +192,19 @@ const TabNavigator = () => (
 // ======= Drawer (Mobile) =======
 const Drawer = createDrawerNavigator();
 
-const DrawerNavigator = () => (
-  <Drawer.Navigator screenOptions={{ headerShown: false }}>
-    <Drawer.Screen name="Main" component={TabNavigator} />
-    <Drawer.Screen name="Analytics" component={AnalyticsScreen} />
-    <Drawer.Screen name="Prescriptions" component={PrescriptionsStack} />
-    <Drawer.Screen name="Doctors" component={DoctorsStack} />
-    <Drawer.Screen name="History" component={HistoryStack} />
-    <Drawer.Screen name="Profile" component={ProfileStack} />
-  </Drawer.Navigator>
-);
+const DrawerNavigator = () => {
+  const { t } = useTranslation();
+  return (
+    <Drawer.Navigator screenOptions={{ headerShown: false }}>
+      <Drawer.Screen name="Main" component={TabNavigator} />
+      <Drawer.Screen name="Analytics" component={AnalyticsScreen} />
+      <Drawer.Screen name="Prescriptions" component={PrescriptionsStack} />
+      <Drawer.Screen name="Doctors" component={DoctorsStack} />
+      <Drawer.Screen name="Search" component={GlobalSearchScreen} options={{ title: t('search.title') }} />
+      <Drawer.Screen name="Profile" component={ProfileStack} />
+    </Drawer.Navigator>
+  );
+};
 
 // ======= Web Navigator avec subScreen =======
 const WebNavigator = () => {
@@ -280,8 +270,8 @@ const WebNavigator = () => {
         if (subScreen === 'DoctorDetails')
           return <DoctorDetailsScreen route={mockRoute} />;
         return <DoctorsStack />;
-      case 'History':
-        return <HistoryStack />;
+      case 'Search':
+        return <GlobalSearchScreen />;
       case 'Profile':
         return <ProfileStack />;
       default:
@@ -296,7 +286,7 @@ const WebNavigator = () => {
     ['Analytics', t('navigation.analytics')],
     ['Prescriptions', t('navigation.prescriptions')],
     ['Doctors', t('navigation.doctors')],
-    ['History', t('navigation.history') || 'History'],
+    ['Search', t('search.title')],
     ['Profile', t('navigation.profile')],
   ];
 
