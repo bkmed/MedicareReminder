@@ -293,7 +293,7 @@ class PermissionsService {
 
   async openAppSettings(): Promise<void> {
     if (Platform.OS === 'web') {
-      window.alert('Please check your browser settings to manage permissions.');
+      (window as any).alert('Please check your browser settings to manage permissions.');
       return;
     }
 

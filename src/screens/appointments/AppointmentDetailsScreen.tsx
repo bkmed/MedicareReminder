@@ -170,10 +170,11 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
         <TouchableOpacity
           style={styles.button}
           onPress={() =>
-            Alert.alert(
-              'View History',
-              'Appointment history tracking is not available yet.',
-            )
+            showNotification({
+              title: t('common.viewHistory'),
+              message: t('common.historyUnavailable'),
+              type: 'info',
+            })
           }
         >
           <Text style={styles.buttonText}>View History</Text>
