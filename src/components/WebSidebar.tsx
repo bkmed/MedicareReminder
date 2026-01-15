@@ -6,6 +6,7 @@ import {
   Image,
   StyleSheet,
   ScrollView,
+  Platform,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
@@ -99,7 +100,8 @@ const styles = StyleSheet.create({
     width: 260,
     borderRightWidth: 1,
     paddingVertical: 24,
-    height: '100%',
+    height: Platform.OS === 'web' ? ('100vh' as any) : '100%',
+    minHeight: Platform.OS === 'web' ? ('100vh' as any) : '100%',
     display: 'flex',
     flexDirection: 'column',
     // Web-like shadow for the sidebar itself

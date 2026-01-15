@@ -35,9 +35,21 @@ export const WebHeader = ({
   // If not mobile, we can render a minimal header or nothing if sidebar is sufficient.
   // But let's keep it for mobile first logic or breedcrumb.
 
-  if (!isMobile) {
-    if (!subScreen) return null; // Simple view without header on desktop main screens if sidebar exists
+  // Helper to get title
+  const getTitle = () => {
+    if (subScreen) {
+      // Logic to get legible title from subScreen name
+      const key = `navigation.${subScreen.toLowerCase().replace('screen', '')}`;
+      return t(key, subScreen.replace(/([A-Z])/g, ' $1').trim()); // Fallback to spaced CamelCase
+    }
+    if (!navItems) return activeTab || '';
+    const navItem = navItems.find(item => item && item[0] === activeTab);
+    return navItem ? navItem[1] : activeTab;
+  };
 
+  const title = getTitle();
+
+  if (!isMobile) {
     return (
       <View
         style={[
@@ -48,20 +60,32 @@ export const WebHeader = ({
           },
         ]}
       >
-        <TouchableOpacity
-          onPress={onBack}
-          style={{ flexDirection: 'row', alignItems: 'center' }}
-        >
-          <Text
-            style={{
-              fontSize: 16,
-              color: theme.colors.primary,
-              fontWeight: '600',
-            }}
-          >
-            ← {t('common.back')}
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.headerContent}>
+          {subScreen ? (
+            <TouchableOpacity
+              onPress={onBack}
+              style={{ flexDirection: 'row', alignItems: 'center' }}
+            >
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: theme.colors.primary,
+                  fontWeight: '600',
+                  marginRight: 16,
+                }}
+              >
+                ←
+              </Text>
+              <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+                {title}
+              </Text>
+            </TouchableOpacity>
+          ) : (
+            <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+              {title}
+            </Text>
+          )}
+        </View>
         {/* Can add more desktop header items here like Profile dropdown */}
       </View>
     );
@@ -199,11 +223,19 @@ export const WebHeader = ({
 
 const styles = StyleSheet.create({
   desktopHeader: {
-    height: 60,
+    height: 70,
     borderBottomWidth: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 32,
     justifyContent: 'center',
     width: '100%',
+  },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
   },
   mobileNavbar: {
     height: 60,
