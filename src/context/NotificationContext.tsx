@@ -36,6 +36,12 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setVisible(true);
     }, []);
 
+    // Subscribe to global notifications
+    React.useEffect(() => {
+        const unsubscribe = require('../services/globalNotificationService').globalNotificationService.subscribe(showNotification);
+        return unsubscribe;
+    }, [showNotification]);
+
     const hideNotification = useCallback(() => {
         setVisible(false);
         if (options?.onCancel) {

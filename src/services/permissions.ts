@@ -293,7 +293,12 @@ class PermissionsService {
 
   async openAppSettings(): Promise<void> {
     if (Platform.OS === 'web') {
-      (window as any).alert('Please check your browser settings to manage permissions.');
+      require('./globalNotificationService').globalNotificationService.show({
+        title: 'Permissions',
+        message: 'Please check your browser settings to manage permissions.',
+        type: 'info',
+        buttons: [{ text: 'OK', onPress: () => { } }]
+      });
       return;
     }
 

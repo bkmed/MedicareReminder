@@ -74,12 +74,12 @@ export const HomeScreen = () => {
   const webContext =
     Platform.OS === 'web'
       ? useContext(
-          require('../navigation/AppNavigator')
-            .WebNavigationContext as React.Context<any>,
-        )
+        require('../navigation/AppNavigator')
+          .WebNavigationContext as React.Context<any>,
+      )
       : null;
 
-  const setActiveTab = webContext?.setActiveTab || (() => {});
+  const setActiveTab = webContext?.setActiveTab || (() => { });
 
   const navigateToTab = (tab: string, screen?: string) => {
     if (Platform.OS === 'web') {
@@ -91,10 +91,10 @@ export const HomeScreen = () => {
         tab === 'medications' || tab === 'Medications'
           ? 'MedicationsTab'
           : tab === 'appointments' || tab === 'Appointments'
-          ? 'AppointmentsTab'
-          : tab === 'analytics'
-          ? 'Analytics'
-          : undefined;
+            ? 'AppointmentsTab'
+            : tab === 'analytics'
+              ? 'Analytics'
+              : undefined;
 
       if (stackScreen) {
         navigation.navigate(
@@ -124,6 +124,15 @@ export const HomeScreen = () => {
           <Text style={styles.appName}>{t('home.appName')}</Text>
           <Text style={styles.subtitle}>{t('home.subtitle')}</Text>
         </View>
+
+        {/* Global Search Bar */}
+        <TouchableOpacity
+          style={styles.searchBar}
+          onPress={() => navigateToTab('Search')}
+        >
+          <Text style={styles.searchIcon}>🔍</Text>
+          <Text style={styles.searchPlaceholder}>{t('search.placeholder')}</Text>
+        </TouchableOpacity>
 
         {/* Quick Stats */}
         <View style={styles.statsContainer}>
@@ -374,5 +383,24 @@ const createStyles = (theme: Theme) =>
       ...theme.textVariants.body,
       color: theme.colors.primary,
       lineHeight: 20,
+    },
+    searchBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.surface,
+      padding: theme.spacing.m,
+      borderRadius: theme.spacing.l,
+      marginBottom: theme.spacing.l,
+      ...theme.shadows.small,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    searchIcon: {
+      fontSize: 20,
+      marginRight: theme.spacing.s,
+    },
+    searchPlaceholder: {
+      ...theme.textVariants.body,
+      color: theme.colors.subText,
     },
   });
