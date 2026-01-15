@@ -6,7 +6,6 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Switch,
   Platform,
 } from 'react-native';
@@ -75,7 +74,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
           d.setMinutes(m);
           return d;
         });
-      } catch (e) {
+      } catch {
         parsedTimes = [
           new Date(new Date().setHours(8, 0)),
           new Date(new Date().setHours(20, 0)),

@@ -1,4 +1,4 @@
-import { Platform, Alert } from 'react-native';
+import { Platform } from 'react-native';
 // Lazy load native component to avoid issues on web
 // Lazy load native component to avoid issues on web
 let RNCalendarEvents: any;

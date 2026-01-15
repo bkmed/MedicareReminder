@@ -1,4 +1,4 @@
-import { Platform, Linking } from 'react-native';
+import { Platform } from 'react-native';
 // Lazy load native modules
 let RNPermissions: any;
 let notifee: any;
@@ -87,7 +87,7 @@ class PermissionsService {
         try {
           const result = await nav.permissions.query({ name: 'camera' });
           return this.mapWebPermissionState(result.state);
-        } catch (error) {
+        } catch {
           // Fallback to MediaDevices check if permissions API fails
           if (nav.mediaDevices?.getUserMedia) {
             return 'denied'; // Can't determine without requesting
@@ -157,7 +157,7 @@ class PermissionsService {
           });
           return this.mapWebPermissionState(result.state);
         }
-      } catch (error) {
+      } catch {
         // Ignore and fall back
       }
 
@@ -190,7 +190,7 @@ class PermissionsService {
           if (permission === 'granted') return 'granted';
           if (permission === 'denied') return 'blocked';
           return 'denied';
-        } catch (error) {
+        } catch {
           return 'denied';
         }
       }
@@ -239,7 +239,7 @@ class PermissionsService {
         try {
           localStorage.setItem('calendar-permission', 'granted');
           return 'granted';
-        } catch (error) {
+        } catch {
           return 'denied';
         }
       }

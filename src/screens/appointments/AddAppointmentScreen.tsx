@@ -6,7 +6,6 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
-  Alert,
   Switch,
   Platform,
 } from 'react-native';
@@ -18,7 +17,7 @@ import {
   addAppointment,
   updateAppointment,
 } from '../../store/redux/slices/appointmentSlice';
-import { appointmentsDb } from '../../database/appointmentsDb';
+
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
@@ -61,7 +60,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   const [notes, setNotes] = useState('');
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(
+  const [selectedDoctorId] = useState<number | null>(
     route?.params?.doctorId ? Number(route.params.doctorId) : null,
   );
   const [loading, setLoading] = useState(false);

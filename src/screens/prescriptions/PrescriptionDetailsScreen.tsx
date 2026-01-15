@@ -50,7 +50,7 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
     try {
       const presc = await prescriptionsDb.getById(prescriptionId);
       setPrescription(presc);
-    } catch (error) {
+    } catch {
       showNotification({
         title: t('common.errorTitle'),
         message: t('common.loadFailed'),
@@ -79,7 +79,7 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
         type: 'success',
       });
       navigateBack();
-    } catch (error) {
+    } catch {
       showNotification({
         title: t('common.errorTitle'),
         message: t('common.deleteFailed'),

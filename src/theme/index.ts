@@ -46,12 +46,12 @@ const shadows = {
 const textVariants = {
   header: {
     fontSize: 28,
-    fontWeight: '700' as '700',
+    fontWeight: '700' as const,
     letterSpacing: 0.5,
   },
   subheader: {
     fontSize: 20,
-    fontWeight: '600' as '600',
+    fontWeight: '600' as const,
   },
   body: {
     fontSize: 16,
@@ -62,7 +62,7 @@ const textVariants = {
   },
   button: {
     fontSize: 16,
-    fontWeight: '600' as '600',
+    fontWeight: '600' as const,
   },
 };
 

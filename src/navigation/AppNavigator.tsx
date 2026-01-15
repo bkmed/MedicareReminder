@@ -1,14 +1,5 @@
 import React, { useState, useMemo, createContext, useEffect } from 'react';
-import {
-  Platform,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  useWindowDimensions,
-  ScrollView,
-} from 'react-native';
+import { Platform, View, Text, useWindowDimensions } from 'react-native';
 import { enableScreens } from 'react-native-screens';
 import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -46,18 +37,24 @@ import { useNetworkStatus } from '../services/offlineService';
 enableScreens();
 
 // ======= Web Navigation Context (avec subScreen) =======
-export const WebNavigationContext = createContext({
+interface WebNavigationContextType {
+  activeTab: string;
+  subScreen: string;
+  screenParams: any;
+  setActiveTab: (tab: string, subScreen?: string, params?: any) => void;
+}
+
+export const WebNavigationContext = createContext<WebNavigationContextType>({
   activeTab: 'Home',
   subScreen: '',
-  screenParams: {} as any,
-  setActiveTab: (tab: string, subScreen?: string, params?: any) => {},
+  screenParams: {},
+  setActiveTab: () => {},
 });
 
 // ======= Stacks =======
 const Stack = createNativeStackNavigator();
 
 const AuthStack = () => {
-  const { t } = useTranslation();
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginScreen} />
@@ -240,11 +237,18 @@ const WebNavigator = () => {
     [activeTab, subScreen, screenParams],
   );
 
+  const mockNavigation = {
+    navigate: () => {},
+    setOptions: () => {},
+    addListener: () => () => {},
+    isFocused: () => true,
+  } as any;
+
   const getActiveComponent = () => {
     const mockRoute = { params: screenParams };
     switch (activeTab) {
       case 'Home':
-        return <HomeStack />;
+        return <HomeScreen />;
       case 'Medications':
         if (subScreen === 'AddMedication')
           return <AddMedicationScreen route={mockRoute} />;
@@ -252,13 +256,13 @@ const WebNavigator = () => {
           return <MedicationDetailsScreen route={mockRoute} />;
         if (subScreen === 'MedicationHistory')
           return <MedicationHistoryScreen route={mockRoute} />;
-        return <MedicationsStack />;
+        return <MedicationListScreen navigation={mockNavigation} />;
       case 'Appointments':
         if (subScreen === 'AddAppointment')
           return <AddAppointmentScreen route={mockRoute} />;
         if (subScreen === 'AppointmentDetails')
           return <AppointmentDetailsScreen route={mockRoute} />;
-        return <AppointmentsStack />;
+        return <AppointmentListScreen navigation={mockNavigation} />;
       case 'Analytics':
         return <AnalyticsScreen />;
       case 'Prescriptions':
@@ -268,19 +272,19 @@ const WebNavigator = () => {
           return <PrescriptionDetailsScreen route={mockRoute} />;
         if (subScreen === 'PrescriptionHistory')
           return <PrescriptionHistoryScreen route={mockRoute} />;
-        return <PrescriptionsStack />;
+        return <PrescriptionListScreen navigation={mockNavigation} />;
       case 'Doctors':
         if (subScreen === 'AddDoctor')
           return <AddDoctorScreen route={mockRoute} />;
         if (subScreen === 'DoctorDetails')
           return <DoctorDetailsScreen route={mockRoute} />;
-        return <DoctorsStack />;
+        return <DoctorListScreen navigation={mockNavigation} />;
       case 'Search':
         return <GlobalSearchScreen />;
       case 'Profile':
-        return <ProfileStack />;
+        return <ProfileScreen />;
       default:
-        return <HomeStack />;
+        return <HomeScreen />;
     }
   };
 
@@ -369,17 +373,13 @@ export const AppNavigator = () => {
 const AppContent = () => {
   const { user, isLoading, signOut } = useAuth();
   const { isConnected } = useNetworkStatus();
-  const { navigationRef }: any = useMemo(
-    () => ({ navigationRef: React.createRef() }),
-    [],
-  );
 
   useEffect(() => {
     // Secure session: log out if disconnected
     if (user && isConnected === false) {
       console.log('Device disconnected, signing out for security...');
       signOut({
-        navigate: (screen: string) => {
+        navigate: () => {
           /** handle redirect if needed */
         },
       });

@@ -5,7 +5,6 @@ import React, {
   useEffect,
   ReactNode,
 } from 'react';
-import { Platform } from 'react-native';
 import { authService, User } from '../services/authService';
 
 interface AuthContextType {

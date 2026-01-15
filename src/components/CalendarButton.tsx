@@ -1,11 +1,5 @@
-import React, { useState } from 'react';
-import {
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  Platform,
-  ActivityIndicator,
-} from 'react-native';
+import React from 'react';
+import { TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useNotification } from '../context/NotificationContext';
@@ -52,7 +46,7 @@ export const CalendarButton: React.FC<CalendarButtonProps> = ({
   const { t, i18n } = useTranslation();
   const { theme } = useTheme();
   const { showNotification } = useNotification();
-  const [loading, setLoading] = useState(false);
+
   const styles = createStyles(theme);
 
   if (Platform.OS === 'web' && AddToCalendarButton) {
@@ -77,6 +71,7 @@ export const CalendarButton: React.FC<CalendarButtonProps> = ({
           // The actual add-to-calendar-button-react component is responsible for its UI and interaction.
           // We can't easily wrap it in our TouchableOpacity and still have it function correctly.
           // So, for web, we return the AddToCalendarButton directly within a View.
+          return;
         }}
         activeOpacity={1} // Disable activeOpacity as it's not a native button
         disabled={true} // Disable the TouchableOpacity itself
@@ -111,7 +106,6 @@ export const CalendarButton: React.FC<CalendarButtonProps> = ({
   }
 
   const handlePress = async () => {
-    setLoading(true);
     try {
       const permission = await permissionsService.checkCalendarPermission();
 
@@ -156,8 +150,6 @@ export const CalendarButton: React.FC<CalendarButtonProps> = ({
         type: 'error',
       });
       onError?.();
-    } finally {
-      setLoading(false);
     }
   };
 

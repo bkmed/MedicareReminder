@@ -18,7 +18,7 @@ import {
   addPrescription,
   updatePrescription,
 } from '../../store/redux/slices/prescriptionSlice';
-import { Prescription, Medication } from '../../database/schema';
+import { Prescription } from '../../database/schema';
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
@@ -56,7 +56,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const [photoUri, setPhotoUri] = useState('');
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(
+  const [selectedDoctorId] = useState<number | null>(
     route?.params?.doctorId ? Number(route.params.doctorId) : null,
   );
   const [loading, setLoading] = useState(false);

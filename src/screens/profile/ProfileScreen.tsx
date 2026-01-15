@@ -10,11 +10,11 @@ import {
   I18nManager,
 } from 'react-native';
 import { useNotification } from '../../context/NotificationContext';
-import { Picker } from '@react-native-picker/picker';
+
 import { useTranslation } from 'react-i18next';
 import { storageService } from '../../services/storage';
 import { useTheme } from '../../context/ThemeContext';
-import { authService } from '../../services/authService';
+
 import { useAuth } from '../../context/AuthContext';
 import {
   permissionsService,
@@ -76,7 +76,7 @@ export const ProfileScreen = ({ navigation }: any) => {
           });
         }
       }
-    } catch (error) {
+    } catch {
       showNotification({
         title: t('common.error'),
         message: t('profile.languageChangeError'),
@@ -165,7 +165,7 @@ export const ProfileScreen = ({ navigation }: any) => {
       onConfirm: async () => {
         try {
           await signOut(navigation);
-        } catch (error) {
+        } catch {
           showNotification({
             title: t('common.error'),
             message: t('profile.logoutError'),

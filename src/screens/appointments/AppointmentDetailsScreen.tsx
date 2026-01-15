@@ -49,7 +49,7 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
     try {
       const appt = await appointmentsDb.getById(appointmentId);
       setAppointment(appt);
-    } catch (error) {
+    } catch {
       showNotification({
         title: t('common.error'),
         message: t('appointmentDetails.errorLoadFailed'),
@@ -79,7 +79,7 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
         type: 'success',
       });
       navigateBack();
-    } catch (error) {
+    } catch {
       showNotification({
         title: t('common.error'),
         message: t('appointmentDetails.errorDeleteFailed'),

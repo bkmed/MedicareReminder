@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { medicationsDb } from '../../database/medicationsDb';
 import { MedicationHistory } from '../../database/schema';
 import { useTranslation } from 'react-i18next';

@@ -22,7 +22,7 @@ export const analyticsService = {
 
       // Calculate weekly medication distribution
       const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-      const weeklyMedications = daysOfWeek.map((day, index) => ({
+      const weeklyMedications = daysOfWeek.map(day => ({
         day,
         count: medications.length, // Simplified: all meds every day
       }));

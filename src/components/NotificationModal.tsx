@@ -6,7 +6,6 @@ import {
   Modal,
   TouchableOpacity,
   Animated,
-  Dimensions,
 } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { Theme } from '../theme';
