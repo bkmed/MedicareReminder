@@ -25,7 +25,9 @@ export const AppointmentListScreen = ({ navigation }: any) => {
   const { showNotification } = useNotification();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const dispatch = useDispatch();
-  const appointments = useSelector((state: RootState) => state.appointments.appointments);
+  const appointments = useSelector(
+    (state: RootState) => state.appointments.appointments,
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 

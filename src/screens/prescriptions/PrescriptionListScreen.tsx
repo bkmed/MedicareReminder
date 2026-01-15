@@ -26,7 +26,9 @@ export const PrescriptionListScreen = ({ navigation }: any) => {
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const dispatch = useDispatch();
-  const prescriptions = useSelector((state: RootState) => state.prescriptions.prescriptions);
+  const prescriptions = useSelector(
+    (state: RootState) => state.prescriptions.prescriptions,
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 

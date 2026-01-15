@@ -31,7 +31,7 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => { } };
+    : { setActiveTab: () => {} };
 
   const navigateBack = () => {
     if (Platform.OS === 'web') {
@@ -95,8 +95,6 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
       navigation.navigate('AddMedication', { medicationId });
     }
   };
-
-
 
   if (loading || !medication) {
     return (
@@ -173,8 +171,6 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
               : t('medicationDetails.reminderDisabled')}
           </Text>
         </View>
-
-
 
         <TouchableOpacity
           style={[styles.button, styles.editButton]}

@@ -49,7 +49,8 @@ export const useNetworkStatus = () => {
 
   return {
     isConnected,
-    isInternetReachable: Platform.OS === 'web' ? isConnected : isInternetReachable,
+    isInternetReachable:
+      Platform.OS === 'web' ? isConnected : isInternetReachable,
     isOffline: isConnected === false,
   };
 };

@@ -31,7 +31,7 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => { } };
+    : { setActiveTab: () => {} };
 
   const navigateBack = () => {
     if (Platform.OS === 'web') {
@@ -166,8 +166,6 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
               : t('appointmentDetails.reminderDisabled')}
           </Text>
         </View>
-
-
 
         <TouchableOpacity
           style={[styles.button, styles.editButton]}

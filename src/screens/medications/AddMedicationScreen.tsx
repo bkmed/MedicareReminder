@@ -14,7 +14,10 @@ import { useNotification } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/redux/store';
-import { addMedication, updateMedication } from '../../store/redux/slices/medicationSlice';
+import {
+  addMedication,
+  updateMedication,
+} from '../../store/redux/slices/medicationSlice';
 import { medicationsDb } from '../../database/medicationsDb';
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
@@ -28,11 +31,15 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const dispatch = useDispatch();
-  const medicationId = route?.params?.medicationId ? Number(route.params.medicationId) : null;
+  const medicationId = route?.params?.medicationId
+    ? Number(route.params.medicationId)
+    : null;
   const isEdit = !!medicationId;
 
   const existingMedication = useSelector((state: RootState) =>
-    medicationId ? state.medications.medications.find(m => m.id === medicationId) : null
+    medicationId
+      ? state.medications.medications.find(m => m.id === medicationId)
+      : null,
   );
 
   const [name, setName] = useState('');
@@ -76,8 +83,16 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
       }
       setTimes(parsedTimes);
 
-      setStartDate(existingMedication.startDate ? new Date(existingMedication.startDate) : new Date());
-      setEndDate(existingMedication.endDate ? new Date(existingMedication.endDate) : null);
+      setStartDate(
+        existingMedication.startDate
+          ? new Date(existingMedication.startDate)
+          : new Date(),
+      );
+      setEndDate(
+        existingMedication.endDate
+          ? new Date(existingMedication.endDate)
+          : null,
+      );
       setNotes(existingMedication.notes || '');
       setReminderEnabled(!!existingMedication.reminderEnabled);
       setIsUrgent(!!existingMedication.isUrgent);
@@ -97,8 +112,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => { } };
-
+    : { setActiveTab: () => {} };
 
   const handleSave = async () => {
     const newErrors: { [key: string]: string } = {};
@@ -135,7 +149,8 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
         notes: notes.trim() || undefined,
         reminderEnabled,
         isUrgent,
-        createdAt: isEdit && existingMedication ? existingMedication.createdAt : now,
+        createdAt:
+          isEdit && existingMedication ? existingMedication.createdAt : now,
         updatedAt: now,
       };
 
@@ -152,7 +167,9 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
       // Show Success and Navigate
       showNotification({
         title: t('common.success'),
-        message: isEdit ? t('medications.editSuccess') : t('medications.addSuccess'),
+        message: isEdit
+          ? t('medications.editSuccess')
+          : t('medications.addSuccess'),
         type: 'success',
       });
 

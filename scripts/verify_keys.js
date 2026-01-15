@@ -39,10 +39,10 @@ languages.forEach(lang => {
   try {
     const langContent = JSON.parse(fs.readFileSync(langPath, 'utf8'));
     const langKeys = new Set(flattenKeys(langContent));
-    
+
     // Check for missing keys
     const missingKeys = [...enKeys].filter(key => !langKeys.has(key));
-    
+
     if (missingKeys.length > 0) {
       console.error(`❌ ${lang}.json is missing ${missingKeys.length} keys:`);
       missingKeys.forEach(k => console.log(`   - ${k}`));
@@ -50,7 +50,6 @@ languages.forEach(lang => {
     } else {
       console.log(`✅ ${lang}.json is complete.`);
     }
-
   } catch (e) {
     console.error(`❌ Error parsing ${lang}.json: ${e.message}`);
     hasErrors = true;

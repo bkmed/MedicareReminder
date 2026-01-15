@@ -50,7 +50,7 @@ export const WebNavigationContext = createContext({
   activeTab: 'Home',
   subScreen: '',
   screenParams: {} as any,
-  setActiveTab: (tab: string, subScreen?: string, params?: any) => { },
+  setActiveTab: (tab: string, subScreen?: string, params?: any) => {},
 });
 
 // ======= Stacks =======
@@ -203,7 +203,11 @@ const DrawerNavigator = () => {
       <Drawer.Screen name="Analytics" component={AnalyticsScreen} />
       <Drawer.Screen name="Prescriptions" component={PrescriptionsStack} />
       <Drawer.Screen name="Doctors" component={DoctorsStack} />
-      <Drawer.Screen name="Search" component={GlobalSearchScreen} options={{ title: t('search.title') }} />
+      <Drawer.Screen
+        name="Search"
+        component={GlobalSearchScreen}
+        options={{ title: t('search.title') }}
+      />
       <Drawer.Screen name="Profile" component={ProfileStack} />
     </Drawer.Navigator>
   );
@@ -239,29 +243,44 @@ const WebNavigator = () => {
   const getActiveComponent = () => {
     const mockRoute = { params: screenParams };
     switch (activeTab) {
-      case 'Home': return <HomeStack />;
+      case 'Home':
+        return <HomeStack />;
       case 'Medications':
-        if (subScreen === 'AddMedication') return <AddMedicationScreen route={mockRoute} />;
-        if (subScreen === 'MedicationDetails') return <MedicationDetailsScreen route={mockRoute} />;
-        if (subScreen === 'MedicationHistory') return <MedicationHistoryScreen route={mockRoute} />;
+        if (subScreen === 'AddMedication')
+          return <AddMedicationScreen route={mockRoute} />;
+        if (subScreen === 'MedicationDetails')
+          return <MedicationDetailsScreen route={mockRoute} />;
+        if (subScreen === 'MedicationHistory')
+          return <MedicationHistoryScreen route={mockRoute} />;
         return <MedicationsStack />;
       case 'Appointments':
-        if (subScreen === 'AddAppointment') return <AddAppointmentScreen route={mockRoute} />;
-        if (subScreen === 'AppointmentDetails') return <AppointmentDetailsScreen route={mockRoute} />;
+        if (subScreen === 'AddAppointment')
+          return <AddAppointmentScreen route={mockRoute} />;
+        if (subScreen === 'AppointmentDetails')
+          return <AppointmentDetailsScreen route={mockRoute} />;
         return <AppointmentsStack />;
-      case 'Analytics': return <AnalyticsScreen />;
+      case 'Analytics':
+        return <AnalyticsScreen />;
       case 'Prescriptions':
-        if (subScreen === 'AddPrescription') return <AddPrescriptionScreen route={mockRoute} />;
-        if (subScreen === 'PrescriptionDetails') return <PrescriptionDetailsScreen route={mockRoute} />;
-        if (subScreen === 'PrescriptionHistory') return <PrescriptionHistoryScreen route={mockRoute} />;
+        if (subScreen === 'AddPrescription')
+          return <AddPrescriptionScreen route={mockRoute} />;
+        if (subScreen === 'PrescriptionDetails')
+          return <PrescriptionDetailsScreen route={mockRoute} />;
+        if (subScreen === 'PrescriptionHistory')
+          return <PrescriptionHistoryScreen route={mockRoute} />;
         return <PrescriptionsStack />;
       case 'Doctors':
-        if (subScreen === 'AddDoctor') return <AddDoctorScreen route={mockRoute} />;
-        if (subScreen === 'DoctorDetails') return <DoctorDetailsScreen route={mockRoute} />;
+        if (subScreen === 'AddDoctor')
+          return <AddDoctorScreen route={mockRoute} />;
+        if (subScreen === 'DoctorDetails')
+          return <DoctorDetailsScreen route={mockRoute} />;
         return <DoctorsStack />;
-      case 'Search': return <GlobalSearchScreen />;
-      case 'Profile': return <ProfileStack />;
-      default: return <HomeStack />;
+      case 'Search':
+        return <GlobalSearchScreen />;
+      case 'Profile':
+        return <ProfileStack />;
+      default:
+        return <HomeStack />;
     }
   };
 
@@ -277,22 +296,39 @@ const WebNavigator = () => {
 
   return (
     <WebNavigationContext.Provider value={contextValue}>
-      <View style={{ flex: 1, flexDirection: isMobile ? 'column' : 'row', backgroundColor: theme.colors.background, height: '100%', overflow: 'hidden' }}>
-
+      <View
+        style={{
+          flex: 1,
+          flexDirection: isMobile ? 'column' : 'row',
+          backgroundColor: theme.colors.background,
+          height: '100%',
+          overflow: 'hidden',
+        }}
+      >
         {/* Sidebar (Desktop Only) */}
         {!isMobile && (
-          <WebSidebar activeTab={activeTab} setActiveTab={(tab) => setActiveTab(tab)} navItems={navItems} />
+          <WebSidebar
+            activeTab={activeTab}
+            setActiveTab={tab => setActiveTab(tab)}
+            navItems={navItems}
+          />
         )}
 
         {/* Main Content Area */}
-        <View style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-
+        <View
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+          }}
+        >
           {/* Header (Handles Mobile Menu & Desktop Back Breadcrumbs) */}
           <WebHeader
             isMobile={isMobile}
             navItems={navItems}
             activeTab={activeTab}
-            setActiveTab={(tab) => setActiveTab(tab)}
+            setActiveTab={tab => setActiveTab(tab)}
             subScreen={subScreen}
             onBack={() => setSubScreen('')}
           />
@@ -333,13 +369,20 @@ export const AppNavigator = () => {
 const AppContent = () => {
   const { user, isLoading, signOut } = useAuth();
   const { isConnected } = useNetworkStatus();
-  const { navigationRef }: any = useMemo(() => ({ navigationRef: React.createRef() }), []);
+  const { navigationRef }: any = useMemo(
+    () => ({ navigationRef: React.createRef() }),
+    [],
+  );
 
   useEffect(() => {
     // Secure session: log out if disconnected
     if (user && isConnected === false) {
       console.log('Device disconnected, signing out for security...');
-      signOut({ navigate: (screen: string) => { /** handle redirect if needed */ } });
+      signOut({
+        navigate: (screen: string) => {
+          /** handle redirect if needed */
+        },
+      });
     }
   }, [isConnected, user, signOut]);
 
@@ -365,4 +408,3 @@ const AppContent = () => {
 };
 
 // ======= Web Styles =======
-

@@ -5,7 +5,9 @@ let RNCalendarEvents: any;
 if (Platform.OS !== 'web') {
   try {
     // RNCalendarEvents = require('react-native-calendar-events').default;
-    console.warn('react-native-calendar-events require commented out to fix web build');
+    console.warn(
+      'react-native-calendar-events require commented out to fix web build',
+    );
   } catch (error) {
     console.warn('react-native-calendar-events not available:', error);
   }
@@ -110,8 +112,9 @@ class CalendarService {
     };
 
     const now = new Date();
-    const uid = `appointment-${appointment.id || Date.now()
-      }@medicarereminder.app`;
+    const uid = `appointment-${
+      appointment.id || Date.now()
+    }@medicarereminder.app`;
 
     let ics = 'BEGIN:VCALENDAR\r\n';
     ics += 'VERSION:2.0\r\n';

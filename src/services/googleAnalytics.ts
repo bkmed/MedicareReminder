@@ -20,7 +20,12 @@ if (Platform.OS !== 'web') {
   }
 } else {
   try {
-    const { getAnalytics, logEvent, setUserProperties, setUserId } = require('firebase/analytics');
+    const {
+      getAnalytics,
+      logEvent,
+      setUserProperties,
+      setUserId,
+    } = require('firebase/analytics');
     const { app } = require('../config/firebase');
     if (app) {
       webAnalytics = getAnalytics(app);

@@ -14,7 +14,10 @@ import { useTranslation } from 'react-i18next';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/redux/store';
-import { addPrescription, updatePrescription } from '../../store/redux/slices/prescriptionSlice';
+import {
+  addPrescription,
+  updatePrescription,
+} from '../../store/redux/slices/prescriptionSlice';
 import { Prescription, Medication } from '../../database/schema';
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
@@ -28,16 +31,24 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const dispatch = useDispatch();
 
-  const prescriptionId = route?.params?.prescriptionId ? Number(route.params.prescriptionId) : null;
+  const prescriptionId = route?.params?.prescriptionId
+    ? Number(route.params.prescriptionId)
+    : null;
   const isEdit = !!prescriptionId;
   const initialDoctorName = route?.params?.doctorName || '';
 
-  const allMedications = useSelector((state: RootState) => state.medications.medications);
+  const allMedications = useSelector(
+    (state: RootState) => state.medications.medications,
+  );
   const existingPrescription = useSelector((state: RootState) =>
-    prescriptionId ? state.prescriptions.prescriptions.find(p => p.id === prescriptionId) : null
+    prescriptionId
+      ? state.prescriptions.prescriptions.find(p => p.id === prescriptionId)
+      : null,
   );
 
-  const [selectedMedicationIds, setSelectedMedicationIds] = useState<number[]>([]);
+  const [selectedMedicationIds, setSelectedMedicationIds] = useState<number[]>(
+    [],
+  );
   const [medicationName, setMedicationName] = useState('');
   const [doctorName, setDoctorName] = useState(initialDoctorName);
   const [issueDate, setIssueDate] = useState<Date | null>(new Date());
@@ -54,14 +65,24 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
     if (isEdit && existingPrescription) {
       setMedicationName(existingPrescription.medicationName || '');
       setDoctorName(existingPrescription.doctorName || '');
-      setIssueDate(existingPrescription.issueDate ? new Date(existingPrescription.issueDate) : new Date());
-      setExpiryDate(existingPrescription.expiryDate ? new Date(existingPrescription.expiryDate) : null);
+      setIssueDate(
+        existingPrescription.issueDate
+          ? new Date(existingPrescription.issueDate)
+          : new Date(),
+      );
+      setExpiryDate(
+        existingPrescription.expiryDate
+          ? new Date(existingPrescription.expiryDate)
+          : null,
+      );
       setPhotoUri(existingPrescription.photoUri || '');
       setNotes(existingPrescription.notes || '');
 
       if (existingPrescription.medicationIds) {
         try {
-          setSelectedMedicationIds(JSON.parse(existingPrescription.medicationIds));
+          setSelectedMedicationIds(
+            JSON.parse(existingPrescription.medicationIds),
+          );
         } catch (e) {
           console.error('Error parsing medicationIds', e);
         }
@@ -82,7 +103,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => { } };
+    : { setActiveTab: () => {} };
 
   const handleTakePhoto = async () => {
     if (Platform.OS === 'web') {
@@ -118,17 +139,20 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         {
           text: t('prescriptions.chooseFromLibrary'),
           onPress: () => {
-            launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, response => {
-              if (response.assets && response.assets[0]?.uri) {
-                setPhotoUri(response.assets[0].uri);
-              }
-            });
+            launchImageLibrary(
+              { mediaType: 'photo', quality: 0.8 },
+              response => {
+                if (response.assets && response.assets[0]?.uri) {
+                  setPhotoUri(response.assets[0].uri);
+                }
+              },
+            );
           },
         },
         {
           text: t('common.cancel'),
           style: 'cancel',
-          onPress: () => { },
+          onPress: () => {},
         },
       ],
     });
@@ -166,10 +190,13 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
         doctorName: doctorName.trim() || undefined,
         doctorId: selectedDoctorId || undefined,
         issueDate: issueDate!.toISOString().split('T')[0],
-        expiryDate: expiryDate ? expiryDate.toISOString().split('T')[0] : undefined,
+        expiryDate: expiryDate
+          ? expiryDate.toISOString().split('T')[0]
+          : undefined,
         photoUri: photoUri || undefined,
         notes: notes.trim() || undefined,
-        createdAt: isEdit && existingPrescription ? existingPrescription.createdAt : now,
+        createdAt:
+          isEdit && existingPrescription ? existingPrescription.createdAt : now,
         updatedAt: now,
       };
 
@@ -194,7 +221,9 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
       showNotification({
         title: t('common.success'),
-        message: isEdit ? t('prescriptions.editSuccess') : t('prescriptions.addSuccess'),
+        message: isEdit
+          ? t('prescriptions.editSuccess')
+          : t('prescriptions.addSuccess'),
         type: 'success',
       });
 

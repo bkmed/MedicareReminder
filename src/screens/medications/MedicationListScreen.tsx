@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useContext,
+} from 'react';
 import {
   View,
   Text,
@@ -26,13 +32,16 @@ export const MedicationListScreen = ({ navigation }: any) => {
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const dispatch = useDispatch();
-  const medications = useSelector((state: RootState) => state.medications.medications);
+  const medications = useSelector(
+    (state: RootState) => state.medications.medications,
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const WebNavigationContext = Platform.OS === 'web'
-    ? require('../../navigation/AppNavigator').WebNavigationContext
-    : null;
+  const WebNavigationContext =
+    Platform.OS === 'web'
+      ? require('../../navigation/AppNavigator').WebNavigationContext
+      : null;
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
@@ -86,7 +95,9 @@ export const MedicationListScreen = ({ navigation }: any) => {
 
   const handleMedicationPress = (medication: Medication) => {
     if (Platform.OS === 'web' && setActiveTab) {
-      setActiveTab('Medications', 'MedicationDetails', { medicationId: Number(medication.id) });
+      setActiveTab('Medications', 'MedicationDetails', {
+        medicationId: Number(medication.id),
+      });
     } else {
       navigation.navigate('MedicationDetails', { medicationId: medication.id });
     }

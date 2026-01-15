@@ -1,5 +1,11 @@
 import React, { useState } from 'react';
-import { TouchableOpacity, Text, StyleSheet, Platform, ActivityIndicator } from 'react-native';
+import {
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Platform,
+  ActivityIndicator,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { useNotification } from '../context/NotificationContext';
@@ -9,7 +15,8 @@ import { Theme } from '../theme';
 let AddToCalendarButton: any;
 if (Platform.OS === 'web') {
   try {
-    AddToCalendarButton = require('add-to-calendar-button-react').AddToCalendarButton;
+    AddToCalendarButton =
+      require('add-to-calendar-button-react').AddToCalendarButton;
   } catch (error) {
     console.warn('add-to-calendar-button-react not available:', error);
   }
@@ -57,7 +64,10 @@ export const CalendarButton: React.FC<CalendarButtonProps> = ({
     const endTime = `${endDateObj
       .getHours()
       .toString()
-      .padStart(2, '0')}:${endDateObj.getMinutes().toString().padStart(2, '0')}`;
+      .padStart(2, '0')}:${endDateObj
+      .getMinutes()
+      .toString()
+      .padStart(2, '0')}`;
 
     return (
       <TouchableOpacity

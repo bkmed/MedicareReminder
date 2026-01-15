@@ -14,7 +14,10 @@ import { useNotification } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/redux/store';
-import { addAppointment, updateAppointment } from '../../store/redux/slices/appointmentSlice';
+import {
+  addAppointment,
+  updateAppointment,
+} from '../../store/redux/slices/appointmentSlice';
 import { appointmentsDb } from '../../database/appointmentsDb';
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
@@ -37,13 +40,17 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => { } }; // fallback pour mobile
+    : { setActiveTab: () => {} }; // fallback pour mobile
 
-  const appointmentId = route?.params?.appointmentId ? Number(route.params.appointmentId) : null;
+  const appointmentId = route?.params?.appointmentId
+    ? Number(route.params.appointmentId)
+    : null;
   const isEdit = !!appointmentId;
 
   const existingAppointment = useSelector((state: RootState) =>
-    appointmentId ? state.appointments.appointments.find(a => a.id === appointmentId) : null
+    appointmentId
+      ? state.appointments.appointments.find(a => a.id === appointmentId)
+      : null,
   );
 
   const [title, setTitle] = useState('');
@@ -105,7 +112,8 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
         dateTime: finalDateTime.toISOString(),
         notes: notes.trim() || undefined,
         reminderEnabled,
-        createdAt: isEdit && existingAppointment ? existingAppointment.createdAt : now,
+        createdAt:
+          isEdit && existingAppointment ? existingAppointment.createdAt : now,
         updatedAt: now,
       };
 
@@ -127,7 +135,9 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
       // Show Success and Navigate
       showNotification({
         title: t('common.success'),
-        message: isEdit ? t('appointments.editSuccess') : t('appointments.addSuccess'),
+        message: isEdit
+          ? t('appointments.editSuccess')
+          : t('appointments.addSuccess'),
         type: 'success',
       });
 

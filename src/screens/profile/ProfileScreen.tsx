@@ -99,7 +99,7 @@ export const ProfileScreen = ({ navigation }: any) => {
         title: t('profile.permissionBlocked'),
         message: t('profile.permissionBlockedMessage'),
         buttons: [
-          { text: t('common.cancel'), style: 'cancel', onPress: () => { } },
+          { text: t('common.cancel'), style: 'cancel', onPress: () => {} },
           {
             text: t('profile.openSettings'),
             onPress: () => permissionsService.openAppSettings(),
@@ -123,7 +123,7 @@ export const ProfileScreen = ({ navigation }: any) => {
         title: t('profile.permissionBlocked'),
         message: t('profile.permissionBlockedMessage'),
         buttons: [
-          { text: t('common.cancel'), style: 'cancel', onPress: () => { } },
+          { text: t('common.cancel'), style: 'cancel', onPress: () => {} },
           {
             text: t('profile.openSettings'),
             onPress: () => permissionsService.openAppSettings(),
@@ -147,7 +147,7 @@ export const ProfileScreen = ({ navigation }: any) => {
         title: t('profile.permissionBlocked'),
         message: t('profile.permissionBlockedMessage'),
         buttons: [
-          { text: t('common.cancel'), style: 'cancel', onPress: () => { } },
+          { text: t('common.cancel'), style: 'cancel', onPress: () => {} },
           {
             text: t('profile.openSettings'),
             onPress: () => permissionsService.openAppSettings(),
@@ -172,7 +172,7 @@ export const ProfileScreen = ({ navigation }: any) => {
             type: 'error',
           });
         }
-      }
+      },
     });
   };
 
@@ -381,7 +381,8 @@ const createStyles = (theme: Theme) =>
       marginBottom: theme.spacing.xs,
     },
     languageRowActive: {
-      backgroundColor: theme.colors.primaryBackground || (theme.dark ? '#1A2E35' : '#E6F2F5'),
+      backgroundColor:
+        theme.colors.primaryBackground || (theme.dark ? '#1A2E35' : '#E6F2F5'),
     },
     languageInfo: {
       flexDirection: 'row',

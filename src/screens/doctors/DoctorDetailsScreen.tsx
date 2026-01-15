@@ -35,7 +35,7 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => { } }; // fallback pour mobile
+    : { setActiveTab: () => {} }; // fallback pour mobile
 
   const navigateToAddAppointment = () => {
     if (Platform.OS === 'web') {

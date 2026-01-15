@@ -32,7 +32,7 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => { } };
+    : { setActiveTab: () => {} };
 
   const navigateBack = () => {
     if (Platform.OS === 'web') {
@@ -96,8 +96,6 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
     }
   };
 
-
-
   if (loading || !prescription) {
     return <LoadingScreen />;
   }
@@ -150,8 +148,6 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
             <Text style={styles.value}>{prescription.notes}</Text>
           </View>
         )}
-
-
 
         <TouchableOpacity
           style={[styles.button, styles.editButton]}

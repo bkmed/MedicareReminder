@@ -297,7 +297,7 @@ class PermissionsService {
         title: 'Permissions',
         message: 'Please check your browser settings to manage permissions.',
         type: 'info',
-        buttons: [{ text: 'OK', onPress: () => { } }]
+        buttons: [{ text: 'OK', onPress: () => {} }],
       });
       return;
     }

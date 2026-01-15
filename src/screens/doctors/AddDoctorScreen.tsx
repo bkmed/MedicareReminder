@@ -15,7 +15,11 @@ import { useTranslation } from 'react-i18next';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/redux/store';
-import { addDoctor, updateDoctor, removeDoctor } from '../../store/redux/slices/doctorSlice';
+import {
+  addDoctor,
+  updateDoctor,
+  removeDoctor,
+} from '../../store/redux/slices/doctorSlice';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 import { Dropdown } from '../../components/Dropdown';
@@ -30,11 +34,13 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const dispatch = useDispatch();
 
-  const doctorId = route?.params?.doctorId ? Number(route.params.doctorId) : null;
+  const doctorId = route?.params?.doctorId
+    ? Number(route.params.doctorId)
+    : null;
   const isEdit = !!doctorId;
 
   const existingDoctor = useSelector((state: RootState) =>
-    doctorId ? state.doctors.doctors.find(d => d.id === doctorId) : null
+    doctorId ? state.doctors.doctors.find(d => d.id === doctorId) : null,
   );
 
   const [name, setName] = useState('');
@@ -54,7 +60,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => { } }; // fallback pour mobile
+    : { setActiveTab: () => {} }; // fallback pour mobile
 
   const specialtyOptions = useMemo(() => {
     return MEDICAL_SPECIALTIES.map(key => ({
@@ -124,17 +130,20 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
         {
           text: t('prescriptions.chooseFromLibrary'),
           onPress: () => {
-            launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, response => {
-              if (response.assets && response.assets[0]?.uri) {
-                setPhotoUri(response.assets[0].uri);
-              }
-            });
+            launchImageLibrary(
+              { mediaType: 'photo', quality: 0.8 },
+              response => {
+                if (response.assets && response.assets[0]?.uri) {
+                  setPhotoUri(response.assets[0].uri);
+                }
+              },
+            );
           },
         },
         {
           text: t('common.cancel'),
           style: 'cancel',
-          onPress: () => { },
+          onPress: () => {},
         },
       ],
     });

@@ -85,7 +85,9 @@ export const DoctorListScreen = ({ navigation }: any) => {
         style={styles.card}
         onPress={() => {
           if (Platform.OS === 'web' && setActiveTab) {
-            setActiveTab('Doctors', 'DoctorDetails', { doctorId: Number(item.id) });
+            setActiveTab('Doctors', 'DoctorDetails', {
+              doctorId: Number(item.id),
+            });
           } else {
             navigation.navigate('DoctorDetails', { doctorId: item.id });
           }
