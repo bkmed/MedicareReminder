@@ -82,6 +82,18 @@ module.exports = {
           from: path.join(__dirname, './public/logo.png'),
           to: path.join(__dirname, './build/logo.png'),
         },
+        {
+          from: path.join(__dirname, './public/manifest.json'),
+          to: path.join(__dirname, './build/manifest.json'),
+        },
+        {
+          from: path.join(__dirname, './public/robots.txt'),
+          to: path.join(__dirname, './build/robots.txt'),
+        },
+        {
+          from: path.join(__dirname, './public/sitemap.xml'),
+          to: path.join(__dirname, './build/sitemap.xml'),
+        },
       ],
     }),
   ],

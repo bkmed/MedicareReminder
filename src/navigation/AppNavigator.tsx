@@ -298,6 +298,31 @@ const WebNavigator = () => {
     ['Profile', t('navigation.profile')],
   ];
 
+  /* ... existing code ... */
+
+  // Update Page Title on Web
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      let title = 'Medicare Reminder';
+
+      const navItem = navItems.find(([key]) => key === activeTab);
+      const tabLabel = navItem ? navItem[1] : activeTab;
+
+      if (subScreen) {
+        // Humanize subScreen
+        const subLabel = t(
+          `navigation.${subScreen.toLowerCase().replace('screen', '')}`,
+          subScreen.replace(/([A-Z])/g, ' $1').trim(),
+        );
+        title = `${subLabel} | ${tabLabel} | Medicare Reminder`;
+      } else if (activeTab !== 'Home') {
+        title = `${tabLabel} | Medicare Reminder`;
+      }
+
+      document.title = title;
+    }
+  }, [activeTab, subScreen, t, navItems]);
+
   return (
     <WebNavigationContext.Provider value={contextValue}>
       <View
@@ -362,7 +387,10 @@ export const AppNavigator = () => {
   return (
     <AuthProvider>
       <NotificationProvider>
-        <NavigationContainer linking={linking}>
+        <NavigationContainer
+          linking={linking}
+          documentTitle={{ enabled: false }}
+        >
           <AppContent />
         </NavigationContainer>
       </NotificationProvider>
