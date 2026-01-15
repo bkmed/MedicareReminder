@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Image,
   useWindowDimensions,
+  ScrollView,
 } from 'react-native';
 import { enableScreens } from 'react-native-screens';
 import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
@@ -227,55 +228,38 @@ const WebNavigator = () => {
         setActiveTab(tab);
         setSubScreen(screen || '');
         setScreenParams(params || {});
-        setIsMenuOpen(false); // Close menu on navigation
+        setIsMenuOpen(false);
       },
     }),
     [activeTab, subScreen, screenParams],
   );
 
   const getActiveComponent = () => {
-    // Create a mock route object for web screens
     const mockRoute = { params: screenParams };
-
     switch (activeTab) {
-      case 'Home':
-        return <HomeStack />;
+      case 'Home': return <HomeStack />;
       case 'Medications':
-        if (subScreen === 'AddMedication')
-          return <AddMedicationScreen route={mockRoute} />;
-        if (subScreen === 'MedicationDetails')
-          return <MedicationDetailsScreen route={mockRoute} />;
-        if (subScreen === 'MedicationHistory')
-          return <MedicationHistoryScreen route={mockRoute} />;
+        if (subScreen === 'AddMedication') return <AddMedicationScreen route={mockRoute} />;
+        if (subScreen === 'MedicationDetails') return <MedicationDetailsScreen route={mockRoute} />;
+        if (subScreen === 'MedicationHistory') return <MedicationHistoryScreen route={mockRoute} />;
         return <MedicationsStack />;
       case 'Appointments':
-        if (subScreen === 'AddAppointment')
-          return <AddAppointmentScreen route={mockRoute} />;
-        if (subScreen === 'AppointmentDetails')
-          return <AppointmentDetailsScreen route={mockRoute} />;
+        if (subScreen === 'AddAppointment') return <AddAppointmentScreen route={mockRoute} />;
+        if (subScreen === 'AppointmentDetails') return <AppointmentDetailsScreen route={mockRoute} />;
         return <AppointmentsStack />;
-      case 'Analytics':
-        return <AnalyticsScreen />;
+      case 'Analytics': return <AnalyticsScreen />;
       case 'Prescriptions':
-        if (subScreen === 'AddPrescription')
-          return <AddPrescriptionScreen route={mockRoute} />;
-        if (subScreen === 'PrescriptionDetails')
-          return <PrescriptionDetailsScreen route={mockRoute} />;
-        if (subScreen === 'PrescriptionHistory')
-          return <PrescriptionHistoryScreen route={mockRoute} />;
+        if (subScreen === 'AddPrescription') return <AddPrescriptionScreen route={mockRoute} />;
+        if (subScreen === 'PrescriptionDetails') return <PrescriptionDetailsScreen route={mockRoute} />;
+        if (subScreen === 'PrescriptionHistory') return <PrescriptionHistoryScreen route={mockRoute} />;
         return <PrescriptionsStack />;
       case 'Doctors':
-        if (subScreen === 'AddDoctor')
-          return <AddDoctorScreen route={mockRoute} />;
-        if (subScreen === 'DoctorDetails')
-          return <DoctorDetailsScreen route={mockRoute} />;
+        if (subScreen === 'AddDoctor') return <AddDoctorScreen route={mockRoute} />;
+        if (subScreen === 'DoctorDetails') return <DoctorDetailsScreen route={mockRoute} />;
         return <DoctorsStack />;
-      case 'Search':
-        return <GlobalSearchScreen />;
-      case 'Profile':
-        return <ProfileStack />;
-      default:
-        return <HomeStack />;
+      case 'Search': return <GlobalSearchScreen />;
+      case 'Profile': return <ProfileStack />;
+      default: return <HomeStack />;
     }
   };
 
@@ -286,162 +270,103 @@ const WebNavigator = () => {
     ['Analytics', t('navigation.analytics')],
     ['Prescriptions', t('navigation.prescriptions')],
     ['Doctors', t('navigation.doctors')],
-    ['Search', t('search.title')],
     ['Profile', t('navigation.profile')],
   ];
 
   return (
     <WebNavigationContext.Provider value={contextValue}>
-      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-        {/* Navbar */}
-        <View
-          style={[
-            webStyles.navbar,
-            {
-              backgroundColor: theme.colors.surface,
-              borderBottomColor: theme.colors.border,
-              borderBottomWidth: 1,
-            },
-          ]}
-        >
-          <View style={webStyles.leftContainer}>
-            {/* Brand */}
-            <TouchableOpacity
-              style={webStyles.brandContainer}
-              onPress={() => setActiveTab('Home')}
-            >
-              <Image
-                source={require('../../public/logo.png')}
-                style={webStyles.logo}
-                resizeMode="contain"
-              />
-              <Text style={[webStyles.title, { color: theme.colors.text }]}>
-                {t('home.appName')}
-              </Text>
+      <View style={{ flex: 1, flexDirection: isMobile ? 'column' : 'row', backgroundColor: theme.colors.background }}>
+
+        {/* Desktop Sidebar */}
+        {!isMobile && (
+          <View style={[webStyles.sidebar, { backgroundColor: theme.colors.surface, borderRightColor: theme.colors.border }]}>
+            <TouchableOpacity style={webStyles.sidebarBrand} onPress={() => setActiveTab('Home')}>
+              <Image source={require('../../public/logo.png')} style={webStyles.sidebarLogo} resizeMode="contain" />
+              <Text style={[webStyles.sidebarTitle, { color: theme.colors.text }]}>{t('home.appName')}</Text>
             </TouchableOpacity>
 
-            {/* Back Button (Desktop: visible, Mobile: only if subScreen) */}
-            {subScreen && (
-              <TouchableOpacity
-                style={webStyles.backButton}
-                onPress={() => setSubScreen('')}
-              >
-                <Text style={webStyles.backButtonText}>
-                  ← {t('common.back')}
-                </Text>
-              </TouchableOpacity>
-            )}
-          </View>
-
-          {/* Desktop Navigation */}
-          {!isMobile && (
-            <View style={webStyles.navButtons}>
+            <ScrollView style={{ flex: 1 }}>
               {navItems.map(([key, label]) => (
                 <TouchableOpacity
                   key={key as string}
                   onPress={() => setActiveTab(key as string)}
-                  style={webStyles.navButton}
-                >
-                  <Text
-                    style={[
-                      webStyles.navButtonText,
-                      {
-                        color:
-                          activeTab === key
-                            ? theme.colors.primary
-                            : theme.colors.subText,
-                      },
-                      activeTab === key && webStyles.activeNavButton,
-                    ]}
-                  >
-                    {label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-
-          {/* Mobile Menu Button */}
-          {isMobile && (
-            <TouchableOpacity
-              style={webStyles.hamburgerButton}
-              onPress={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <Text
-                style={[webStyles.hamburgerText, { color: theme.colors.text }]}
-              >
-                ☰
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Mobile Menu Overlay */}
-        {isMobile && isMenuOpen && (
-          <View
-            style={[
-              webStyles.mobileMenuOverlay,
-              { backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000 },
-            ]}
-          >
-            <View
-              style={[
-                webStyles.mobileMenu,
-                {
-                  backgroundColor: theme.colors.surface, // Solid color from theme
-                  borderRightWidth: 1,
-                  borderRightColor: theme.colors.border,
-                  height: height,
-                },
-              ]}
-            >
-              <TouchableOpacity
-                style={webStyles.closeButton}
-                onPress={() => setIsMenuOpen(false)}
-              >
-                <Text
                   style={[
-                    webStyles.closeButtonText,
-                    { color: theme.colors.text },
+                    webStyles.sidebarNavItem,
+                    activeTab === key && webStyles.activeSidebarNavItem
                   ]}
                 >
-                  ✕
-                </Text>
-              </TouchableOpacity>
-              {navItems.map(([key, label]) => (
-                <TouchableOpacity
-                  key={key as string}
-                  onPress={() => {
-                    setActiveTab(key as string);
-                    setIsMenuOpen(false);
-                  }}
-                  style={webStyles.mobileMenuItem}
-                >
-                  <Text
-                    style={[
-                      webStyles.mobileMenuItemText,
-                      {
-                        color:
-                          activeTab === key
-                            ? theme.colors.primary
-                            : theme.colors.text,
-                      },
-                    ]}
+                  <Text style={[
+                    webStyles.sidebarNavText,
+                    { color: theme.colors.text },
+                    activeTab === key && webStyles.activeSidebarNavText
+                  ]}
                   >
                     {label}
                   </Text>
                 </TouchableOpacity>
               ))}
-            </View>
-            <TouchableOpacity
-              style={{ flex: 1 }}
-              onPress={() => setIsMenuOpen(false)}
-            />
+            </ScrollView>
           </View>
         )}
 
-        {/* Content */}
-        <View style={{ flex: 1 }}>{getActiveComponent()}</View>
+        {/* Main Content Area w/ Mobile Header */}
+        <View style={{ flex: 1, height: '100%' }}>
+          {/* Mobile Header */}
+          {isMobile && (
+            <View style={[webStyles.navbar, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
+              <View style={webStyles.leftContainer}>
+                <TouchableOpacity style={webStyles.brandContainer} onPress={() => setActiveTab('Home')}>
+                  <Image source={require('../../public/logo.png')} style={webStyles.logo} resizeMode="contain" />
+                  <Text style={[webStyles.title, { color: theme.colors.text }]}>{t('home.appName')}</Text>
+                </TouchableOpacity>
+                {subScreen && (
+                  <TouchableOpacity style={webStyles.backButton} onPress={() => setSubScreen('')}>
+                    <Text style={webStyles.backButtonText}>← {t('common.back')}</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <TouchableOpacity style={webStyles.hamburgerButton} onPress={() => setIsMenuOpen(!isMenuOpen)}>
+                <Text style={[webStyles.hamburgerText, { color: theme.colors.text }]}>☰</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Mobile Menu Overlay */}
+          {isMobile && isMenuOpen && (
+            <View style={[webStyles.mobileMenuOverlay, { backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000 }]}>
+              <View style={[webStyles.mobileMenu, { backgroundColor: theme.colors.surface, height: height }]}>
+                <TouchableOpacity style={webStyles.closeButton} onPress={() => setIsMenuOpen(false)}>
+                  <Text style={[webStyles.closeButtonText, { color: theme.colors.text }]}>✕</Text>
+                </TouchableOpacity>
+                {navItems.map(([key, label]) => (
+                  <TouchableOpacity
+                    key={key as string}
+                    onPress={() => { setActiveTab(key as string); setIsMenuOpen(false); }}
+                    style={webStyles.mobileMenuItem}
+                  >
+                    <Text style={[webStyles.mobileMenuItemText, { color: activeTab === key ? theme.colors.primary : theme.colors.text }]}>
+                      {label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TouchableOpacity style={{ flex: 1 }} onPress={() => setIsMenuOpen(false)} />
+            </View>
+          )}
+
+          {/* Screen Content */}
+          <View style={{ flex: 1 }}>
+            {/* Desktop Back Button (Breadcrumb style or simple back) */}
+            {!isMobile && subScreen && (
+              <View style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: theme.colors.border, backgroundColor: theme.colors.surface }}>
+                <TouchableOpacity onPress={() => setSubScreen('')} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 16, color: theme.colors.primary }}>← {t('common.back')}</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            {getActiveComponent()}
+          </View>
+        </View>
       </View>
     </WebNavigationContext.Provider>
   );
@@ -588,5 +513,50 @@ const webStyles = StyleSheet.create({
   },
   mobileMenuItemText: {
     fontSize: 18,
+  },
+  sidebar: {
+    width: 260,
+    backgroundColor: '#FFFFFF',
+    borderRightWidth: 1,
+    borderRightColor: '#E0E0E0',
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  sidebarBrand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 40,
+    paddingHorizontal: 12,
+  },
+  sidebarLogo: {
+    width: 32,
+    height: 32,
+    marginRight: 12,
+  },
+  sidebarTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  sidebarNavItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginBottom: 4,
+  },
+  sidebarNavText: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  activeSidebarNavItem: {
+    backgroundColor: '#F0F7FF', // Light blue background for active
+  },
+  activeSidebarNavText: {
+    color: '#007AFF', // Primary color
+    fontWeight: '600',
   },
 });
