@@ -56,35 +56,48 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      t('appointmentDetails.deleteConfirmTitle'),
-      t('appointmentDetails.deleteConfirmMessage'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await appointmentsDb.delete(appointmentId);
-              await notificationService.cancelAppointmentReminder(
-                appointmentId,
-              );
-              if (Platform.OS === 'web') {
-                Alert.alert(t('common.success'), t('appointments.deleteSuccess'));
-                navigateBack();
-              } else {
-                Alert.alert(t('common.success'), t('appointments.deleteSuccess'), [
-                  { text: t('common.ok'), onPress: () => navigateBack() },
-                ]);
-              }
-            } catch (error) {
-              Alert.alert(t('appointmentDetails.errorDeleteFailed'));
-            }
+    if (Platform.OS === 'web') {
+      const confirmed = (window as any).confirm(
+        t('appointmentDetails.deleteConfirmMessage'),
+      );
+      if (confirmed) {
+        performDelete();
+      }
+    } else {
+      Alert.alert(
+        t('appointmentDetails.deleteConfirmTitle'),
+        t('appointmentDetails.deleteConfirmMessage'),
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('common.delete'),
+            style: 'destructive',
+            onPress: performDelete,
           },
-        },
-      ],
-    );
+        ],
+      );
+    }
+  };
+
+  const performDelete = async () => {
+    try {
+      await appointmentsDb.delete(appointmentId);
+      await notificationService.cancelAppointmentReminder(appointmentId);
+      if (Platform.OS === 'web') {
+        (window as any).alert(t('appointments.deleteSuccess'));
+        navigateBack();
+      } else {
+        Alert.alert(t('common.success'), t('appointments.deleteSuccess'), [
+          { text: t('common.ok'), onPress: () => navigateBack() },
+        ]);
+      }
+    } catch (error) {
+      if (Platform.OS === 'web') {
+        (window as any).alert(t('appointmentDetails.errorDeleteFailed'));
+      } else {
+        Alert.alert(t('appointmentDetails.errorDeleteFailed'));
+      }
+    }
   };
 
   const handleEdit = () => {

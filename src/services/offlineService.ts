@@ -14,7 +14,7 @@ export const useNetworkStatus = () => {
   const [isConnected, setIsConnected] = useState<boolean | null>(
     Platform.OS === 'web'
       ? typeof window !== 'undefined'
-        ? (window as any).navigator.onLine
+        ? (window as any)['navigator']?.onLine
         : true
       : true,
   );
@@ -57,7 +57,10 @@ export const useNetworkStatus = () => {
 // Check network status once
 export const checkNetworkStatus = async () => {
   if (Platform.OS === 'web') {
-    const online = typeof window !== 'undefined' ? (window as any).navigator.onLine : true;
+    const online =
+      typeof window !== 'undefined'
+        ? (window as any)['navigator']?.onLine
+        : true;
     return {
       isConnected: online,
       isInternetReachable: online,

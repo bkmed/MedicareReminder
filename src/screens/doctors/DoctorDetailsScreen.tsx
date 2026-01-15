@@ -41,11 +41,13 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
       if (setActiveTab) {
         setActiveTab('Appointments', 'AddAppointment', {
           doctorName: doctor?.name || '',
+          doctorId: doctorId,
         });
       }
     } else {
       navigation.navigate('AddAppointment', {
         doctorName: doctor?.name || '',
+        doctorId: doctorId,
       });
     }
   };
@@ -65,11 +67,13 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
       if (setActiveTab) {
         setActiveTab('Prescriptions', 'AddPrescription', {
           doctorName: doctor.name,
+          doctorId: doctor.id,
         });
       }
     } else {
       navigation.navigate('AddPrescription', {
         doctorName: doctor.name,
+        doctorId: doctor.id,
       });
     }
   };
@@ -110,33 +114,46 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      t('doctors.deleteConfirmTitle'),
-      t('doctors.deleteConfirmMessage'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await doctorsDb.delete(doctorId);
-              if (Platform.OS === 'web') {
-                Alert.alert(t('common.success'), t('doctors.deleteSuccess'));
-                navigationBack();
-              } else {
-                Alert.alert(t('common.success'), t('doctors.deleteSuccess'), [
-                  { text: t('common.ok'), onPress: () => navigationBack() },
-                ]);
-              }
-            } catch (error) {
-              console.error('Error deleting doctor:', error);
-              Alert.alert(t('common.error'), t('doctors.deleteError'));
-            }
+    if (Platform.OS === 'web') {
+      const confirmed = (window as any).confirm(t('doctors.deleteConfirmMessage'));
+      if (confirmed) {
+        performDelete();
+      }
+    } else {
+      Alert.alert(
+        t('doctors.deleteConfirmTitle'),
+        t('doctors.deleteConfirmMessage'),
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('common.delete'),
+            style: 'destructive',
+            onPress: performDelete,
           },
-        },
-      ],
-    );
+        ],
+      );
+    }
+  };
+
+  const performDelete = async () => {
+    try {
+      await doctorsDb.delete(doctorId);
+      if (Platform.OS === 'web') {
+        (window as any).alert(t('doctors.deleteSuccess'));
+        navigationBack();
+      } else {
+        Alert.alert(t('common.success'), t('doctors.deleteSuccess'), [
+          { text: t('common.ok'), onPress: () => navigationBack() },
+        ]);
+      }
+    } catch (error) {
+      console.error('Error deleting doctor:', error);
+      if (Platform.OS === 'web') {
+        (window as any).alert(t('doctors.deleteError'));
+      } else {
+        Alert.alert(t('common.error'), t('doctors.deleteError'));
+      }
+    }
   };
 
   const renderAppointment = ({ item }: { item: Appointment }) => (

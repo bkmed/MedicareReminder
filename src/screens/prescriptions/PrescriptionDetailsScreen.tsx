@@ -57,28 +57,41 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
   };
 
   const handleDelete = () => {
-    Alert.alert(t('common.deleteTitle'), t('common.deleteMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await prescriptionsDb.delete(prescriptionId);
-            if (Platform.OS === 'web') {
-              Alert.alert(t('common.success'), t('prescriptions.deleteSuccess'));
-              navigateBack();
-            } else {
-              Alert.alert(t('common.success'), t('prescriptions.deleteSuccess'), [
-                { text: t('common.ok'), onPress: () => navigateBack() },
-              ]);
-            }
-          } catch (error) {
-            Alert.alert(t('common.errorTitle'), t('common.deleteFailed'));
-          }
+    if (Platform.OS === 'web') {
+      const confirmed = (window as any).confirm(t('common.deleteMessage'));
+      if (confirmed) {
+        performDelete();
+      }
+    } else {
+      Alert.alert(t('common.deleteTitle'), t('common.deleteMessage'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: performDelete,
         },
-      },
-    ]);
+      ]);
+    }
+  };
+
+  const performDelete = async () => {
+    try {
+      await prescriptionsDb.delete(prescriptionId);
+      if (Platform.OS === 'web') {
+        (window as any).alert(t('prescriptions.deleteSuccess'));
+        navigateBack();
+      } else {
+        Alert.alert(t('common.success'), t('prescriptions.deleteSuccess'), [
+          { text: t('common.ok'), onPress: () => navigateBack() },
+        ]);
+      }
+    } catch (error) {
+      if (Platform.OS === 'web') {
+        (window as any).alert(t('common.deleteFailed'));
+      } else {
+        Alert.alert(t('common.errorTitle'), t('common.deleteFailed'));
+      }
+    }
   };
 
   const handleEdit = () => {

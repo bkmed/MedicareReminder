@@ -162,7 +162,18 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
         await doctorsDb.add(doctorData);
       }
 
-      navigateBack();
+      if (Platform.OS === 'web') {
+        (window as any).alert(
+          isEdit ? t('doctors.editSuccess') : t('doctors.addSuccess'),
+        );
+        navigateBack();
+      } else {
+        Alert.alert(
+          t('common.success'),
+          isEdit ? t('doctors.editSuccess') : t('doctors.addSuccess'),
+          [{ text: t('common.ok'), onPress: () => navigateBack() }],
+        );
+      }
     } catch (error) {
       console.error('Error saving doctor:', error);
       Alert.alert(t('common.error'), t('doctors.saveError'));
@@ -171,27 +182,48 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!doctorId) return;
-    Alert.alert(
-      t('doctors.deleteConfirmTitle'),
-      t('doctors.deleteConfirmMessage'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await doctorsDb.delete(doctorId);
-              navigateBack();
-            } catch (error) {
-              Alert.alert(t('common.error'), t('doctors.deleteError'));
-            }
+    if (Platform.OS === 'web') {
+      const confirmed = (window as any).confirm(t('doctors.deleteConfirmMessage'));
+      if (confirmed) {
+        performDelete();
+      }
+    } else {
+      Alert.alert(
+        t('doctors.deleteConfirmTitle'),
+        t('doctors.deleteConfirmMessage'),
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('common.delete'),
+            style: 'destructive',
+            onPress: performDelete,
           },
-        },
-      ],
-    );
+        ],
+      );
+    }
+  };
+
+  const performDelete = async () => {
+    try {
+      if (!doctorId) return;
+      await doctorsDb.delete(doctorId);
+      if (Platform.OS === 'web') {
+        (window as any).alert(t('doctors.deleteSuccess'));
+        navigateBack();
+      } else {
+        Alert.alert(t('common.success'), t('doctors.deleteSuccess'), [
+          { text: t('common.ok'), onPress: () => navigateBack() },
+        ]);
+      }
+    } catch (error) {
+      if (Platform.OS === 'web') {
+        (window as any).alert(t('doctors.deleteError'));
+      } else {
+        Alert.alert(t('common.error'), t('doctors.deleteError'));
+      }
+    }
   };
 
   return (

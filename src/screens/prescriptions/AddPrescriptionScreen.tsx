@@ -40,6 +40,9 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const [photoUri, setPhotoUri] = useState('');
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(
+    route?.params?.doctorId ? Number(route.params.doctorId) : null,
+  );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -183,12 +186,14 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
       const prescriptionData = {
         medicationName: computedMedicationName,
-        medicationIds: JSON.stringify(selectedMedicationIds),
+        medicationIds:
+          selectedMedicationIds.length > 0
+            ? JSON.stringify(selectedMedicationIds)
+            : undefined,
         doctorName: doctorName.trim() || undefined,
-        issueDate: issueDate!.toISOString().split('T')[0],
-        expiryDate: expiryDate
-          ? expiryDate.toISOString().split('T')[0]
-          : undefined,
+        doctorId: selectedDoctorId || undefined,
+        issueDate: issueDate!.toISOString(),
+        expiryDate: expiryDate?.toISOString(),
         photoUri: photoUri || undefined,
         notes: notes.trim() || undefined,
       };
@@ -214,8 +219,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
       }
 
       if (Platform.OS === 'web') {
-        Alert.alert(
-          t('common.success'),
+        (window as any).alert(
           isEdit
             ? t('prescriptions.editSuccess')
             : t('prescriptions.addSuccess'),

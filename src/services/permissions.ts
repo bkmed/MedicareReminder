@@ -1,12 +1,19 @@
 import { Platform, Linking, Alert } from 'react-native';
-import {
-  PERMISSIONS,
-  request,
-  check,
-  RESULTS,
-  openSettings,
-} from 'react-native-permissions';
-import notifee, { AuthorizationStatus } from '@notifee/react-native';
+// Lazy load native modules
+let RNPermissions: any;
+let notifee: any;
+let AuthorizationStatus: any;
+
+if (Platform.OS !== 'web') {
+  try {
+    RNPermissions = require('react-native-permissions');
+    const notifeeModule = require('@notifee/react-native');
+    notifee = notifeeModule.default;
+    AuthorizationStatus = notifeeModule.AuthorizationStatus;
+  } catch (error) {
+    console.warn('Native modules for permissions not available:', error);
+  }
+}
 
 // Declare web-only globals
 declare global {
@@ -96,9 +103,9 @@ class PermissionsService {
     // Mobile: Use react-native-permissions
     const permission =
       Platform.OS === 'ios'
-        ? PERMISSIONS.IOS.CAMERA
-        : PERMISSIONS.ANDROID.CAMERA;
-    const result = await check(permission);
+        ? RNPermissions.PERMISSIONS.IOS.CAMERA
+        : RNPermissions.PERMISSIONS.ANDROID.CAMERA;
+    const result = await RNPermissions.check(permission);
     return this.mapNativePermissionStatus(result);
   }
 
@@ -130,9 +137,9 @@ class PermissionsService {
     // Mobile: Request permission
     const permission =
       Platform.OS === 'ios'
-        ? PERMISSIONS.IOS.CAMERA
-        : PERMISSIONS.ANDROID.CAMERA;
-    const result = await request(permission);
+        ? RNPermissions.PERMISSIONS.IOS.CAMERA
+        : RNPermissions.PERMISSIONS.ANDROID.CAMERA;
+    const result = await RNPermissions.request(permission);
     return this.mapNativePermissionStatus(result);
   }
 
@@ -216,9 +223,9 @@ class PermissionsService {
     // Mobile: Use react-native-permissions
     const permission =
       Platform.OS === 'ios'
-        ? PERMISSIONS.IOS.CALENDARS
-        : PERMISSIONS.ANDROID.WRITE_CALENDAR;
-    const result = await check(permission);
+        ? RNPermissions.PERMISSIONS.IOS.CALENDARS
+        : RNPermissions.PERMISSIONS.ANDROID.WRITE_CALENDAR;
+    const result = await RNPermissions.check(permission);
     return this.mapNativePermissionStatus(result);
   }
 
@@ -242,9 +249,9 @@ class PermissionsService {
     // Mobile: Request permission
     const permission =
       Platform.OS === 'ios'
-        ? PERMISSIONS.IOS.CALENDARS
-        : PERMISSIONS.ANDROID.WRITE_CALENDAR;
-    const result = await request(permission);
+        ? RNPermissions.PERMISSIONS.IOS.CALENDARS
+        : RNPermissions.PERMISSIONS.ANDROID.WRITE_CALENDAR;
+    const result = await RNPermissions.request(permission);
     return this.mapNativePermissionStatus(result);
   }
 
@@ -269,15 +276,15 @@ class PermissionsService {
    */
   private mapNativePermissionStatus(status: string): PermissionStatus {
     switch (status) {
-      case RESULTS.GRANTED:
+      case RNPermissions.RESULTS.GRANTED:
         return 'granted';
-      case RESULTS.DENIED:
+      case RNPermissions.RESULTS.DENIED:
         return 'denied';
-      case RESULTS.BLOCKED:
+      case RNPermissions.RESULTS.BLOCKED:
         return 'blocked';
-      case RESULTS.LIMITED:
+      case RNPermissions.RESULTS.LIMITED:
         return 'limited';
-      case RESULTS.UNAVAILABLE:
+      case RNPermissions.RESULTS.UNAVAILABLE:
         return 'unavailable';
       default:
         return 'denied';
@@ -295,7 +302,7 @@ class PermissionsService {
     }
 
     try {
-      await openSettings();
+      await RNPermissions.openSettings();
     } catch (error) {
       console.error('Error opening settings:', error);
     }

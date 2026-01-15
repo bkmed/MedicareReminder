@@ -153,8 +153,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
       }
 
       if (Platform.OS === 'web') {
-        Alert.alert(
-          t('common.success'),
+        (window as any).alert(
           isEdit ? t('medications.editSuccess') : t('medications.addSuccess'),
         );
         setActiveTab('Medications');

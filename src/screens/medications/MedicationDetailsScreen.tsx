@@ -56,33 +56,48 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
   };
 
   const handleDelete = () => {
-    Alert.alert(
-      t('medicationDetails.deleteConfirmTitle'),
-      t('medicationDetails.deleteConfirmMessage'),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await medicationsDb.delete(medicationId);
-              await notificationService.cancelMedicationReminders(medicationId);
-              if (Platform.OS === 'web') {
-                Alert.alert(t('common.success'), t('medications.deleteSuccess'));
-                navigateBack();
-              } else {
-                Alert.alert(t('common.success'), t('medications.deleteSuccess'), [
-                  { text: t('common.ok'), onPress: () => navigateBack() },
-                ]);
-              }
-            } catch (error) {
-              Alert.alert(t('medicationDetails.errorDeleteFailed'));
-            }
+    if (Platform.OS === 'web') {
+      const confirmed = (window as any).confirm(
+        t('medicationDetails.deleteConfirmMessage'),
+      );
+      if (confirmed) {
+        performDelete();
+      }
+    } else {
+      Alert.alert(
+        t('medicationDetails.deleteConfirmTitle'),
+        t('medicationDetails.deleteConfirmMessage'),
+        [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('common.delete'),
+            style: 'destructive',
+            onPress: performDelete,
           },
-        },
-      ],
-    );
+        ],
+      );
+    }
+  };
+
+  const performDelete = async () => {
+    try {
+      await medicationsDb.delete(medicationId);
+      await notificationService.cancelMedicationReminders(medicationId);
+      if (Platform.OS === 'web') {
+        (window as any).alert(t('medications.deleteSuccess'));
+        navigateBack();
+      } else {
+        Alert.alert(t('common.success'), t('medications.deleteSuccess'), [
+          { text: t('common.ok'), onPress: () => navigateBack() },
+        ]);
+      }
+    } catch (error) {
+      if (Platform.OS === 'web') {
+        (window as any).alert(t('medicationDetails.errorDeleteFailed'));
+      } else {
+        Alert.alert(t('medicationDetails.errorDeleteFailed'));
+      }
+    }
   };
 
   const handleEdit = () => {

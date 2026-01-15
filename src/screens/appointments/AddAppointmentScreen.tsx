@@ -38,13 +38,16 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   const isEdit = !!appointmentId;
 
   const [title, setTitle] = useState('');
-  const [doctorName, setDoctorName] = useState('');
+  const [doctorName, setDoctorName] = useState(route?.params?.doctorName || '');
   const [location, setLocation] = useState('');
   const [date, setDate] = useState<Date | null>(new Date());
   const [time, setTime] = useState<Date | null>(new Date());
   const [notes, setNotes] = useState('');
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(
+    route?.params?.doctorId ? Number(route.params.doctorId) : null,
+  );
   const [loading, setLoading] = useState(false);
 
   const loadAppointment = async () => {
@@ -97,6 +100,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
       const appointmentData = {
         title: title.trim(),
         doctorName: doctorName.trim() || undefined,
+        doctorId: selectedDoctorId || undefined,
         location: location.trim() || undefined,
         dateTime: finalDateTime.toISOString(),
         notes: notes.trim() || undefined,
@@ -122,8 +126,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
 
       // Go back: Mobile stack or Web tab
       if (Platform.OS === 'web') {
-        Alert.alert(
-          t('common.success'),
+        (window as any).alert(
           isEdit ? t('appointments.editSuccess') : t('appointments.addSuccess'),
         );
         setActiveTab('Appointments'); // retourne à la liste

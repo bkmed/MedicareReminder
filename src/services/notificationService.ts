@@ -1,10 +1,23 @@
 import { Platform } from 'react-native';
-import notifee, {
-  TimestampTrigger,
-  TriggerType,
-  AndroidImportance,
-  RepeatFrequency,
-} from '@notifee/react-native';
+// Lazy load native modules
+let notifee: any;
+let TimestampTrigger: any;
+let TriggerType: any;
+let AndroidImportance: any;
+let RepeatFrequency: any;
+
+if (Platform.OS !== 'web') {
+  try {
+    const notifeeModule = require('@notifee/react-native');
+    notifee = notifeeModule.default;
+    TimestampTrigger = notifeeModule.TimestampTrigger;
+    TriggerType = notifeeModule.TriggerType;
+    AndroidImportance = notifeeModule.AndroidImportance;
+    RepeatFrequency = notifeeModule.RepeatFrequency;
+  } catch (error) {
+    console.warn('notifee not available:', error);
+  }
+}
 import { Medication } from '../database/schema';
 
 export const notificationService = {
@@ -90,7 +103,7 @@ export const notificationService = {
           notificationTime.setDate(notificationTime.getDate() + 1);
         }
 
-        const trigger: TimestampTrigger = {
+        const trigger: any = {
           type: TriggerType.TIMESTAMP,
           timestamp: notificationTime.getTime(),
           repeatFrequency: medication.frequency.toLowerCase().includes('daily')
@@ -171,7 +184,7 @@ export const notificationService = {
       return;
     }
 
-    const trigger: TimestampTrigger = {
+    const trigger: any = {
       type: TriggerType.TIMESTAMP,
       timestamp: reminderTime.getTime(),
     };
@@ -225,7 +238,7 @@ export const notificationService = {
       return;
     }
 
-    const trigger: TimestampTrigger = {
+    const trigger: any = {
       type: TriggerType.TIMESTAMP,
       timestamp: reminderTime.getTime(),
     };

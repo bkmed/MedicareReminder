@@ -1,5 +1,13 @@
 import { Platform, Alert } from 'react-native';
-import RNCalendarEvents from 'react-native-calendar-events';
+// Lazy load native component to avoid issues on web
+let RNCalendarEvents: any;
+if (Platform.OS !== 'web') {
+  try {
+    RNCalendarEvents = require('react-native-calendar-events').default;
+  } catch (error) {
+    console.warn('react-native-calendar-events not available:', error);
+  }
+}
 import { permissionsService } from './permissions';
 
 export interface CalendarAppointment {
@@ -100,9 +108,8 @@ class CalendarService {
     };
 
     const now = new Date();
-    const uid = `appointment-${
-      appointment.id || Date.now()
-    }@medicarereminder.app`;
+    const uid = `appointment-${appointment.id || Date.now()
+      }@medicarereminder.app`;
 
     let ics = 'BEGIN:VCALENDAR\r\n';
     ics += 'VERSION:2.0\r\n';
