@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useContext } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +23,15 @@ export const AppointmentListScreen = ({ navigation }: any) => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const WebNavigationContext =
+    Platform.OS === 'web'
+      ? require('../../navigation/AppNavigator').WebNavigationContext
+      : null;
+
+  const { setActiveTab } = WebNavigationContext
+    ? (useContext(WebNavigationContext) as any)
+    : { setActiveTab: null };
 
   const loadAppointments = async () => {
     try {
@@ -71,9 +81,17 @@ export const AppointmentListScreen = ({ navigation }: any) => {
     return (
       <TouchableOpacity
         style={styles.card}
-        onPress={() =>
-          navigation.navigate('AppointmentDetails', { appointmentId: item.id })
-        }
+        onPress={() => {
+          if (Platform.OS === 'web' && setActiveTab) {
+            setActiveTab('Appointments', 'AppointmentDetails', {
+              appointmentId: Number(item.id),
+            });
+          } else {
+            navigation.navigate('AppointmentDetails', {
+              appointmentId: item.id,
+            });
+          }
+        }}
       >
         <View style={styles.dateColumn}>
           <Text style={styles.dateText}>{dateStr}</Text>
@@ -119,7 +137,13 @@ export const AppointmentListScreen = ({ navigation }: any) => {
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => navigation.navigate('AddAppointment')}
+        onPress={() => {
+          if (Platform.OS === 'web' && setActiveTab) {
+            setActiveTab('Appointments', 'AddAppointment');
+          } else {
+            navigation.navigate('AddAppointment');
+          }
+        }}
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>

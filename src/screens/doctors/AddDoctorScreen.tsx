@@ -24,7 +24,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const doctorId = route?.params?.doctorId;
+  const doctorId = route?.params?.doctorId ? Number(route.params.doctorId) : null;
   const isEdit = !!doctorId;
 
   const [name, setName] = useState('');
@@ -44,7 +44,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => {} }; // fallback pour mobile
+    : { setActiveTab: () => { } }; // fallback pour mobile
 
   const specialtyOptions = useMemo(() => {
     return MEDICAL_SPECIALTIES.map(key => ({
@@ -93,7 +93,7 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
 
   const handleTakePhoto = async () => {
     if (Platform.OS === 'web') {
-      const input = (document as any).createElement('input');
+      const input = (window as any).document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
       input.onchange = (e: any) => {

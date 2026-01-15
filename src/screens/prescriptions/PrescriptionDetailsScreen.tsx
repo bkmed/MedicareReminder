@@ -31,7 +31,7 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => {} };
+    : { setActiveTab: () => { } };
 
   const navigateBack = () => {
     if (Platform.OS === 'web') {
@@ -65,11 +65,13 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
         onPress: async () => {
           try {
             await prescriptionsDb.delete(prescriptionId);
-            Alert.alert(t('common.success'), t('prescriptions.deleteSuccess'), [
-              { text: t('common.ok'), onPress: () => navigateBack() },
-            ]);
             if (Platform.OS === 'web') {
+              Alert.alert(t('common.success'), t('prescriptions.deleteSuccess'));
               navigateBack();
+            } else {
+              Alert.alert(t('common.success'), t('prescriptions.deleteSuccess'), [
+                { text: t('common.ok'), onPress: () => navigateBack() },
+              ]);
             }
           } catch (error) {
             Alert.alert(t('common.errorTitle'), t('common.deleteFailed'));
@@ -80,7 +82,11 @@ export const PrescriptionDetailsScreen = ({ navigation, route }: any) => {
   };
 
   const handleEdit = () => {
-    navigation.navigate('AddPrescription', { prescriptionId });
+    if (Platform.OS === 'web') {
+      setActiveTab('Prescriptions', 'AddPrescription', { prescriptionId });
+    } else {
+      navigation.navigate('AddPrescription', { prescriptionId });
+    }
   };
 
   const handleViewHistory = () => {

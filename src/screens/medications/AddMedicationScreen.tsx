@@ -22,7 +22,7 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
 
-  const medicationId = route?.params?.medicationId;
+  const medicationId = route?.params?.medicationId ? Number(route.params.medicationId) : null;
   const isEdit = !!medicationId;
 
   const [name, setName] = useState('');
@@ -40,33 +40,14 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (isEdit) loadMedication();
-  }, [medicationId]);
-
-  useEffect(() => {
-    navigation?.setOptions({
-      title: isEdit ? t('medications.edit') : t('medications.add'),
-    });
-  }, [isEdit, navigation, t]);
-
-  const WebNavigationContext =
-    Platform.OS === 'web'
-      ? require('../../navigation/AppNavigator').WebNavigationContext
-      : null;
-
-  const { setActiveTab } = WebNavigationContext
-    ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => {} };
-
   const loadMedication = async () => {
     if (!medicationId) return;
     try {
       const med = await medicationsDb.getById(medicationId);
       if (med) {
-        setName(med.name || '');
-        setDosage(med.dosage || '');
-        setFrequency(med.frequency || 'Daily');
+        setName(med.name);
+        setDosage(med.dosage);
+        setFrequency(med.frequency);
 
         // Parse times usually string "['08:00', '20:00']"
         // Convert to Date objects for the picker
@@ -100,6 +81,26 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
       Alert.alert(t('common.error'), t('medications.loadError'));
     }
   };
+
+  useEffect(() => {
+    if (isEdit) loadMedication();
+  }, [medicationId, isEdit]);
+
+  useEffect(() => {
+    navigation?.setOptions({
+      title: isEdit ? t('medications.edit') : t('medications.add'),
+    });
+  }, [isEdit, navigation, t]);
+
+  const WebNavigationContext =
+    Platform.OS === 'web'
+      ? require('../../navigation/AppNavigator').WebNavigationContext
+      : null;
+
+  const { setActiveTab } = WebNavigationContext
+    ? (useContext(WebNavigationContext) as any)
+    : { setActiveTab: () => { } };
+
 
   const handleSave = async () => {
     const newErrors: { [key: string]: string } = {};

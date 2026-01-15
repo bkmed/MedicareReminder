@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useContext } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +23,15 @@ export const DoctorListScreen = ({ navigation }: any) => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const WebNavigationContext =
+    Platform.OS === 'web'
+      ? require('../../navigation/AppNavigator').WebNavigationContext
+      : null;
+
+  const { setActiveTab } = WebNavigationContext
+    ? (useContext(WebNavigationContext) as any)
+    : { setActiveTab: null };
 
   const loadDoctors = async () => {
     try {
@@ -59,9 +69,13 @@ export const DoctorListScreen = ({ navigation }: any) => {
     return (
       <TouchableOpacity
         style={styles.card}
-        onPress={() =>
-          navigation.navigate('DoctorDetails', { doctorId: item.id })
-        }
+        onPress={() => {
+          if (Platform.OS === 'web' && setActiveTab) {
+            setActiveTab('Doctors', 'DoctorDetails', { doctorId: Number(item.id) });
+          } else {
+            navigation.navigate('DoctorDetails', { doctorId: item.id });
+          }
+        }}
       >
         <View style={styles.headerRow}>
           <Text style={styles.name}>
@@ -113,7 +127,13 @@ export const DoctorListScreen = ({ navigation }: any) => {
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => navigation.navigate('AddDoctor')}
+        onPress={() => {
+          if (Platform.OS === 'web' && setActiveTab) {
+            setActiveTab('Doctors', 'AddDoctor');
+          } else {
+            navigation.navigate('AddDoctor');
+          }
+        }}
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>

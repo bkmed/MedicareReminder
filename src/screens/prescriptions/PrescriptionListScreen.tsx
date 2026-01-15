@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useContext } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert,
   Image,
+  Platform,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +24,15 @@ export const PrescriptionListScreen = ({ navigation }: any) => {
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const WebNavigationContext =
+    Platform.OS === 'web'
+      ? require('../../navigation/AppNavigator').WebNavigationContext
+      : null;
+
+  const { setActiveTab } = WebNavigationContext
+    ? (useContext(WebNavigationContext) as any)
+    : { setActiveTab: null };
 
   const loadPrescriptions = async () => {
     try {
@@ -67,11 +77,17 @@ export const PrescriptionListScreen = ({ navigation }: any) => {
     return (
       <TouchableOpacity
         style={[styles.card, expiryWarning && styles.cardWarning]}
-        onPress={() =>
-          navigation.navigate('PrescriptionDetails', {
-            prescriptionId: item.id,
-          })
-        }
+        onPress={() => {
+          if (Platform.OS === 'web' && setActiveTab) {
+            setActiveTab('Prescriptions', 'PrescriptionDetails', {
+              prescriptionId: Number(item.id),
+            });
+          } else {
+            navigation.navigate('PrescriptionDetails', {
+              prescriptionId: item.id,
+            });
+          }
+        }}
       >
         {item.photoUri && (
           <Image
@@ -136,7 +152,13 @@ export const PrescriptionListScreen = ({ navigation }: any) => {
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => navigation.navigate('AddPrescription')}
+        onPress={() => {
+          if (Platform.OS === 'web' && setActiveTab) {
+            setActiveTab('Prescriptions', 'AddPrescription');
+          } else {
+            navigation.navigate('AddPrescription');
+          }
+        }}
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>

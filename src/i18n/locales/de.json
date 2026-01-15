@@ -405,9 +405,12 @@
     "medicationHistory": "Medikamentenverlauf"
   },
   "languages": {
-    "en": "English",
-    "fr": "Français",
-    "ar": "العربية",
-    "de": "Deutsch"
+    "en": "Englisch",
+    "fr": "Französisch",
+    "ar": "Arabisch",
+    "de": "Deutsch",
+    "es": "Spanisch",
+    "zh": "Chinesisch",
+    "hi": "Hindi"
   }
 }

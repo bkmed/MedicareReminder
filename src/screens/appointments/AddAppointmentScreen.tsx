@@ -31,10 +31,10 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => {} }; // fallback pour mobile
+    : { setActiveTab: () => { } }; // fallback pour mobile
 
-  // Get appointmentId only if route exists (mobile)
-  const appointmentId = route?.params?.appointmentId;
+  // Get appointmentId only if route exists
+  const appointmentId = route?.params?.appointmentId ? Number(route.params.appointmentId) : null;
   const isEdit = !!appointmentId;
 
   const [title, setTitle] = useState('');
@@ -47,17 +47,8 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (isEdit) loadAppointment();
-  }, [appointmentId]);
-
-  useEffect(() => {
-    navigation?.setOptions({
-      title: isEdit ? t('appointments.edit') : t('appointments.add'),
-    });
-  }, [isEdit, navigation, t]);
-
   const loadAppointment = async () => {
+    if (!appointmentId) return;
     try {
       const appt = await appointmentsDb.getById(appointmentId);
       if (appt) {
@@ -74,6 +65,16 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
       Alert.alert(t('common.error'), t('appointments.loadError'));
     }
   };
+
+  useEffect(() => {
+    if (isEdit) loadAppointment();
+  }, [appointmentId, isEdit]);
+
+  useEffect(() => {
+    navigation?.setOptions({
+      title: isEdit ? t('appointments.edit') : t('appointments.add'),
+    });
+  }, [isEdit, navigation, t]);
 
   const handleSave = async () => {
     const newErrors: { [key: string]: string } = {};

@@ -30,7 +30,7 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => {} };
+    : { setActiveTab: () => { } };
 
   const navigateBack = () => {
     if (Platform.OS === 'web') {
@@ -68,11 +68,13 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
             try {
               await medicationsDb.delete(medicationId);
               await notificationService.cancelMedicationReminders(medicationId);
-              Alert.alert(t('common.success'), t('medications.deleteSuccess'), [
-                { text: t('common.ok'), onPress: () => navigateBack() },
-              ]);
               if (Platform.OS === 'web') {
+                Alert.alert(t('common.success'), t('medications.deleteSuccess'));
                 navigateBack();
+              } else {
+                Alert.alert(t('common.success'), t('medications.deleteSuccess'), [
+                  { text: t('common.ok'), onPress: () => navigateBack() },
+                ]);
               }
             } catch (error) {
               Alert.alert(t('medicationDetails.errorDeleteFailed'));
@@ -84,7 +86,11 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
   };
 
   const handleEdit = () => {
-    navigation.navigate('AddMedication', { medicationId });
+    if (Platform.OS === 'web') {
+      setActiveTab('Medications', 'AddMedication', { medicationId });
+    } else {
+      navigation.navigate('AddMedication', { medicationId });
+    }
   };
 
   const handleViewHistory = () => {

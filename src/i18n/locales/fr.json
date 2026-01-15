@@ -405,9 +405,12 @@
     "medicationHistory": "Historique des médicaments"
   },
   "languages": {
-    "en": "English",
+    "en": "Anglais",
     "fr": "Français",
-    "ar": "العربية",
-    "de": "Deutsch"
+    "ar": "Arabe",
+    "de": "Allemand",
+    "es": "Espagnol",
+    "zh": "Chinois",
+    "hi": "Hindi"
   }
 }

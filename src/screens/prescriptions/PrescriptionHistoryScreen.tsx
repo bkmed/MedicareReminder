@@ -8,7 +8,7 @@ import { prescriptionsDb } from '../../database/prescriptionsDb';
 import { PrescriptionHistory } from '../../database/schema';
 
 export const PrescriptionHistoryScreen = ({ route }: any) => {
-  const { prescriptionId } = route.params;
+  const prescriptionId = Number(route.params.prescriptionId);
   const { t } = useTranslation();
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);

@@ -30,7 +30,7 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => {} };
+    : { setActiveTab: () => { } };
 
   const navigateBack = () => {
     if (Platform.OS === 'web') {
@@ -70,13 +70,13 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
               await notificationService.cancelAppointmentReminder(
                 appointmentId,
               );
-              Alert.alert(
-                t('common.success'),
-                t('appointments.deleteSuccess'),
-                [{ text: t('common.ok'), onPress: () => navigateBack() }],
-              );
               if (Platform.OS === 'web') {
+                Alert.alert(t('common.success'), t('appointments.deleteSuccess'));
                 navigateBack();
+              } else {
+                Alert.alert(t('common.success'), t('appointments.deleteSuccess'), [
+                  { text: t('common.ok'), onPress: () => navigateBack() },
+                ]);
               }
             } catch (error) {
               Alert.alert(t('appointmentDetails.errorDeleteFailed'));
@@ -88,7 +88,11 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
   };
 
   const handleEdit = () => {
-    navigation.navigate('AddAppointment', { appointmentId });
+    if (Platform.OS === 'web') {
+      setActiveTab('Appointments', 'AddAppointment', { appointmentId });
+    } else {
+      navigation.navigate('AddAppointment', { appointmentId });
+    }
   };
 
   if (loading || !appointment) {

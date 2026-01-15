@@ -34,7 +34,7 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
 
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
-    : { setActiveTab: () => {} }; // fallback pour mobile
+    : { setActiveTab: () => { } }; // fallback pour mobile
 
   const navigateToAddAppointment = () => {
     if (Platform.OS === 'web') {
@@ -102,7 +102,11 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
   );
 
   const handleEdit = () => {
-    navigation.navigate('AddDoctor', { doctorId });
+    if (Platform.OS === 'web') {
+      setActiveTab('Doctors', 'AddDoctor', { doctorId });
+    } else {
+      navigation.navigate('AddDoctor', { doctorId });
+    }
   };
 
   const handleDelete = () => {
@@ -117,11 +121,13 @@ export const DoctorDetailsScreen = ({ navigation, route }: any) => {
           onPress: async () => {
             try {
               await doctorsDb.delete(doctorId);
-              Alert.alert(t('common.success'), t('doctors.deleteSuccess'), [
-                { text: t('common.ok'), onPress: () => navigationBack() },
-              ]);
               if (Platform.OS === 'web') {
+                Alert.alert(t('common.success'), t('doctors.deleteSuccess'));
                 navigationBack();
+              } else {
+                Alert.alert(t('common.success'), t('doctors.deleteSuccess'), [
+                  { text: t('common.ok'), onPress: () => navigationBack() },
+                ]);
               }
             } catch (error) {
               console.error('Error deleting doctor:', error);

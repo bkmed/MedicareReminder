@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useContext } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +24,14 @@ export const MedicationListScreen = ({ navigation }: any) => {
   const [medications, setMedications] = useState<Medication[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const WebNavigationContext = Platform.OS === 'web'
+    ? require('../../navigation/AppNavigator').WebNavigationContext
+    : null;
+
+  const { setActiveTab } = WebNavigationContext
+    ? (useContext(WebNavigationContext) as any)
+    : { setActiveTab: null };
 
   const loadMedications = async () => {
     try {
@@ -61,7 +70,11 @@ export const MedicationListScreen = ({ navigation }: any) => {
   }, [medications, searchQuery]);
 
   const handleMedicationPress = (medication: Medication) => {
-    navigation.navigate('MedicationDetails', { medicationId: medication.id });
+    if (Platform.OS === 'web' && setActiveTab) {
+      setActiveTab('Medications', 'MedicationDetails', { medicationId: Number(medication.id) });
+    } else {
+      navigation.navigate('MedicationDetails', { medicationId: medication.id });
+    }
   };
 
   const renderEmpty = () => (
@@ -95,7 +108,13 @@ export const MedicationListScreen = ({ navigation }: any) => {
 
       <TouchableOpacity
         style={styles.fab}
-        onPress={() => navigation.navigate('AddMedication')}
+        onPress={() => {
+          if (Platform.OS === 'web' && setActiveTab) {
+            setActiveTab('Medications', 'AddMedication');
+          } else {
+            navigation.navigate('AddMedication');
+          }
+        }}
       >
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>

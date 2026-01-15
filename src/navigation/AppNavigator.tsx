@@ -45,7 +45,7 @@ export const WebNavigationContext = createContext({
   activeTab: 'Home',
   subScreen: '',
   screenParams: {} as any,
-  setActiveTab: (tab: string, subScreen?: string, params?: any) => {},
+  setActiveTab: (tab: string, subScreen?: string, params?: any) => { },
 });
 
 // ======= Stacks =======
@@ -270,7 +270,7 @@ const WebNavigator = () => {
         if (subScreen === 'PrescriptionDetails')
           return <PrescriptionDetailsScreen route={mockRoute} />;
         if (subScreen === 'PrescriptionHistory')
-          return <PrescriptionHistoryScreen />;
+          return <PrescriptionHistoryScreen route={mockRoute} />;
         return <PrescriptionsStack />;
       case 'Doctors':
         if (subScreen === 'AddDoctor')
