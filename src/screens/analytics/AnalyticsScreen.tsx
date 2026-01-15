@@ -126,30 +126,31 @@ export const AnalyticsScreen = () => {
         )}
 
         {/* Upcoming Appointments Chart */}
-        {appointmentsChart && appointmentsChart.data.some((val: number) => val > 0) && (
-          <View style={styles.chartSection}>
-            <Text style={styles.chartTitle}>
-              {t('analytics.upcomingAppointmentsChart')}
-            </Text>
-            <BarChart
-              data={{
-                labels: appointmentsChart.labels,
-                datasets: [{ data: appointmentsChart.data }],
-              }}
-              width={chartWidth}
-              height={220}
-              yAxisLabel=""
-              yAxisSuffix=""
-              chartConfig={{
-                ...chartConfig,
-                color: (opacity = 1) => `rgba(52, 199, 89, ${opacity})`, // Keep green for success/appointments
-              }}
-              style={styles.chart}
-              showValuesOnTopOfBars
-              withInnerLines={false}
-            />
-          </View>
-        )}
+        {appointmentsChart &&
+          appointmentsChart.data.some((val: number) => val > 0) && (
+            <View style={styles.chartSection}>
+              <Text style={styles.chartTitle}>
+                {t('analytics.upcomingAppointmentsChart')}
+              </Text>
+              <BarChart
+                data={{
+                  labels: appointmentsChart.labels,
+                  datasets: [{ data: appointmentsChart.data }],
+                }}
+                width={chartWidth}
+                height={220}
+                yAxisLabel=""
+                yAxisSuffix=""
+                chartConfig={{
+                  ...chartConfig,
+                  color: (opacity = 1) => `rgba(52, 199, 89, ${opacity})`, // Keep green for success/appointments
+                }}
+                style={styles.chart}
+                showValuesOnTopOfBars
+                withInnerLines={false}
+              />
+            </View>
+          )}
 
         {/* Health Insights */}
         <View style={styles.insightsSection}>
