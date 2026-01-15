@@ -10,6 +10,9 @@ import {
 import { useNotification } from '../../context/NotificationContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../store/redux/store';
+import { setAppointments } from '../../store/redux/slices/appointmentSlice';
 import { appointmentsDb } from '../../database/appointmentsDb';
 import { Appointment } from '../../database/schema';
 import { useTheme } from '../../context/ThemeContext';
@@ -21,7 +24,8 @@ export const AppointmentListScreen = ({ navigation }: any) => {
   const { theme } = useTheme();
   const { showNotification } = useNotification();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const dispatch = useDispatch();
+  const appointments = useSelector((state: RootState) => state.appointments.appointments);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -36,8 +40,12 @@ export const AppointmentListScreen = ({ navigation }: any) => {
 
   const loadAppointments = async () => {
     try {
-      const data = await appointmentsDb.getAll();
-      setAppointments(data);
+      if (appointments.length === 0) {
+        const data = await appointmentsDb.getAll();
+        if (data.length > 0) {
+          dispatch(setAppointments(data));
+        }
+      }
     } catch (error) {
       console.error('Error loading appointments:', error);
       showNotification({
@@ -53,13 +61,14 @@ export const AppointmentListScreen = ({ navigation }: any) => {
   useFocusEffect(
     useCallback(() => {
       loadAppointments();
-    }, []),
+    }, [appointments.length]),
   );
 
   const filteredAppointments = useMemo(() => {
-    if (!searchQuery) return appointments;
+    const apptsToFilter = appointments;
+    if (!searchQuery) return apptsToFilter;
     const lowerQuery = searchQuery.toLowerCase();
-    return appointments.filter(
+    return apptsToFilter.filter(
       appt =>
         appt.title.toLowerCase().includes(lowerQuery) ||
         (appt.doctorName && appt.doctorName.toLowerCase().includes(lowerQuery)),

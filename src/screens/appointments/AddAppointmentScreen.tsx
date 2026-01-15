@@ -12,6 +12,9 @@ import {
 } from 'react-native';
 import { useNotification } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store/redux/store';
+import { addAppointment, updateAppointment } from '../../store/redux/slices/appointmentSlice';
 import { appointmentsDb } from '../../database/appointmentsDb';
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
@@ -24,6 +27,7 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   const { theme } = useTheme();
   const { showNotification } = useNotification();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const dispatch = useDispatch();
 
   // Web Navigation context
   const WebNavigationContext =
@@ -35,9 +39,12 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
     ? (useContext(WebNavigationContext) as any)
     : { setActiveTab: () => { } }; // fallback pour mobile
 
-  // Get appointmentId only if route exists
   const appointmentId = route?.params?.appointmentId ? Number(route.params.appointmentId) : null;
   const isEdit = !!appointmentId;
+
+  const existingAppointment = useSelector((state: RootState) =>
+    appointmentId ? state.appointments.appointments.find(a => a.id === appointmentId) : null
+  );
 
   const [title, setTitle] = useState('');
   const [doctorName, setDoctorName] = useState(route?.params?.doctorName || '');
@@ -52,28 +59,18 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
   );
   const [loading, setLoading] = useState(false);
 
-  const loadAppointment = async () => {
-    if (!appointmentId) return;
-    try {
-      const appt = await appointmentsDb.getById(appointmentId);
-      if (appt) {
-        setTitle(appt.title);
-        setDoctorName(appt.doctorName || '');
-        setLocation(appt.location || '');
-        const dateTime = new Date(appt.dateTime);
-        setDate(dateTime);
-        setTime(dateTime);
-        setNotes(appt.notes || '');
-        setReminderEnabled(appt.reminderEnabled);
-      }
-    } catch (error) {
-      Alert.alert(t('common.error'), t('appointments.loadError'));
-    }
-  };
-
   useEffect(() => {
-    if (isEdit) loadAppointment();
-  }, [appointmentId, isEdit]);
+    if (isEdit && existingAppointment) {
+      setTitle(existingAppointment.title);
+      setDoctorName(existingAppointment.doctorName || '');
+      setLocation(existingAppointment.location || '');
+      const dateTime = new Date(existingAppointment.dateTime);
+      setDate(dateTime);
+      setTime(dateTime);
+      setNotes(existingAppointment.notes || '');
+      setReminderEnabled(existingAppointment.reminderEnabled);
+    }
+  }, [isEdit, existingAppointment]);
 
   useEffect(() => {
     navigation?.setOptions({
@@ -92,14 +89,15 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
 
     setLoading(true);
     try {
-      // Create combined DateTime
       const finalDateTime = new Date(date!);
       finalDateTime.setHours(time!.getHours());
       finalDateTime.setMinutes(time!.getMinutes());
       finalDateTime.setSeconds(0);
       finalDateTime.setMilliseconds(0);
 
+      const now = new Date().toISOString();
       const appointmentData = {
+        id: isEdit && appointmentId ? appointmentId : Date.now(),
         title: title.trim(),
         doctorName: doctorName.trim() || undefined,
         doctorId: selectedDoctorId || undefined,
@@ -107,20 +105,20 @@ export const AddAppointmentScreen = ({ navigation, route }: any) => {
         dateTime: finalDateTime.toISOString(),
         notes: notes.trim() || undefined,
         reminderEnabled,
+        createdAt: isEdit && existingAppointment ? existingAppointment.createdAt : now,
+        updatedAt: now,
       };
 
-      let id: number;
       if (isEdit) {
-        await appointmentsDb.update(appointmentId, appointmentData);
-        id = appointmentId;
-        await notificationService.cancelAppointmentReminder(appointmentId);
+        dispatch(updateAppointment(appointmentData));
+        await notificationService.cancelAppointmentReminder(appointmentId!);
       } else {
-        id = await appointmentsDb.add(appointmentData);
+        dispatch(addAppointment(appointmentData));
       }
 
       if (reminderEnabled) {
         await notificationService.scheduleAppointmentReminder(
-          id,
+          appointmentData.id,
           title,
           finalDateTime.toISOString(),
         );

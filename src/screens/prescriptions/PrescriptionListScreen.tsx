@@ -11,6 +11,9 @@ import {
 import { useNotification } from '../../context/NotificationContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../store/redux/store';
+import { setPrescriptions } from '../../store/redux/slices/prescriptionSlice';
 import { prescriptionsDb } from '../../database/prescriptionsDb';
 import { Prescription } from '../../database/schema';
 import { useTheme } from '../../context/ThemeContext';
@@ -22,7 +25,8 @@ export const PrescriptionListScreen = ({ navigation }: any) => {
   const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const dispatch = useDispatch();
+  const prescriptions = useSelector((state: RootState) => state.prescriptions.prescriptions);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -37,8 +41,12 @@ export const PrescriptionListScreen = ({ navigation }: any) => {
 
   const loadPrescriptions = async () => {
     try {
-      const data = await prescriptionsDb.getAll();
-      setPrescriptions(data);
+      if (prescriptions.length === 0) {
+        const data = await prescriptionsDb.getAll();
+        if (data.length > 0) {
+          dispatch(setPrescriptions(data));
+        }
+      }
     } catch (error) {
       console.error('Error loading prescriptions:', error);
       showNotification({
@@ -54,13 +62,14 @@ export const PrescriptionListScreen = ({ navigation }: any) => {
   useFocusEffect(
     useCallback(() => {
       loadPrescriptions();
-    }, []),
+    }, [prescriptions.length]),
   );
 
   const filteredPrescriptions = useMemo(() => {
-    if (!searchQuery) return prescriptions;
+    const prescriptionsToFilter = prescriptions;
+    if (!searchQuery) return prescriptionsToFilter;
     const lowerQuery = searchQuery.toLowerCase();
-    return prescriptions.filter(
+    return prescriptionsToFilter.filter(
       p =>
         p.medicationName.toLowerCase().includes(lowerQuery) ||
         (p.doctorName && p.doctorName.toLowerCase().includes(lowerQuery)),

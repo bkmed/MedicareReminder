@@ -412,6 +412,15 @@
     "de": "Deutsch",
     "es": "Español",
     "zh": "中文",
-    "hi": "हिन्दी"
+    "hi": "हिन्दी""search": {
+      "title": "Global Search",
+      "placeholder": "Search medications, appointments...",
+      "startTyping": "Start typing to search across your health data",
+      "noResults": "No results found for your search query",
+      "medication": "Medication",
+      "appointment": "Appointment",
+      "doctor": "Doctor",
+      "prescription": "Prescription"
+    }
   }
 }

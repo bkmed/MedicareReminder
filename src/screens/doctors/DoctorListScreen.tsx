@@ -10,6 +10,9 @@ import {
 import { useNotification } from '../../context/NotificationContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../store/redux/store';
+import { setDoctors } from '../../store/redux/slices/doctorSlice';
 import { doctorsDb } from '../../database/doctorsDb';
 import { Doctor } from '../../database/schema';
 import { useTheme } from '../../context/ThemeContext';
@@ -21,7 +24,8 @@ export const DoctorListScreen = ({ navigation }: any) => {
   const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const dispatch = useDispatch();
+  const doctors = useSelector((state: RootState) => state.doctors.doctors);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -36,8 +40,12 @@ export const DoctorListScreen = ({ navigation }: any) => {
 
   const loadDoctors = async () => {
     try {
-      const data = await doctorsDb.getAll();
-      setDoctors(data);
+      if (doctors.length === 0) {
+        const data = await doctorsDb.getAll();
+        if (data.length > 0) {
+          dispatch(setDoctors(data));
+        }
+      }
     } catch (error) {
       console.error('Error loading doctors:', error);
       showNotification({
@@ -53,13 +61,14 @@ export const DoctorListScreen = ({ navigation }: any) => {
   useFocusEffect(
     useCallback(() => {
       loadDoctors();
-    }, []),
+    }, [doctors.length]),
   );
 
   const filteredDoctors = useMemo(() => {
-    if (!searchQuery) return doctors;
+    const docsToFilter = doctors;
+    if (!searchQuery) return docsToFilter;
     const lowerQuery = searchQuery.toLowerCase();
-    return doctors.filter(doc => {
+    return docsToFilter.filter(doc => {
       const specialty = doc.specialty
         ? t(`specialties.${doc.specialty}`, { defaultValue: doc.specialty })
         : '';

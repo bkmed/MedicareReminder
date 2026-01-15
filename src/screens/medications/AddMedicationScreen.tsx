@@ -12,6 +12,9 @@ import {
 } from 'react-native';
 import { useNotification } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store/redux/store';
+import { addMedication, updateMedication } from '../../store/redux/slices/medicationSlice';
 import { medicationsDb } from '../../database/medicationsDb';
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
@@ -23,9 +26,13 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
-
+  const dispatch = useDispatch();
   const medicationId = route?.params?.medicationId ? Number(route.params.medicationId) : null;
   const isEdit = !!medicationId;
+
+  const existingMedication = useSelector((state: RootState) =>
+    medicationId ? state.medications.medications.find(m => m.id === medicationId) : null
+  );
 
   const [name, setName] = useState('');
   const [dosage, setDosage] = useState('');
@@ -42,51 +49,39 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [loading, setLoading] = useState(false);
 
-  const loadMedication = async () => {
-    if (!medicationId) return;
-    try {
-      const med = await medicationsDb.getById(medicationId);
-      if (med) {
-        setName(med.name);
-        setDosage(med.dosage);
-        setFrequency(med.frequency);
-
-        // Parse times usually string "['08:00', '20:00']"
-        // Convert to Date objects for the picker
-        let parsedTimes: Date[] = [];
-        try {
-          const timeStrings = med.times
-            ? JSON.parse(med.times)
-            : ['08:00', '20:00'];
-          parsedTimes = timeStrings.map((ts: string) => {
-            const [h, m] = ts.split(':').map(Number);
-            const d = new Date();
-            d.setHours(h);
-            d.setMinutes(m);
-            return d;
-          });
-        } catch (e) {
-          parsedTimes = [
-            new Date(new Date().setHours(8, 0)),
-            new Date(new Date().setHours(20, 0)),
-          ];
-        }
-        setTimes(parsedTimes);
-
-        setStartDate(med.startDate ? new Date(med.startDate) : new Date());
-        setEndDate(med.endDate ? new Date(med.endDate) : null);
-        setNotes(med.notes || '');
-        setReminderEnabled(!!med.reminderEnabled);
-        setIsUrgent(!!med.isUrgent);
-      }
-    } catch (error) {
-      Alert.alert(t('common.error'), t('medications.loadError'));
-    }
-  };
-
   useEffect(() => {
-    if (isEdit) loadMedication();
-  }, [medicationId, isEdit]);
+    if (isEdit && existingMedication) {
+      setName(existingMedication.name);
+      setDosage(existingMedication.dosage);
+      setFrequency(existingMedication.frequency);
+
+      let parsedTimes: Date[] = [];
+      try {
+        const timeStrings = existingMedication.times
+          ? JSON.parse(existingMedication.times)
+          : ['08:00', '20:00'];
+        parsedTimes = timeStrings.map((ts: string) => {
+          const [h, m] = ts.split(':').map(Number);
+          const d = new Date();
+          d.setHours(h);
+          d.setMinutes(m);
+          return d;
+        });
+      } catch (e) {
+        parsedTimes = [
+          new Date(new Date().setHours(8, 0)),
+          new Date(new Date().setHours(20, 0)),
+        ];
+      }
+      setTimes(parsedTimes);
+
+      setStartDate(existingMedication.startDate ? new Date(existingMedication.startDate) : new Date());
+      setEndDate(existingMedication.endDate ? new Date(existingMedication.endDate) : null);
+      setNotes(existingMedication.notes || '');
+      setReminderEnabled(!!existingMedication.reminderEnabled);
+      setIsUrgent(!!existingMedication.isUrgent);
+    }
+  }, [isEdit, existingMedication]);
 
   useEffect(() => {
     navigation?.setOptions({
@@ -110,9 +105,8 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
     if (!dosage.trim()) newErrors.dosage = t('common.required');
     if (!startDate) newErrors.startDate = t('common.required');
 
-    // Validate End Date > Start Date
     if (startDate && endDate && endDate < startDate) {
-      newErrors.endDate = t('common.invalidDateRange'); // Add key to i18n
+      newErrors.endDate = t('common.invalidDateRange');
     }
 
     setErrors(newErrors);
@@ -120,7 +114,6 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
 
     setLoading(true);
     try {
-      // Format times back to string array HH:MM
       const timeStrings = times.map(t =>
         t.toLocaleTimeString([], {
           hour: '2-digit',
@@ -129,7 +122,9 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
         }),
       );
 
-      const medicationData = {
+      const now = new Date().toISOString();
+      const medicationData: Medication = {
+        id: isEdit && medicationId ? medicationId : Date.now(),
         name: name.trim(),
         dosage: dosage.trim(),
         frequency,
@@ -139,14 +134,14 @@ export const AddMedicationScreen = ({ navigation, route }: any) => {
         notes: notes.trim() || undefined,
         reminderEnabled,
         isUrgent,
+        createdAt: isEdit && existingMedication ? existingMedication.createdAt : now,
+        updatedAt: now,
       };
 
-      let id: number;
-      if (isEdit && medicationId) {
-        await medicationsDb.update(medicationId, medicationData);
-        id = medicationId;
+      if (isEdit) {
+        dispatch(updateMedication(medicationData));
       } else {
-        id = await medicationsDb.add(medicationData);
+        dispatch(addMedication(medicationData));
       }
 
       if (reminderEnabled) {

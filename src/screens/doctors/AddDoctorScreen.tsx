@@ -13,21 +13,29 @@ import {
 import { useNotification } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { doctorsDb } from '../../database/doctorsDb';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store/redux/store';
+import { addDoctor, updateDoctor } from '../../store/redux/slices/doctorSlice';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 import { Dropdown } from '../../components/Dropdown';
 import { MEDICAL_SPECIALTIES } from '../../constants/specialties';
 import { isValidEmail, isValidPhone } from '../../utils/validation';
+import { Doctor } from '../../database/schema';
 
 export const AddDoctorScreen = ({ navigation, route }: any) => {
   const { theme } = useTheme();
   const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const dispatch = useDispatch();
 
   const doctorId = route?.params?.doctorId ? Number(route.params.doctorId) : null;
   const isEdit = !!doctorId;
+
+  const existingDoctor = useSelector((state: RootState) =>
+    doctorId ? state.doctors.doctors.find(d => d.id === doctorId) : null
+  );
 
   const [name, setName] = useState('');
   const [specialty, setSpecialty] = useState('');
@@ -64,39 +72,22 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
   };
 
   useEffect(() => {
-    if (isEdit) {
-      loadDoctor();
+    if (isEdit && existingDoctor) {
+      setName(existingDoctor.name || '');
+      setSpecialty(existingDoctor.specialty || '');
+      setPhone(existingDoctor.phone || '');
+      setEmail(existingDoctor.email || '');
+      setAddress(existingDoctor.address || '');
+      setPhotoUri(existingDoctor.photoUri || '');
+      setNotes(existingDoctor.notes || '');
     }
-  }, [doctorId]);
+  }, [isEdit, existingDoctor]);
 
   useEffect(() => {
     navigation?.setOptions({
       title: isEdit ? t('doctors.edit') : t('doctors.add'),
     });
   }, [isEdit, navigation, t]);
-
-  const loadDoctor = async () => {
-    if (!doctorId) return;
-    try {
-      const doctor = await doctorsDb.getById(doctorId);
-      if (doctor) {
-        setName(doctor.name || '');
-        setSpecialty(doctor.specialty || '');
-        setPhone(doctor.phone || '');
-        setEmail(doctor.email || '');
-        setAddress(doctor.address || '');
-        setPhotoUri(doctor.photoUri || '');
-        setNotes(doctor.notes || '');
-      }
-    } catch (error) {
-      console.error('Error loading doctor:', error);
-      showNotification({
-        title: t('common.error'),
-        message: t('doctors.loadError'),
-        type: 'error',
-      });
-    }
-  };
 
   const handleTakePhoto = async () => {
     if (Platform.OS === 'web') {
@@ -115,29 +106,37 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
       return;
     }
 
-    Alert.alert(t('prescriptions.addPhoto'), t('prescriptions.chooseOption'), [
-      {
-        text: t('prescriptions.takePhoto'),
-        onPress: () => {
-          launchCamera({ mediaType: 'photo', quality: 0.8 }, response => {
-            if (response.assets && response.assets[0]?.uri) {
-              setPhotoUri(response.assets[0].uri);
-            }
-          });
+    showNotification({
+      title: t('prescriptions.addPhoto'),
+      message: t('prescriptions.chooseOption'),
+      type: 'info',
+      buttons: [
+        {
+          text: t('prescriptions.takePhoto'),
+          onPress: () => {
+            launchCamera({ mediaType: 'photo', quality: 0.8 }, response => {
+              if (response.assets && response.assets[0]?.uri) {
+                setPhotoUri(response.assets[0].uri);
+              }
+            });
+          },
         },
-      },
-      {
-        text: t('prescriptions.chooseFromLibrary'),
-        onPress: () => {
-          launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, response => {
-            if (response.assets && response.assets[0]?.uri) {
-              setPhotoUri(response.assets[0].uri);
-            }
-          });
+        {
+          text: t('prescriptions.chooseFromLibrary'),
+          onPress: () => {
+            launchImageLibrary({ mediaType: 'photo', quality: 0.8 }, response => {
+              if (response.assets && response.assets[0]?.uri) {
+                setPhotoUri(response.assets[0].uri);
+              }
+            });
+          },
         },
-      },
-      { text: t('common.cancel'), style: 'cancel' },
-    ]);
+        {
+          text: t('common.cancel'),
+          style: 'cancel',
+        },
+      ],
+    });
   };
 
   const handleSave = async () => {
@@ -153,34 +152,32 @@ export const AddDoctorScreen = ({ navigation, route }: any) => {
 
     setLoading(true);
     try {
-      const doctorData = {
+      const now = new Date().toISOString();
+      const doctorData: Doctor = {
+        id: isEdit && doctorId ? doctorId : Date.now(),
         name: name.trim(),
         specialty: specialty || undefined,
-        phone: phone || undefined,
-        email: email || undefined,
-        address: address || undefined,
+        phone: phone.trim() || undefined,
+        email: email.trim() || undefined,
+        address: address.trim() || undefined,
         photoUri: photoUri || undefined,
-        notes: notes || undefined,
+        notes: notes.trim() || undefined,
+        createdAt: isEdit && existingDoctor ? existingDoctor.createdAt : now,
+        updatedAt: now,
       };
 
-      if (isEdit && doctorId) {
-        await doctorsDb.update(doctorId, doctorData);
+      if (isEdit) {
+        dispatch(updateDoctor(doctorData));
       } else {
-        await doctorsDb.add(doctorData);
+        dispatch(addDoctor(doctorData));
       }
 
-      // Show Success and Navigate
       showNotification({
         title: t('common.success'),
         message: isEdit ? t('doctors.editSuccess') : t('doctors.addSuccess'),
         type: 'success',
       });
-
-      if (Platform.OS === 'web') {
-        setActiveTab('Doctors');
-      } else {
-        navigation.goBack();
-      }
+      navigateBack();
     } catch (error) {
       console.error('Error saving doctor:', error);
       showNotification({

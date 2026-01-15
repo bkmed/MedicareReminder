@@ -1,3 +1,4 @@
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Doctor } from '../../../database/schema';
 
 interface DoctorState {

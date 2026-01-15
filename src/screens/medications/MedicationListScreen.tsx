@@ -10,6 +10,9 @@ import {
 import { useNotification } from '../../context/NotificationContext';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../store/redux/store';
+import { setMedications } from '../../store/redux/slices/medicationSlice';
 import { medicationsDb } from '../../database/medicationsDb';
 import { Medication } from '../../database/schema';
 import { MedicationCard } from '../../components/MedicationCard';
@@ -22,7 +25,8 @@ export const MedicationListScreen = ({ navigation }: any) => {
   const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const [medications, setMedications] = useState<Medication[]>([]);
+  const dispatch = useDispatch();
+  const medications = useSelector((state: RootState) => state.medications.medications);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -36,8 +40,13 @@ export const MedicationListScreen = ({ navigation }: any) => {
 
   const loadMedications = async () => {
     try {
-      const data = await medicationsDb.getAll();
-      setMedications(data);
+      // Si le store est vide, on tente de charger depuis la DB locale (migration/initial load)
+      if (medications.length === 0) {
+        const data = await medicationsDb.getAll();
+        if (data.length > 0) {
+          dispatch(setMedications(data));
+        }
+      }
     } catch (error) {
       console.error('Error loading medications:', error);
       showNotification({
@@ -53,13 +62,14 @@ export const MedicationListScreen = ({ navigation }: any) => {
   useFocusEffect(
     useCallback(() => {
       loadMedications();
-    }, []),
+    }, [medications.length]),
   );
 
   const filteredMedications = useMemo(() => {
-    if (!searchQuery) return medications;
+    const medsToFilter = medications;
+    if (!searchQuery) return medsToFilter;
     const lowerQuery = searchQuery.toLowerCase();
-    return medications
+    return medsToFilter
       .filter(
         med =>
           med.name.toLowerCase().includes(lowerQuery) ||

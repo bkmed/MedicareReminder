@@ -12,9 +12,10 @@ import {
 import { useNotification } from '../../context/NotificationContext';
 import { useTranslation } from 'react-i18next';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { prescriptionsDb } from '../../database/prescriptionsDb';
-import { medicationsDb } from '../../database/medicationsDb';
-import { Medication } from '../../database/schema';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../store/redux/store';
+import { addPrescription, updatePrescription } from '../../store/redux/slices/prescriptionSlice';
+import { Prescription, Medication } from '../../database/schema';
 import { notificationService } from '../../services/notificationService';
 import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
@@ -25,16 +26,19 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const { showNotification } = useNotification();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
+  const dispatch = useDispatch();
 
   const prescriptionId = route?.params?.prescriptionId ? Number(route.params.prescriptionId) : null;
   const isEdit = !!prescriptionId;
   const initialDoctorName = route?.params?.doctorName || '';
 
-  const [allMedications, setAllMedications] = useState<Medication[]>([]);
-  const [selectedMedicationIds, setSelectedMedicationIds] = useState<number[]>(
-    [],
+  const allMedications = useSelector((state: RootState) => state.medications.medications);
+  const existingPrescription = useSelector((state: RootState) =>
+    prescriptionId ? state.prescriptions.prescriptions.find(p => p.id === prescriptionId) : null
   );
-  const [medicationName, setMedicationName] = useState(''); // Fallback or computed
+
+  const [selectedMedicationIds, setSelectedMedicationIds] = useState<number[]>([]);
+  const [medicationName, setMedicationName] = useState('');
   const [doctorName, setDoctorName] = useState(initialDoctorName);
   const [issueDate, setIssueDate] = useState<Date | null>(new Date());
   const [expiryDate, setExpiryDate] = useState<Date | null>(null);
@@ -47,12 +51,23 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadMedications();
-  }, []);
+    if (isEdit && existingPrescription) {
+      setMedicationName(existingPrescription.medicationName || '');
+      setDoctorName(existingPrescription.doctorName || '');
+      setIssueDate(existingPrescription.issueDate ? new Date(existingPrescription.issueDate) : new Date());
+      setExpiryDate(existingPrescription.expiryDate ? new Date(existingPrescription.expiryDate) : null);
+      setPhotoUri(existingPrescription.photoUri || '');
+      setNotes(existingPrescription.notes || '');
 
-  useEffect(() => {
-    if (isEdit) loadPrescription();
-  }, [prescriptionId]);
+      if (existingPrescription.medicationIds) {
+        try {
+          setSelectedMedicationIds(JSON.parse(existingPrescription.medicationIds));
+        } catch (e) {
+          console.error('Error parsing medicationIds', e);
+        }
+      }
+    }
+  }, [isEdit, existingPrescription]);
 
   useEffect(() => {
     navigation?.setOptions({
@@ -68,50 +83,6 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
   const { setActiveTab } = WebNavigationContext
     ? (useContext(WebNavigationContext) as any)
     : { setActiveTab: () => { } };
-
-  const loadMedications = async () => {
-    try {
-      const data = await medicationsDb.getAll();
-      setAllMedications(data);
-    } catch (error) {
-      console.error('Error loading medications', error);
-    }
-  };
-
-  const loadPrescription = async () => {
-    if (!prescriptionId) return;
-    try {
-      const prescription = await prescriptionsDb.getById(prescriptionId);
-      if (prescription) {
-        setMedicationName(prescription.medicationName || '');
-        setDoctorName(prescription.doctorName || '');
-        setIssueDate(
-          prescription.issueDate
-            ? new Date(prescription.issueDate)
-            : new Date(),
-        );
-        setExpiryDate(
-          prescription.expiryDate ? new Date(prescription.expiryDate) : null,
-        );
-        setPhotoUri(prescription.photoUri || '');
-        setNotes(prescription.notes || '');
-
-        if (prescription.medicationIds) {
-          try {
-            setSelectedMedicationIds(JSON.parse(prescription.medicationIds));
-          } catch (e) {
-            console.error('Error parsing medicationIds', e);
-          }
-        }
-      }
-    } catch (error) {
-      showNotification({
-        title: t('common.error'),
-        message: t('prescriptions.loadError'),
-        type: 'error',
-      });
-    }
-  };
 
   const handleTakePhoto = async () => {
     if (Platform.OS === 'web') {
@@ -138,16 +109,7 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
           text: t('prescriptions.takePhoto'),
           onPress: () => {
             launchCamera({ mediaType: 'photo', quality: 0.8 }, response => {
-              if (response.didCancel) {
-                console.log('User cancelled image picker');
-              } else if (response.errorCode) {
-                console.error('ImagePicker Error: ', response.errorMessage);
-                showNotification({
-                  title: t('common.error'),
-                  message: t('prescriptions.imagePickerError'),
-                  type: 'error',
-                });
-              } else if (response.assets && response.assets[0]?.uri) {
+              if (response.assets && response.assets[0]?.uri) {
                 setPhotoUri(response.assets[0].uri);
               }
             });
@@ -182,9 +144,8 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
   const handleSave = async () => {
     const newErrors: { [key: string]: string } = {};
-    if (selectedMedicationIds.length === 0 && !medicationName.trim()) {
+    if (!medicationName.trim() && selectedMedicationIds.length === 0)
       newErrors.medicationName = t('common.required');
-    }
     if (!issueDate) newErrors.issueDate = t('common.required');
 
     // Validate Expiry Date > Issue Date
@@ -197,39 +158,30 @@ export const AddPrescriptionScreen = ({ navigation, route }: any) => {
 
     setLoading(true);
     try {
-      // Compute medication name from selected IDs if available
-      let computedMedicationName = medicationName.trim();
-      if (selectedMedicationIds.length > 0) {
-        const selectedNames = allMedications
-          .filter(m => m.id && selectedMedicationIds.includes(m.id))
-          .map(m => m.name);
-        computedMedicationName = selectedNames.join(', ');
-      }
-
-      const prescriptionData = {
-        medicationName: computedMedicationName,
-        medicationIds:
-          selectedMedicationIds.length > 0
-            ? JSON.stringify(selectedMedicationIds)
-            : undefined,
+      const now = new Date().toISOString();
+      const prescriptionData: Prescription = {
+        id: isEdit && prescriptionId ? prescriptionId : Date.now(),
+        medicationName: medicationName.trim(),
+        medicationIds: JSON.stringify(selectedMedicationIds),
         doctorName: doctorName.trim() || undefined,
         doctorId: selectedDoctorId || undefined,
-        issueDate: issueDate!.toISOString(),
-        expiryDate: expiryDate?.toISOString(),
+        issueDate: issueDate!.toISOString().split('T')[0],
+        expiryDate: expiryDate ? expiryDate.toISOString().split('T')[0] : undefined,
         photoUri: photoUri || undefined,
         notes: notes.trim() || undefined,
+        createdAt: isEdit && existingPrescription ? existingPrescription.createdAt : now,
+        updatedAt: now,
       };
 
-      let id = prescriptionId;
+      const id = prescriptionData.id;
 
-      if (isEdit && prescriptionId) {
-        await prescriptionsDb.update(prescriptionId, prescriptionData);
+      if (isEdit) {
+        dispatch(updatePrescription(prescriptionData));
       } else {
-        id = await prescriptionsDb.add(prescriptionData);
+        dispatch(addPrescription(prescriptionData));
       }
 
       // Notifications
-      if (!id) return;
       if (prescriptionData.expiryDate) {
         await notificationService.schedulePrescriptionExpiryReminder(
           id,
