@@ -143,9 +143,9 @@ class PermissionsService {
     if (Platform.OS === 'web') {
       // Web: Use Permissions API with fallback to Notification API
       try {
-        // @ts-ignore
-        if (navigator.permissions && navigator.permissions.query) {
-          const result = await navigator.permissions.query({
+        const nav = typeof window !== 'undefined' && (window as any).navigator;
+        if (nav?.permissions?.query) {
+          const result = await nav.permissions.query({
             name: 'notifications',
           });
           return this.mapWebPermissionState(result.state);

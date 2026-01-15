@@ -19,7 +19,7 @@ import { Theme } from '../../theme';
 import { LoadingScreen } from '../../components/LoadingScreen';
 
 export const DoctorDetailsScreen = ({ navigation, route }: any) => {
-  const { doctorId } = route.params;
+  const doctorId = Number(route.params.doctorId);
   const { t } = useTranslation();
   const { theme } = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);

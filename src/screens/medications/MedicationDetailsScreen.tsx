@@ -16,7 +16,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 
 export const MedicationDetailsScreen = ({ navigation, route }: any) => {
-  const { medicationId } = route.params;
+  const medicationId = Number(route.params.medicationId);
   const { theme } = useTheme();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);

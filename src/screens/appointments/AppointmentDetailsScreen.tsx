@@ -16,7 +16,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { Theme } from '../../theme';
 
 export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
-  const { appointmentId } = route.params;
+  const appointmentId = Number(route.params.appointmentId);
   const { theme } = useTheme();
   const { t } = useTranslation();
   const styles = useMemo(() => createStyles(theme), [theme]);
