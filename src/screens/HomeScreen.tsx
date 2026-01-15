@@ -25,9 +25,16 @@ export const HomeScreen = () => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const dispatch = useDispatch<AppDispatch>();
 
-  const { data: summary, loading } = useSelector(
-    (state: RootState) => state.analytics,
-  );
+  const analyticsStr = useSelector((state: RootState) => state.analytics);
+  // Safely derive summary and loading with fallbacks
+  const summary = analyticsStr?.data || {
+    totalMedications: 0,
+    upcomingAppointments: 0,
+    expiringPrescriptions: 0,
+    medicationAdherence: 0,
+    weeklyMedications: [],
+  };
+  const loading = analyticsStr?.loading || false;
 
   const [hasNotificationPermission, setHasNotificationPermission] =
     useState(true);

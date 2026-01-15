@@ -24,12 +24,11 @@ export const AnalyticsScreen = () => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const dispatch = useDispatch<AppDispatch>();
 
-  const {
-    data: analytics,
-    adherenceChart,
-    appointmentsChart,
-    loading,
-  } = useSelector((state: RootState) => state.analytics);
+  const analyticsState = useSelector((state: RootState) => state.analytics);
+  const analytics = analyticsState?.data;
+  const adherenceChart = analyticsState?.adherenceChart;
+  const appointmentsChart = analyticsState?.appointmentsChart;
+  const loading = analyticsState?.loading;
 
   useEffect(() => {
     // Log screen view for analytics
