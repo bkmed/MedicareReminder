@@ -167,18 +167,7 @@ export const AppointmentDetailsScreen = ({ navigation, route }: any) => {
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() =>
-            showNotification({
-              title: t('common.viewHistory'),
-              message: t('common.historyUnavailable'),
-              type: 'info',
-            })
-          }
-        >
-          <Text style={styles.buttonText}>View History</Text>
-        </TouchableOpacity>
+
 
         <TouchableOpacity
           style={[styles.button, styles.editButton]}

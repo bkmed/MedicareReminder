@@ -96,13 +96,7 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
     }
   };
 
-  const handleViewHistory = () => {
-    if (Platform.OS === 'web') {
-      setActiveTab('Medications', 'MedicationHistory', { medicationId });
-    } else {
-      navigation.navigate('MedicationHistory', { medicationId });
-    }
-  };
+
 
   if (loading || !medication) {
     return (
@@ -180,11 +174,7 @@ export const MedicationDetailsScreen = ({ navigation, route }: any) => {
           </Text>
         </View>
 
-        <TouchableOpacity style={styles.button} onPress={handleViewHistory}>
-          <Text style={styles.buttonText}>
-            {t('medicationDetails.viewHistoryButton')}
-          </Text>
-        </TouchableOpacity>
+
 
         <TouchableOpacity
           style={[styles.button, styles.editButton]}

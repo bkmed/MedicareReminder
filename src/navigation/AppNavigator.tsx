@@ -17,6 +17,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { HomeScreen } from '../screens/HomeScreen';
+import { WebSidebar } from '../components/WebSidebar';
+import { WebHeader } from '../components/WebHeader';
 import { MedicationListScreen } from '../screens/medications/MedicationListScreen';
 import { AddMedicationScreen } from '../screens/medications/AddMedicationScreen';
 import { MedicationDetailsScreen } from '../screens/medications/MedicationDetailsScreen';
@@ -211,25 +213,25 @@ const DrawerNavigator = () => {
 const WebNavigator = () => {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const isMobile = width < 1024;
 
-  const [activeTab, setActiveTab] = useState('Home');
+  const [activeTab, setActiveTabRaw] = useState('Home');
   const [subScreen, setSubScreen] = useState('');
   const [screenParams, setScreenParams] = useState<any>({});
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const setActiveTab = (tab: string, screen?: string, params?: any) => {
+    setActiveTabRaw(tab);
+    setSubScreen(screen || '');
+    setScreenParams(params || {});
+  };
 
   const contextValue = useMemo(
     () => ({
       activeTab,
       subScreen,
       screenParams,
-      setActiveTab: (tab: string, screen?: string, params?: any) => {
-        setActiveTab(tab);
-        setSubScreen(screen || '');
-        setScreenParams(params || {});
-        setIsMenuOpen(false);
-      },
+      setActiveTab,
     }),
     [activeTab, subScreen, screenParams],
   );
@@ -275,95 +277,29 @@ const WebNavigator = () => {
 
   return (
     <WebNavigationContext.Provider value={contextValue}>
-      <View style={{ flex: 1, flexDirection: isMobile ? 'column' : 'row', backgroundColor: theme.colors.background }}>
+      <View style={{ flex: 1, flexDirection: isMobile ? 'column' : 'row', backgroundColor: theme.colors.background, height: '100%', overflow: 'hidden' }}>
 
-        {/* Desktop Sidebar */}
+        {/* Sidebar (Desktop Only) */}
         {!isMobile && (
-          <View style={[webStyles.sidebar, { backgroundColor: theme.colors.surface, borderRightColor: theme.colors.border }]}>
-            <TouchableOpacity style={webStyles.sidebarBrand} onPress={() => setActiveTab('Home')}>
-              <Image source={require('../../public/logo.png')} style={webStyles.sidebarLogo} resizeMode="contain" />
-              <Text style={[webStyles.sidebarTitle, { color: theme.colors.text }]}>{t('home.appName')}</Text>
-            </TouchableOpacity>
-
-            <ScrollView style={{ flex: 1 }}>
-              {navItems.map(([key, label]) => (
-                <TouchableOpacity
-                  key={key as string}
-                  onPress={() => setActiveTab(key as string)}
-                  style={[
-                    webStyles.sidebarNavItem,
-                    activeTab === key && webStyles.activeSidebarNavItem
-                  ]}
-                >
-                  <Text style={[
-                    webStyles.sidebarNavText,
-                    { color: theme.colors.text },
-                    activeTab === key && webStyles.activeSidebarNavText
-                  ]}
-                  >
-                    {label}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
+          <WebSidebar activeTab={activeTab} setActiveTab={(tab) => setActiveTab(tab)} navItems={navItems} />
         )}
 
-        {/* Main Content Area w/ Mobile Header */}
-        <View style={{ flex: 1, height: '100%' }}>
-          {/* Mobile Header */}
-          {isMobile && (
-            <View style={[webStyles.navbar, { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.border }]}>
-              <View style={webStyles.leftContainer}>
-                <TouchableOpacity style={webStyles.brandContainer} onPress={() => setActiveTab('Home')}>
-                  <Image source={require('../../public/logo.png')} style={webStyles.logo} resizeMode="contain" />
-                  <Text style={[webStyles.title, { color: theme.colors.text }]}>{t('home.appName')}</Text>
-                </TouchableOpacity>
-                {subScreen && (
-                  <TouchableOpacity style={webStyles.backButton} onPress={() => setSubScreen('')}>
-                    <Text style={webStyles.backButtonText}>← {t('common.back')}</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-              <TouchableOpacity style={webStyles.hamburgerButton} onPress={() => setIsMenuOpen(!isMenuOpen)}>
-                <Text style={[webStyles.hamburgerText, { color: theme.colors.text }]}>☰</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+        {/* Main Content Area */}
+        <View style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
 
-          {/* Mobile Menu Overlay */}
-          {isMobile && isMenuOpen && (
-            <View style={[webStyles.mobileMenuOverlay, { backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000 }]}>
-              <View style={[webStyles.mobileMenu, { backgroundColor: theme.colors.surface, height: height }]}>
-                <TouchableOpacity style={webStyles.closeButton} onPress={() => setIsMenuOpen(false)}>
-                  <Text style={[webStyles.closeButtonText, { color: theme.colors.text }]}>✕</Text>
-                </TouchableOpacity>
-                {navItems.map(([key, label]) => (
-                  <TouchableOpacity
-                    key={key as string}
-                    onPress={() => { setActiveTab(key as string); setIsMenuOpen(false); }}
-                    style={webStyles.mobileMenuItem}
-                  >
-                    <Text style={[webStyles.mobileMenuItemText, { color: activeTab === key ? theme.colors.primary : theme.colors.text }]}>
-                      {label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-              <TouchableOpacity style={{ flex: 1 }} onPress={() => setIsMenuOpen(false)} />
-            </View>
-          )}
+          {/* Header (Handles Mobile Menu & Desktop Back Breadcrumbs) */}
+          <WebHeader
+            isMobile={isMobile}
+            navItems={navItems}
+            activeTab={activeTab}
+            setActiveTab={(tab) => setActiveTab(tab)}
+            subScreen={subScreen}
+            onBack={() => setSubScreen('')}
+          />
 
           {/* Screen Content */}
-          <View style={{ flex: 1 }}>
-            {/* Desktop Back Button (Breadcrumb style or simple back) */}
-            {!isMobile && subScreen && (
-              <View style={{ padding: 16, borderBottomWidth: 1, borderBottomColor: theme.colors.border, backgroundColor: theme.colors.surface }}>
-                <TouchableOpacity onPress={() => setSubScreen('')} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={{ fontSize: 16, color: theme.colors.primary }}>← {t('common.back')}</Text>
-                </TouchableOpacity>
-              </View>
-            )}
+          <View style={{ flex: 1, overflow: 'scroll' }}>
+            {/* Note: overflow: 'scroll' here ensures the content scrolls independently of the sidebar */}
             {getActiveComponent()}
           </View>
         </View>
@@ -429,134 +365,4 @@ const AppContent = () => {
 };
 
 // ======= Web Styles =======
-const webStyles = StyleSheet.create({
-  navbar: {
-    height: 60,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    elevation: 3,
-    zIndex: 10,
-  },
-  leftContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  brandContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  logo: {
-    width: 40,
-    height: 40,
-  },
-  title: { fontSize: 20, fontWeight: 'bold' },
-  navButtons: { flexDirection: 'row', gap: 20 },
-  navButton: { paddingVertical: 8, paddingHorizontal: 16 },
-  navButtonText: { fontSize: 16 },
-  activeNavButton: { fontWeight: '600' },
-  backButton: {
-    marginLeft: 20,
-    padding: 8,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-  },
-  backButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  hamburgerButton: {
-    padding: 8,
-  },
-  hamburgerText: {
-    fontSize: 24,
-  },
-  mobileMenuOverlay: {
-    position: 'absolute',
-    top: 60,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 20,
-    flexDirection: 'row',
-  },
-  mobileMenu: {
-    width: 250,
-    height: '100%',
-    backgroundColor: '#FFFFFF', // Default light, overridden by theme
-    padding: 20,
-    zIndex: 1001, // Ensure it sits above everything
-    ...Platform.select({
-      web: {
-        boxShadow: '2px 0 5px rgba(0,0,0,0.2)',
-      },
-      default: {
-        elevation: 5,
-      },
-    }),
-  },
-  closeButton: {
-    alignSelf: 'flex-end',
-    padding: 10,
-    marginBottom: 10,
-  },
-  closeButtonText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  mobileMenuItem: {
-    paddingVertical: 15,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#ccc',
-  },
-  mobileMenuItemText: {
-    fontSize: 18,
-  },
-  sidebar: {
-    width: 260,
-    backgroundColor: '#FFFFFF',
-    borderRightWidth: 1,
-    borderRightColor: '#E0E0E0',
-    paddingVertical: 24,
-    paddingHorizontal: 16,
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  sidebarBrand: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 40,
-    paddingHorizontal: 12,
-  },
-  sidebarLogo: {
-    width: 32,
-    height: 32,
-    marginRight: 12,
-  },
-  sidebarTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  sidebarNavItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 4,
-  },
-  sidebarNavText: {
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  activeSidebarNavItem: {
-    backgroundColor: '#F0F7FF', // Light blue background for active
-  },
-  activeSidebarNavText: {
-    color: '#007AFF', // Primary color
-    fontWeight: '600',
-  },
-});
+

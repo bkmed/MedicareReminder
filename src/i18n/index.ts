@@ -8,6 +8,9 @@ import en from './locales/en.json';
 import fr from './locales/fr.json';
 import ar from './locales/ar.json';
 import de from './locales/de.json';
+import zh from './locales/zh.json';
+import es from './locales/es.json';
+import hi from './locales/hi.json';
 
 // Language detector for web and mobile
 const languageDetector = {
@@ -46,6 +49,9 @@ i18n
       fr: { translation: fr },
       ar: { translation: ar },
       de: { translation: de },
+      es: { translation: es },
+      zh: { translation: zh },
+      hi: { translation: hi },
     },
     fallbackLng: 'en',
     interpolation: {
