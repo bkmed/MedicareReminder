@@ -413,5 +413,15 @@
         "es": "Español",
         "zh": "中文",
         "hi": "हिन्दी"
+    },
+    "search": {
+        "title": "Búsqueda Global",
+        "placeholder": "Buscar medicamentos, citas...",
+        "startTyping": "Empieza a escribir para buscar en tus datos de salud",
+        "noResults": "No se encontraron resultados para su consulta",
+        "medication": "Medicamento",
+        "appointment": "Cita",
+        "doctor": "Doctor",
+        "prescription": "Receta"
     }
 }

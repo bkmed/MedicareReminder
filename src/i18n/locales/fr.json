@@ -413,5 +413,15 @@
     "es": "Espagnol",
     "zh": "Chinois",
     "hi": "Hindi"
+  },
+  "search": {
+    "title": "Recherche globale",
+    "placeholder": "Rechercher médicaments, rendez-vous...",
+    "startTyping": "Commencez à taper pour rechercher dans vos données de santé",
+    "noResults": "Aucun résultat trouvé pour votre recherche",
+    "medication": "Médicament",
+    "appointment": "Rendez-vous",
+    "doctor": "Médecin",
+    "prescription": "Ordonnance"
   }
 }

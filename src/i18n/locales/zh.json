@@ -413,5 +413,15 @@
         "es": "Español",
         "zh": "中文",
         "hi": "हिन्दी"
+    },
+    "search": {
+        "title": "全局搜索",
+        "placeholder": "搜索药物、预约...",
+        "startTyping": "开始输入以搜索您的健康数据",
+        "noResults": "未找到与您的查询匹配的结果",
+        "medication": "药物",
+        "appointment": "预约",
+        "doctor": "医生",
+        "prescription": "处方"
     }
 }

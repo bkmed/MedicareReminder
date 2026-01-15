@@ -413,5 +413,15 @@
     "es": "Spanisch",
     "zh": "Chinesisch",
     "hi": "Hindi"
+  },
+  "search": {
+    "title": "Globale Suche",
+    "placeholder": "Suche nach Medikamenten, Terminen...",
+    "startTyping": "Beginnen Sie mit der Eingabe, um Ihre Gesundheitsdaten zu durchsuchen",
+    "noResults": "Keine Ergebnisse für Ihre Suchanfrage gefunden",
+    "medication": "Medikament",
+    "appointment": "Termin",
+    "doctor": "Arzt",
+    "prescription": "Rezept"
   }
 }
